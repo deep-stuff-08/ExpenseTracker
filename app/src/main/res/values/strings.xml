@@ -44,4 +44,9 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="default_exp_entry">Entry</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_expense_name">Name</string>
+    <string name="logo">LOGO</string>
+    <string name="add_expense_value">Value</string>
 </resources>

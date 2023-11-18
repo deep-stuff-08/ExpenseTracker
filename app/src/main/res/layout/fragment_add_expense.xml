@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    tools:context=".AddExpenseFragment" >
+
+
+    <AutoCompleteTextView
+        android:id="@+id/expense_name"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/exp_image_height"
+        android:layout_alignParentTop="true"
+        android:autofillHints="Expense Name"
+        android:hint="@string/add_expense_name"
+        android:inputType="text"
+        android:layout_margin="8dp"
+        android:textSize="24sp" />
+
+    <EditText
+        android:id="@+id/expense_value"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/exp_image_height"
+        android:layout_below="@id/expense_name"
+        android:hint="@string/add_expense_value"
+        android:inputType="numberSigned"
+        android:layout_margin="8dp"
+        android:textSize="24sp"
+        android:autofillHints="Cost" />
+
+    <Spinner
+        android:id="@+id/expense_category"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/exp_image_height"
+        android:layout_below="@id/expense_value"
+        android:layout_margin="8dp" />
+
+    <Spinner
+        android:id="@+id/expense_subcategory"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/exp_image_height"
+        android:layout_below="@id/expense_category"
+        android:layout_margin="8dp" />
+
+
+</RelativeLayout>

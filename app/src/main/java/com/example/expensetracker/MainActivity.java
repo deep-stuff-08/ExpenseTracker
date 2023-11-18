@@ -1,20 +1,20 @@
 package com.example.expensetracker;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import androidx.navigation.NavController;
+import androidx.navigation.NavDestination;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.NavigationUI;
 
 public class MainActivity extends AppCompatActivity {
+    private boolean isSettingsVisible;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,30 +22,51 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Add New", Snackbar.LENGTH_SHORT).show());
+        NavController mNavigationController = Navigation.findNavController(this,R.id.fragment_container_view);
+        NavigationUI.setupActionBarWithNavController(this, mNavigationController);
 
-        RecyclerView recycler = findViewById(R.id.recycleView);
-        recycler.setAdapter(new CustomAdapter());
+        mNavigationController.addOnDestinationChangedListener((navController, navDestination, bundle) -> {
+            if(navDestination.getId() == R.id.homeFragment) {
+                isSettingsVisible = true;
+            } else {
+                isSettingsVisible = false;
+            }
+            invalidateOptionsMenu();
+        });
 
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.setVerticalScrollbarPosition(0);
+        isSettingsVisible = true;
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.menu_action_settings).setVisible(isSettingsVisible);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(R.id.action_settings == item.getItemId()) {
-            Snackbar.make(getWindow().getDecorView(), "Settings Clicked", Snackbar.LENGTH_SHORT).show();
+        if(R.id.menu_action_settings == item.getItemId()) {
+            invalidateMenu();
+            Navigation.findNavController(this,R.id.fragment_container_view).navigate(R.id.action_homeFragment_to_settingsFragment);
             return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        return Navigation.findNavController(this,R.id.fragment_container_view).navigateUp();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }
