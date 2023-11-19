@@ -24,7 +24,6 @@
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@id/spinner_category_image"
         android:layout_centerInParent="true"
-        android:text="Hello"
         />
 
 </RelativeLayout>

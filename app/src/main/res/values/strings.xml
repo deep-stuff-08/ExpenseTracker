@@ -49,4 +49,9 @@
     <string name="add_expense_name">Name</string>
     <string name="logo">LOGO</string>
     <string name="add_expense_value">Value</string>
+    <string name="add_expense_date">Date</string>
+    <string name="add_expense_time">Time</string>
+    <string name="add_expense_shared_expense">Shared Expense</string>
+    <string name="add_expense_submit">SUBMIT</string>
+    <string name="add_expense_log">Log More Entries</string>
 </resources>
