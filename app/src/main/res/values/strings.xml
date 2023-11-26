@@ -54,4 +54,7 @@
     <string name="add_expense_shared_expense">Shared Expense</string>
     <string name="add_expense_submit">SUBMIT</string>
     <string name="add_expense_log">Log More Entries</string>
+    <string name="settings_filename">ExpenseSettings.json</string>
+    <string name="remove">Remove</string>
+    <string name="save_btn">Save</string>
 </resources>

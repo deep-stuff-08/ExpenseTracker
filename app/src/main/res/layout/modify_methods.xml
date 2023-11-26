@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/modify_image"
+        android:layout_width="@dimen/exp_image_height"
+        android:layout_height="@dimen/exp_image_height"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="10dp"
+        android:scaleType="fitCenter"
+        android:src="@android:drawable/ic_media_play"
+        app:shapeAppearance="@style/Theme.ExpenseTracker.RoundImage"
+        />
+
+    <TextView
+        android:id="@+id/modify_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_toStartOf="@id/modify_modify"
+        android:layout_toEndOf="@id/modify_image"
+        android:text=""
+        android:textSize="28sp" />
+
+    <ImageView
+        android:id="@+id/modify_modify"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/modify_remove"
+        android:contentDescription="@string/remove"
+        android:src="@android:drawable/ic_menu_edit"/>
+
+    <ImageView
+        android:id="@+id/modify_remove"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="@string/remove"
+        android:src="@android:drawable/ic_menu_delete"/>
+
+</RelativeLayout>

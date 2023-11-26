@@ -12,9 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
 
-public class SpinnerCategoryAdapter extends ArrayAdapter<SpinnerCategoryAdapter.CategoryItem> {
+import java.util.ArrayList;
 
-    public SpinnerCategoryAdapter(@NonNull Context context, CategoryItem[] data) {
+public class SpinnerCategoryAdapter extends ArrayAdapter<ExpenseSettings.LogoNameCombo> {
+
+    public SpinnerCategoryAdapter(@NonNull Context context, ArrayList<ExpenseSettings.LogoNameCombo> data) {
         super(context, android.R.layout.simple_spinner_item, data);
     }
 
@@ -34,12 +36,12 @@ public class SpinnerCategoryAdapter extends ArrayAdapter<SpinnerCategoryAdapter.
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.spinner_category_item, parent, false);
         }
 
-        CategoryItem item = getItem(position);
+        ExpenseSettings.LogoNameCombo item = getItem(position);
         if(item != null) {
             TextView text = convertView.findViewById(R.id.spinner_category_text);
-            text.setText(item.getText());
+            text.setText(item.getName());
             ImageView image = convertView.findViewById(R.id.spinner_category_image);
-            image.setImageDrawable(ResourcesCompat.getDrawable(convertView.getResources(), item.getId(), convertView.getResources().newTheme()));
+            image.setImageDrawable(ResourcesCompat.getDrawable(convertView.getResources(), item.getLogo(), convertView.getResources().newTheme()));
         }
 
         return convertView;

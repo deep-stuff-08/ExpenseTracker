@@ -59,15 +59,15 @@ public class AddExpenseFragment extends Fragment {
             expenseValue.getText();
 
             Spinner expenseCategory = view.findViewById(R.id.expense_category);
-            SpinnerCategoryAdapter string_adt = new SpinnerCategoryAdapter(context, new SpinnerCategoryAdapter.CategoryItem[]{new SpinnerCategoryAdapter.CategoryItem("Food", android.R.drawable.ic_dialog_alert)});
+            SpinnerCategoryAdapter string_adt = new SpinnerCategoryAdapter(context, ((MainActivity)getActivity()).getSettings().getPaymentMethod());
             expenseCategory.setAdapter(string_adt);
 
             Spinner expenseSubCategory = view.findViewById(R.id.expense_subcategory);
-            SpinnerCategoryAdapter string_adt2 = new SpinnerCategoryAdapter(context, new SpinnerCategoryAdapter.CategoryItem[]{new SpinnerCategoryAdapter.CategoryItem("Meal", android.R.drawable.ic_dialog_email)});
+            SpinnerCategoryAdapter string_adt2 = new SpinnerCategoryAdapter(context, ((MainActivity)getActivity()).getSettings().getPaymentMethod());
             expenseSubCategory.setAdapter(string_adt2);
 
             Spinner expensePayment = view.findViewById(R.id.expense_payment);
-            SpinnerCategoryAdapter string_adt3 = new SpinnerCategoryAdapter(context, new SpinnerCategoryAdapter.CategoryItem[]{new SpinnerCategoryAdapter.CategoryItem("UPI", android.R.drawable.ic_btn_speak_now)});
+            SpinnerCategoryAdapter string_adt3 = new SpinnerCategoryAdapter(context, ((MainActivity)getActivity()).getSettings().getPaymentMethod());
             expensePayment.setAdapter(string_adt3);
         }
         Calendar currentTime = Calendar.getInstance();
