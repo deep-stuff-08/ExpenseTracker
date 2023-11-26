@@ -1,9 +1,7 @@
 package com.example.expensetracker;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.JsonReader;
-import android.util.JsonWriter;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -16,12 +14,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.Objects;
 
 /**
  * -1 : File Write Error
@@ -39,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
         File f = new File(getFilesDir(), getString(R.string.settings_filename));
         if(!f.exists()) {
-            expenseSettings = ExpenseSettings.createWithDefaultParameters();
+            expenseSettings = ExpenseSettings.createWithDefaultParameters(this);
             try {
                 expenseSettings.writeSettingsToJson(f);
             } catch(IOException e) {
@@ -48,10 +41,12 @@ public class MainActivity extends AppCompatActivity {
             Snackbar.make(findViewById(android.R.id.content), "Settings not found opening with default settings", Snackbar.LENGTH_LONG).show();
         } else {
             try {
-                expenseSettings = ExpenseSettings.createWithParametersFromFile(f);
+                expenseSettings = ExpenseSettings.createWithParametersFromFile(this, f);
             } catch(IOException e) {
-                f.delete();
-                expenseSettings = ExpenseSettings.createWithDefaultParameters();
+                if(!f.delete()) {
+                    Log.d("MyTag", "This is Impossible");
+                }
+                expenseSettings = ExpenseSettings.createWithDefaultParameters(this);
                 try {
                     expenseSettings.writeSettingsToJson(f);
                     Snackbar.make(findViewById(android.R.id.content), "Error: Couldn't read settings file. Initializing with default settings", Snackbar.LENGTH_LONG).show();
@@ -114,12 +109,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setMessage("Unrecoverable error, contact Developer. Exiting Now");
         builder.setTitle("Error Code " + errorCode);
         builder.setCancelable(false);
-        builder.setNeutralButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                finish();
-            }
-        });
+        builder.setNeutralButton("Ok", (dialogInterface,  i) -> finish());
         builder.create().show();
     }
 }

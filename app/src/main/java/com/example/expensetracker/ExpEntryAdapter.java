@@ -17,7 +17,7 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
     }
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.getTextView().setText("Hello");
+        holder.getTextView().setText("");
     }
     @Override
     public int getItemCount() {

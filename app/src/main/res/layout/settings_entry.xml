@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -19,7 +20,7 @@
             android:scaleType="fitCenter"
             android:src="@android:drawable/ic_media_play"
             app:shapeAppearance="@style/Theme.ExpenseTracker.RoundImage"
-            />
+            tools:ignore="ImageContrastCheck" />
 
         <TextView
             android:id="@+id/settings_category_text"
@@ -42,9 +43,12 @@
         android:id="@+id/settings_hidden2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="+ Add"
+        android:text="@string/add"
         android:layout_below="@id/settings_hidden"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginStart="20dp"
-        />
+        tools:ignore="VisualLintButtonSize" />
 
 </RelativeLayout>

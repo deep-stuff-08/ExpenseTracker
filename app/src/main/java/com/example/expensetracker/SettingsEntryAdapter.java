@@ -4,12 +4,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.transition.TransitionManager;
 
 import java.util.ArrayList;
 
@@ -37,7 +38,6 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
         holder.itemView.setActivated(isExpanded);
         holder.itemView.setOnClickListener(v -> {
             mExpandedPosition = isExpanded ? -1:holder.getAdapterPosition();
-            //TransitionManager.beginDelayedTransition(recyclerView);
             notifyItemChanged(position);
         });
         holder.textview.setText(dataList.get(position));
@@ -57,11 +57,49 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
 
             textview = itemView.findViewById(R.id.settings_category_text);
             hidden = itemView.findViewById(R.id.settings_hidden);
-            SettingsModifyAdapter settingsModifyAdapter = new SettingsModifyAdapter(((MainActivity) itemView.getContext()).getSettings().getPaymentMethod());
+            ExpenseSettings settings = ((MainActivity) itemView.getContext()).getSettings();
+            ExpenseSettings.SettingsUpdateListener nameListener = new ExpenseSettings.SettingsUpdateListener() {
+                @Override
+                public void onSettingsNameUpdateListener(int position, String newName) {
+                    settings.updatePaymentMethodName(position, newName);
+                    if(hidden.getAdapter() != null)
+                        hidden.getAdapter().notifyItemChanged(position);
+                }
+
+                @Override
+                public void onSettingsLogoUpdateListener(int position, int newLogo) {
+                    settings.updatePaymentMethodLogo(position, newLogo);
+                }
+
+                @Override
+                public void onSettingsNameLogoComboDeleteListener(int position) {
+                    settings.deletePaymentMethod(position);
+                    if(hidden.getAdapter() != null)
+                        hidden.getAdapter().notifyItemRemoved(position);
+                }
+
+                @Override
+                public void onSettingsNameLogoComboAddListener(String name, int logo) {
+                    settings.addPaymentMethod(new ExpenseSettings.LogoNameCombo(name, logo));
+                    if(hidden.getAdapter() != null)
+                        hidden.getAdapter().notifyItemInserted(hidden.getAdapter().getItemCount() + 1);
+                }
+            };
+            SettingsModifyAdapter settingsModifyAdapter = new SettingsModifyAdapter(settings.getPaymentMethod(), nameListener);
             hidden.setAdapter(settingsModifyAdapter);
             hidden.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
             hidden.setVerticalScrollbarPosition(0);
             hiddenButton = itemView.findViewById(R.id.settings_hidden2);
+            hiddenButton.setOnClickListener(view -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(itemView.getContext());
+                View diagView = View.inflate(itemView.getContext(), R.layout.edittext_dialog, null);
+                builder.setView(diagView);
+                builder.setTitle("Add New Item");
+                builder.setPositiveButton("Add", (dialogInterface, i) -> nameListener.onSettingsNameLogoComboAddListener(((EditText)diagView.findViewById(R.id.dialog_edittext)).getText().toString(), R.drawable.ic_launcher_foreground));
+                builder.setNegativeButton("Cancel", null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            });
         }
     }
 }

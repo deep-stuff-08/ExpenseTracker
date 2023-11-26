@@ -46,23 +46,4 @@ public class SpinnerCategoryAdapter extends ArrayAdapter<ExpenseSettings.LogoNam
 
         return convertView;
     }
-
-    public static class CategoryItem {
-        private String text;
-        private int id;
-
-        CategoryItem(String text, int id) {
-            this.text = text;
-            this.id = id;
-        }
-
-        @NonNull
-        public String getText() {
-            return text;
-        }
-
-        public int getId() {
-            return id;
-        }
-    }
 }

@@ -1,7 +1,9 @@
 package com.example.expensetracker;
 
+import android.content.Context;
 import android.util.JsonReader;
 import android.util.JsonWriter;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,10 +15,11 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class ExpenseSettings {
+    private final Context activityContext;
     private final ArrayList<LogoNameCombo> paymentMethod;
     public static class LogoNameCombo {
-        private final String name;
-        private final int logo;
+        private String name;
+        private int logo;
 
         private static LogoNameCombo readFromJson(JsonReader reader) throws IOException {
             String name = "";
@@ -53,28 +56,60 @@ public class ExpenseSettings {
         }
     }
 
-    private ExpenseSettings() {
+    private ExpenseSettings(Context context) {
+        activityContext = context;
         paymentMethod = new ArrayList<>();
     }
 
-    public void addPaymentMethod(LogoNameCombo paymentMethod) {
-        this.paymentMethod.add(paymentMethod);
+    public void addPaymentMethod(LogoNameCombo payment) {
+        paymentMethod.add(payment);
+    }
+
+    public void deletePaymentMethod(int position) {
+        LogoNameCombo old = paymentMethod.remove(position);
+        if(safeWriteJson()) {
+            paymentMethod.add(position, old);
+        }
+    }
+
+    private boolean safeWriteJson() {
+        try {
+            File f = new File(activityContext.getFilesDir(), activityContext.getString(R.string.settings_filename));
+            writeSettingsToJson(f);
+            return false;
+        } catch(IOException e) {
+            Toast.makeText(activityContext, "Unable to update settings, any changes you make will be temporary.", Toast.LENGTH_LONG).show();
+            return true;
+        }
+    }
+
+    public void updatePaymentMethodName(int position, String name) {
+        String old = paymentMethod.get(position).name = name;
+        if(safeWriteJson()) {
+            paymentMethod.get(position).name = old;
+        }
+    }
+    public void updatePaymentMethodLogo(int position, int logo) {
+        int old = paymentMethod.get(position).logo = logo;
+        if(!safeWriteJson()) {
+            paymentMethod.get(position).logo = old;
+        }
     }
 
     public ArrayList<LogoNameCombo> getPaymentMethod() {
         return paymentMethod;
     }
 
-    public static ExpenseSettings createWithDefaultParameters() {
-        ExpenseSettings s = new ExpenseSettings();
+    public static ExpenseSettings createWithDefaultParameters(Context context) {
+        ExpenseSettings s = new ExpenseSettings(context);
 
         s.initToDefault();
 
         return s;
     }
 
-    public static ExpenseSettings createWithParametersFromFile(File f) throws IOException {
-        ExpenseSettings s = new ExpenseSettings();
+    public static ExpenseSettings createWithParametersFromFile(Context context, File f) throws IOException {
+        ExpenseSettings s = new ExpenseSettings(context);
         FileInputStream fis = new FileInputStream(f);
         JsonReader reader = new JsonReader(new InputStreamReader(fis));
         reader.beginObject();
@@ -120,5 +155,12 @@ public class ExpenseSettings {
             l.writeToJson(writer);
         }
         writer.endArray();
+    }
+
+    public interface SettingsUpdateListener {
+        void onSettingsNameUpdateListener(int position, String newName);
+        void onSettingsLogoUpdateListener(int position, int newLogo);
+        void onSettingsNameLogoComboDeleteListener(int position);
+        void onSettingsNameLogoComboAddListener(String name, int logo);
     }
 }

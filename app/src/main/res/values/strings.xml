@@ -57,4 +57,7 @@
     <string name="settings_filename">ExpenseSettings.json</string>
     <string name="remove">Remove</string>
     <string name="save_btn">Save</string>
+    <string name="new_name">New Name</string>
+    <string name="edit">edit</string>
+    <string name="add">+ Add</string>
 </resources>

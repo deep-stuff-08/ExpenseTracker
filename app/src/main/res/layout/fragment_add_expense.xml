@@ -98,7 +98,8 @@
         android:layout_height="@dimen/exp_image_height"
         android:layout_below="@id/expense_linearlayout"
         android:textSize="24sp"
-        android:text="@string/add_expense_shared_expense"/>
+        android:text="@string/add_expense_shared_expense"
+        tools:ignore="VisualLintButtonSize" />
 
     <CheckBox
         android:id="@+id/expense_repeat"
@@ -106,7 +107,8 @@
         android:layout_height="@dimen/exp_image_height"
         android:layout_below="@id/expense_shared"
         android:textSize="24sp"
-        android:text="@string/add_expense_log" />
+        android:text="@string/add_expense_log"
+        tools:ignore="VisualLintButtonSize" />
 
     <Button
         android:id="@+id/expense_submit"
@@ -114,5 +116,6 @@
         android:layout_height="@dimen/exp_image_height"
         android:layout_alignParentBottom="true"
         android:backgroundTint="?attr/colorAccent"
-        android:text="@string/add_expense_submit"/>
+        android:text="@string/add_expense_submit"
+        tools:ignore="VisualLintButtonSize" />
 </RelativeLayout>

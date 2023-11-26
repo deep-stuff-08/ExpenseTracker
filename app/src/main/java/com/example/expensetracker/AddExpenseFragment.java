@@ -55,19 +55,21 @@ public class AddExpenseFragment extends Fragment {
             expenseName.setAdapter(adt);
             expenseName.setThreshold(1);
 
+            ExpenseSettings settings = ((MainActivity)requireActivity()).getSettings();
+
             EditText expenseValue = view.findViewById(R.id.expense_value);
             expenseValue.getText();
 
             Spinner expenseCategory = view.findViewById(R.id.expense_category);
-            SpinnerCategoryAdapter string_adt = new SpinnerCategoryAdapter(context, ((MainActivity)getActivity()).getSettings().getPaymentMethod());
+            SpinnerCategoryAdapter string_adt = new SpinnerCategoryAdapter(context, settings.getPaymentMethod());
             expenseCategory.setAdapter(string_adt);
 
             Spinner expenseSubCategory = view.findViewById(R.id.expense_subcategory);
-            SpinnerCategoryAdapter string_adt2 = new SpinnerCategoryAdapter(context, ((MainActivity)getActivity()).getSettings().getPaymentMethod());
+            SpinnerCategoryAdapter string_adt2 = new SpinnerCategoryAdapter(context, settings.getPaymentMethod());
             expenseSubCategory.setAdapter(string_adt2);
 
             Spinner expensePayment = view.findViewById(R.id.expense_payment);
-            SpinnerCategoryAdapter string_adt3 = new SpinnerCategoryAdapter(context, ((MainActivity)getActivity()).getSettings().getPaymentMethod());
+            SpinnerCategoryAdapter string_adt3 = new SpinnerCategoryAdapter(context, settings.getPaymentMethod());
             expensePayment.setAdapter(string_adt3);
         }
         Calendar currentTime = Calendar.getInstance();

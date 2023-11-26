@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -14,31 +15,33 @@
         android:scaleType="fitCenter"
         android:src="@android:drawable/ic_media_play"
         app:shapeAppearance="@style/Theme.ExpenseTracker.RoundImage"
-        />
+        tools:ignore="ImageContrastCheck" />
 
     <TextView
         android:id="@+id/modify_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_toStartOf="@id/modify_modify"
+        android:layout_toStartOf="@id/modify_modify_btn"
         android:layout_toEndOf="@id/modify_image"
         android:text=""
         android:textSize="28sp" />
 
-    <ImageView
-        android:id="@+id/modify_modify"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+    <ImageButton
+        android:id="@+id/modify_modify_btn"
+        android:layout_width="50dp"
+        android:theme="@style/Theme.ExpenseTracker"
+        android:layout_height="50dp"
         android:layout_centerVertical="true"
-        android:layout_toStartOf="@id/modify_remove"
-        android:contentDescription="@string/remove"
+        android:layout_toStartOf="@id/modify_remove_btn"
+        android:contentDescription="@string/edit"
         android:src="@android:drawable/ic_menu_edit"/>
 
-    <ImageView
-        android:id="@+id/modify_remove"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+    <ImageButton
+        android:id="@+id/modify_remove_btn"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:theme="@style/Theme.ExpenseTracker"
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
         android:contentDescription="@string/remove"
