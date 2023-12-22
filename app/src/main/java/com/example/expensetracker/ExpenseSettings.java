@@ -17,25 +17,29 @@ import java.util.Objects;
 public class ExpenseSettings {
     private final Context activityContext;
     private final ArrayList<LogoNameCombo> paymentMethod;
-    public static class LogoNameCombo {
+    private final ArrayList<LogoNameCombo> category;
+
+    public interface JsonIO {
+        void readFromJson(JsonReader reader) throws IOException;
+        void writeToJson(JsonWriter writer) throws IOException;
+    }
+
+    public static class LogoNameCombo implements JsonIO {
         private String name;
         private int logo;
 
-        private static LogoNameCombo readFromJson(JsonReader reader) throws IOException {
-            String name = "";
-            int logo = 0;
+        public void readFromJson(JsonReader reader) throws IOException {
             reader.beginObject();
             if (Objects.equals(reader.nextName(), "name")) {
-                name = reader.nextString();
+                this.name = reader.nextString();
             }
             if (Objects.equals(reader.nextName(), "logo")) {
-                logo = reader.nextInt();
+                this.logo = reader.nextInt();
             }
             reader.endObject();
-            return new LogoNameCombo(name, logo);
         }
 
-        private void writeToJson(JsonWriter writer) throws IOException {
+        public void writeToJson(JsonWriter writer) throws IOException {
             writer.beginObject();
             writer.name("name").value(this.name);
             writer.name("logo").value(this.logo);
@@ -45,6 +49,10 @@ public class ExpenseSettings {
         public LogoNameCombo(String name, int logo) {
             this.name = name;
             this.logo = logo;
+        }
+        public LogoNameCombo() {
+            this.name = "";
+            this.logo = 0;
         }
 
         public String getName() {
@@ -56,19 +64,55 @@ public class ExpenseSettings {
         }
     }
 
+    public static class Category {
+        private LogoNameCombo name;
+        private ArrayList<LogoNameCombo> subCategories;
+
+        public Category(LogoNameCombo name, ArrayList<LogoNameCombo> subCategories) {
+            this.name = name;
+            this.subCategories = subCategories;
+        }
+
+        public LogoNameCombo getName() {
+            return name;
+        }
+
+        public ArrayList<LogoNameCombo> getSubCategories() {
+            return subCategories;
+        }
+    }
+
     private ExpenseSettings(Context context) {
         activityContext = context;
         paymentMethod = new ArrayList<>();
+        category = new ArrayList<>();
     }
 
     public void addPaymentMethod(LogoNameCombo payment) {
         paymentMethod.add(payment);
+        if(safeWriteJson()) {
+            paymentMethod.remove(payment);
+        }
+    }
+
+    public void addCategory(LogoNameCombo cat) {
+        category.add(cat);
+        if(safeWriteJson()) {
+            category.remove(cat);
+        }
     }
 
     public void deletePaymentMethod(int position) {
         LogoNameCombo old = paymentMethod.remove(position);
         if(safeWriteJson()) {
             paymentMethod.add(position, old);
+        }
+    }
+
+    public void deleteCategory(int position) {
+        LogoNameCombo old = category.remove(position);
+        if(safeWriteJson()) {
+            category.add(position, old);
         }
     }
 
@@ -91,13 +135,29 @@ public class ExpenseSettings {
     }
     public void updatePaymentMethodLogo(int position, int logo) {
         int old = paymentMethod.get(position).logo = logo;
-        if(!safeWriteJson()) {
+        if(safeWriteJson()) {
             paymentMethod.get(position).logo = old;
         }
     }
 
+    public void updateCategoryName(int position, String name) {
+        String old = category.get(position).name = name;
+        if(safeWriteJson()) {
+            category.get(position).name = old;
+        }
+    }
+    public void updateCategoryLogo(int position, int logo) {
+        int old = category.get(position).logo = logo;
+        if(safeWriteJson()) {
+            category.get(position).logo = old;
+        }
+    }
     public ArrayList<LogoNameCombo> getPaymentMethod() {
         return paymentMethod;
+    }
+
+    public ArrayList<LogoNameCombo> getCategory() {
+        return category;
     }
 
     public static ExpenseSettings createWithDefaultParameters(Context context) {
@@ -114,8 +174,11 @@ public class ExpenseSettings {
         JsonReader reader = new JsonReader(new InputStreamReader(fis));
         reader.beginObject();
         while (reader.hasNext()) {
-            if (Objects.equals(reader.nextName(), "PaymentMethod")) {
+            String nextName = reader.nextName();
+            if (Objects.equals(nextName, "PaymentMethod")) {
                 s.readPaymentMethod(reader);
+            } else if(Objects.equals(nextName, "Category")) {
+                s.readCategory(reader);
             }
         }
         reader.endObject();
@@ -127,6 +190,11 @@ public class ExpenseSettings {
         this.paymentMethod.add(new LogoNameCombo("UPI", R.drawable.ic_launcher_foreground));
         this.paymentMethod.add(new LogoNameCombo("Cash", R.drawable.ic_launcher_foreground));
         this.paymentMethod.add(new LogoNameCombo("Credit Card", R.drawable.ic_launcher_foreground));
+
+        this.category.add(new LogoNameCombo("Food", R.color.categoryOrange));
+        this.category.add(new LogoNameCombo("Housing", R.color.categoryYellow));
+        this.category.add(new LogoNameCombo("Travel", R.color.categoryBlue));
+        this.category.add(new LogoNameCombo("Entertainment", R.color.categoryGreen));
     }
 
     public void writeSettingsToJson(File f) throws IOException {
@@ -135,6 +203,7 @@ public class ExpenseSettings {
         writer.setIndent("\t");
         writer.beginObject();
         writePaymentMethod(writer);
+        writeCategory(writer);
         writer.endObject();
         writer.close();
     }
@@ -143,7 +212,9 @@ public class ExpenseSettings {
     private void readPaymentMethod(JsonReader reader) throws IOException {
         reader.beginArray();
         while (reader.hasNext()) {
-            paymentMethod.add(LogoNameCombo.readFromJson(reader));
+            LogoNameCombo logoNameCombo = new LogoNameCombo();
+            logoNameCombo.readFromJson(reader);
+            paymentMethod.add(logoNameCombo);
         }
         reader.endArray();
     }
@@ -152,6 +223,25 @@ public class ExpenseSettings {
         writer.name("PaymentMethod");
         writer.beginArray();
         for(LogoNameCombo l : paymentMethod) {
+            l.writeToJson(writer);
+        }
+        writer.endArray();
+    }
+
+    private void readCategory(JsonReader reader) throws IOException {
+        reader.beginArray();
+        while(reader.hasNext()) {
+            LogoNameCombo logoNameCombo = new LogoNameCombo();
+            logoNameCombo.readFromJson(reader);
+            category.add(logoNameCombo);
+        }
+        reader.endArray();
+    }
+
+    private void writeCategory(JsonWriter writer) throws IOException {
+        writer.name("Category");
+        writer.beginArray();
+        for(LogoNameCombo l : category) {
             l.writeToJson(writer);
         }
         writer.endArray();

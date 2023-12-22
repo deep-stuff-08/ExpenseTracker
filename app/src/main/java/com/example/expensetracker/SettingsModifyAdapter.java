@@ -9,7 +9,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.ArrayList;
 
@@ -31,6 +34,7 @@ public class SettingsModifyAdapter extends RecyclerView.Adapter<SettingsModifyAd
     @Override
     public void onBindViewHolder(@NonNull SettingsModifyViewHolder holder, int position) {
         holder.textview.setText(settingsData.get(position).getName());
+        holder.imageView.setImageDrawable(ResourcesCompat.getDrawable(holder.itemView.getResources(), settingsData.get(position).getLogo(), holder.itemView.getResources().newTheme()));
         holder.modifyBtn.setOnClickListener(view -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
             View diagview = View.inflate(view.getContext(), R.layout.edittext_dialog, null);
@@ -67,11 +71,13 @@ public class SettingsModifyAdapter extends RecyclerView.Adapter<SettingsModifyAd
 
     public static class SettingsModifyViewHolder extends  RecyclerView.ViewHolder {
         private final TextView textview;
+        private final ShapeableImageView imageView;
         private final ImageButton modifyBtn;
         private final ImageButton removeBtn;
         public SettingsModifyViewHolder(@NonNull View itemView) {
             super(itemView);
             textview = itemView.findViewById(R.id.modify_text);
+            imageView = itemView.findViewById(R.id.modify_image);
             modifyBtn = itemView.findViewById(R.id.modify_modify_btn);
             removeBtn = itemView.findViewById(R.id.modify_remove_btn);
         }

@@ -65,7 +65,7 @@ public class AddExpenseFragment extends Fragment {
             expenseCategory.setAdapter(string_adt);
 
             Spinner expenseSubCategory = view.findViewById(R.id.expense_subcategory);
-            SpinnerCategoryAdapter string_adt2 = new SpinnerCategoryAdapter(context, settings.getPaymentMethod());
+            SpinnerCategoryAdapter string_adt2 = new SpinnerCategoryAdapter(context, settings.getCategory());
             expenseSubCategory.setAdapter(string_adt2);
 
             Spinner expensePayment = view.findViewById(R.id.expense_payment);
