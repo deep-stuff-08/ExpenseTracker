@@ -15,6 +15,7 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -29,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 
 public class AddExpenseFragment extends Fragment {
     private SimpleDateFormat sdfDate;
@@ -60,17 +62,33 @@ public class AddExpenseFragment extends Fragment {
             EditText expenseValue = view.findViewById(R.id.expense_value);
             expenseValue.getText();
 
+            int bgId = settings.getCategory().get(0).getColorId();
+
+            Spinner expensePayment = view.findViewById(R.id.expense_payment);
+            SpinnerCategoryAdapter string_adt3 = new SpinnerCategoryAdapter(context, settings.getPaymentMethod(), bgId);
+            expensePayment.setAdapter(string_adt3);
+
             Spinner expenseCategory = view.findViewById(R.id.expense_category);
-            SpinnerCategoryAdapter string_adt = new SpinnerCategoryAdapter(context, settings.getPaymentMethod());
+            SpinnerCategoryAdapter string_adt = new SpinnerCategoryAdapter(context, settings.getCategory(), bgId);
             expenseCategory.setAdapter(string_adt);
 
             Spinner expenseSubCategory = view.findViewById(R.id.expense_subcategory);
-            SpinnerCategoryAdapter string_adt2 = new SpinnerCategoryAdapter(context, settings.getCategory());
+            SpinnerCategoryAdapter string_adt2 = new SpinnerCategoryAdapter(context, settings.getSubCategory(0), bgId);
             expenseSubCategory.setAdapter(string_adt2);
+            expenseCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    int bgId = settings.getCategory().get(position).getColorId();
+                    expenseSubCategory.setAdapter(new SpinnerCategoryAdapter(requireContext(), settings.getSubCategory(position), bgId));
+                    ((SpinnerCategoryAdapter)expensePayment.getAdapter()).setBackgroundColorId(bgId);
+                    ((SpinnerCategoryAdapter) expensePayment.getAdapter()).notifyDataSetChanged();
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
 
-            Spinner expensePayment = view.findViewById(R.id.expense_payment);
-            SpinnerCategoryAdapter string_adt3 = new SpinnerCategoryAdapter(context, settings.getPaymentMethod());
-            expensePayment.setAdapter(string_adt3);
+                }
+            });
+
         }
         Calendar currentTime = Calendar.getInstance();
 
@@ -130,7 +148,7 @@ public class AddExpenseFragment extends Fragment {
                 Navigation.findNavController(view).navigate(R.id.addExpenseFragment, bundle, new NavOptions.Builder().setPopUpTo(R.id.addExpenseFragment, true).build());
             } else {
                 if(getActivity() != null) {
-                    getActivity().onBackPressed();
+                    getActivity().getOnBackPressedDispatcher().onBackPressed();
                 }
             }
         });

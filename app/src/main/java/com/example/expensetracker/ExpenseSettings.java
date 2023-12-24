@@ -5,6 +5,10 @@ import android.util.JsonReader;
 import android.util.JsonWriter;
 import android.widget.Toast;
 
+import com.example.expensetracker.POJO.Category;
+import com.example.expensetracker.POJO.PaymentType;
+import com.example.expensetracker.POJO.SubCategory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,108 +16,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class ExpenseSettings {
     private final Context activityContext;
-    private final ArrayList<LogoNameCombo> paymentMethod;
-    private final ArrayList<LogoNameCombo> category;
-
-    public interface JsonIO {
-        void readFromJson(JsonReader reader) throws IOException;
-        void writeToJson(JsonWriter writer) throws IOException;
-    }
-
-    public static class LogoNameCombo implements JsonIO {
-        private String name;
-        private int logo;
-
-        public void readFromJson(JsonReader reader) throws IOException {
-            reader.beginObject();
-            if (Objects.equals(reader.nextName(), "name")) {
-                this.name = reader.nextString();
-            }
-            if (Objects.equals(reader.nextName(), "logo")) {
-                this.logo = reader.nextInt();
-            }
-            reader.endObject();
-        }
-
-        public void writeToJson(JsonWriter writer) throws IOException {
-            writer.beginObject();
-            writer.name("name").value(this.name);
-            writer.name("logo").value(this.logo);
-            writer.endObject();
-        }
-
-        public LogoNameCombo(String name, int logo) {
-            this.name = name;
-            this.logo = logo;
-        }
-        public LogoNameCombo() {
-            this.name = "";
-            this.logo = 0;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getLogo() {
-            return logo;
-        }
-    }
-
-    public static class Category {
-        private LogoNameCombo name;
-        private ArrayList<LogoNameCombo> subCategories;
-
-        public Category(LogoNameCombo name, ArrayList<LogoNameCombo> subCategories) {
-            this.name = name;
-            this.subCategories = subCategories;
-        }
-
-        public LogoNameCombo getName() {
-            return name;
-        }
-
-        public ArrayList<LogoNameCombo> getSubCategories() {
-            return subCategories;
-        }
-    }
+    private final ArrayList<PaymentType> paymentMethod;
+    private final ArrayList<Category> category;
 
     private ExpenseSettings(Context context) {
         activityContext = context;
         paymentMethod = new ArrayList<>();
         category = new ArrayList<>();
-    }
-
-    public void addPaymentMethod(LogoNameCombo payment) {
-        paymentMethod.add(payment);
-        if(safeWriteJson()) {
-            paymentMethod.remove(payment);
-        }
-    }
-
-    public void addCategory(LogoNameCombo cat) {
-        category.add(cat);
-        if(safeWriteJson()) {
-            category.remove(cat);
-        }
-    }
-
-    public void deletePaymentMethod(int position) {
-        LogoNameCombo old = paymentMethod.remove(position);
-        if(safeWriteJson()) {
-            paymentMethod.add(position, old);
-        }
-    }
-
-    public void deleteCategory(int position) {
-        LogoNameCombo old = category.remove(position);
-        if(safeWriteJson()) {
-            category.add(position, old);
-        }
     }
 
     private boolean safeWriteJson() {
@@ -126,45 +40,18 @@ public class ExpenseSettings {
             return true;
         }
     }
-
-    public void updatePaymentMethodName(int position, String name) {
-        String old = paymentMethod.get(position).name = name;
-        if(safeWriteJson()) {
-            paymentMethod.get(position).name = old;
-        }
-    }
-    public void updatePaymentMethodLogo(int position, int logo) {
-        int old = paymentMethod.get(position).logo = logo;
-        if(safeWriteJson()) {
-            paymentMethod.get(position).logo = old;
-        }
-    }
-
-    public void updateCategoryName(int position, String name) {
-        String old = category.get(position).name = name;
-        if(safeWriteJson()) {
-            category.get(position).name = old;
-        }
-    }
-    public void updateCategoryLogo(int position, int logo) {
-        int old = category.get(position).logo = logo;
-        if(safeWriteJson()) {
-            category.get(position).logo = old;
-        }
-    }
-    public ArrayList<LogoNameCombo> getPaymentMethod() {
+    public ArrayList<PaymentType> getPaymentMethod() {
         return paymentMethod;
     }
-
-    public ArrayList<LogoNameCombo> getCategory() {
+    public ArrayList<Category> getCategory() {
         return category;
     }
-
+    public ArrayList<SubCategory> getSubCategory(int index) {
+        return category.get(index).getSubCategories();
+    }
     public static ExpenseSettings createWithDefaultParameters(Context context) {
         ExpenseSettings s = new ExpenseSettings(context);
-
         s.initToDefault();
-
         return s;
     }
 
@@ -187,14 +74,26 @@ public class ExpenseSettings {
 
     public void initToDefault() {
         //Payment Method
-        this.paymentMethod.add(new LogoNameCombo("UPI", R.drawable.ic_launcher_foreground));
-        this.paymentMethod.add(new LogoNameCombo("Cash", R.drawable.ic_launcher_foreground));
-        this.paymentMethod.add(new LogoNameCombo("Credit Card", R.drawable.ic_launcher_foreground));
+        this.paymentMethod.add(new PaymentType("UPI", R.drawable.ic_launcher_foreground));
+        this.paymentMethod.add(new PaymentType("Cash", R.drawable.ic_launcher_foreground));
+        this.paymentMethod.add(new PaymentType("Credit Card", R.drawable.ic_launcher_foreground));
 
-        this.category.add(new LogoNameCombo("Food", R.color.categoryOrange));
-        this.category.add(new LogoNameCombo("Housing", R.color.categoryYellow));
-        this.category.add(new LogoNameCombo("Travel", R.color.categoryBlue));
-        this.category.add(new LogoNameCombo("Entertainment", R.color.categoryGreen));
+        this.category.add(new Category("Food", R.color.categoryOrange, new ArrayList<>(Arrays.asList(
+                new SubCategory("Restaurant", R.drawable.ic_launcher_foreground),
+                new SubCategory("Grocery", R.drawable.ic_launcher_foreground)
+        ))));
+        this.category.add(new Category("Housing", R.color.categoryYellow, new ArrayList<>(Arrays.asList(
+                new SubCategory("Rent", R.drawable.ic_launcher_foreground),
+                new SubCategory("Electricity", R.drawable.ic_launcher_foreground)
+        ))));
+        this.category.add(new Category("Travel", R.color.categoryBlue, new ArrayList<>(Arrays.asList(
+                new SubCategory("Public", R.drawable.ic_launcher_foreground),
+                new SubCategory("Long Distance", R.drawable.ic_launcher_foreground)
+        ))));
+        this.category.add(new Category("Entertainment", R.color.categoryGreen, new ArrayList<>(Arrays.asList(
+                new SubCategory("Entry Fee", R.drawable.ic_launcher_foreground),
+                new SubCategory("Trip", R.drawable.ic_launcher_foreground)
+        ))));
     }
 
     public void writeSettingsToJson(File f) throws IOException {
@@ -212,9 +111,9 @@ public class ExpenseSettings {
     private void readPaymentMethod(JsonReader reader) throws IOException {
         reader.beginArray();
         while (reader.hasNext()) {
-            LogoNameCombo logoNameCombo = new LogoNameCombo();
-            logoNameCombo.readFromJson(reader);
-            paymentMethod.add(logoNameCombo);
+            PaymentType paymentType = new PaymentType();
+            paymentType.readFromJson(reader);
+            paymentMethod.add(paymentType);
         }
         reader.endArray();
     }
@@ -222,7 +121,7 @@ public class ExpenseSettings {
     private void writePaymentMethod(JsonWriter writer) throws IOException {
         writer.name("PaymentMethod");
         writer.beginArray();
-        for(LogoNameCombo l : paymentMethod) {
+        for(PaymentType l : paymentMethod) {
             l.writeToJson(writer);
         }
         writer.endArray();
@@ -231,9 +130,9 @@ public class ExpenseSettings {
     private void readCategory(JsonReader reader) throws IOException {
         reader.beginArray();
         while(reader.hasNext()) {
-            LogoNameCombo logoNameCombo = new LogoNameCombo();
-            logoNameCombo.readFromJson(reader);
-            category.add(logoNameCombo);
+            Category category1 = new Category();
+            category1.readFromJson(reader);
+            category.add(category1);
         }
         reader.endArray();
     }
@@ -241,16 +140,97 @@ public class ExpenseSettings {
     private void writeCategory(JsonWriter writer) throws IOException {
         writer.name("Category");
         writer.beginArray();
-        for(LogoNameCombo l : category) {
+        for(Category l : category) {
             l.writeToJson(writer);
         }
         writer.endArray();
     }
 
-    public interface SettingsUpdateListener {
-        void onSettingsNameUpdateListener(int position, String newName);
-        void onSettingsLogoUpdateListener(int position, int newLogo);
-        void onSettingsNameLogoComboDeleteListener(int position);
-        void onSettingsNameLogoComboAddListener(String name, int logo);
+    public void addPaymentMethod(PaymentType payment) {
+        paymentMethod.add(payment);
+        if(safeWriteJson()) {
+            paymentMethod.remove(payment);
+        }
+    }
+
+    public void addCategory(Category cat) {
+        category.add(cat);
+        if(safeWriteJson()) {
+            category.remove(cat);
+        }
+    }
+
+    public void addSubCategory(int categoryId, SubCategory subCat) {
+        category.get(categoryId).getSubCategories().add(subCat);
+        if(safeWriteJson()) {
+            category.get(categoryId).getSubCategories().remove(subCat);
+        }
+    }
+
+    public void deletePaymentMethod(int position) {
+        PaymentType old = paymentMethod.remove(position);
+        if(safeWriteJson()) {
+            paymentMethod.add(position, old);
+        }
+    }
+
+    public void deleteCategory(int position) {
+        Category old = category.remove(position);
+        if(safeWriteJson()) {
+            category.add(position, old);
+        }
+    }
+
+    public void deleteSubCategory(int categoryId, int position) {
+        SubCategory old = category.get(categoryId).getSubCategories().remove(position);
+        if(safeWriteJson()) {
+            category.get(categoryId).getSubCategories().add(position, old);
+        }
+    }
+
+    public void updatePaymentMethodName(int position, String name) {
+        String old = paymentMethod.get(position).getName();
+        paymentMethod.get(position).setName(name);
+        if(safeWriteJson()) {
+            paymentMethod.get(position).setName(old);
+        }
+    }
+    public void updatePaymentMethodDrawId(int position, int logo) {
+        int old = paymentMethod.get(position).getDrawableId();
+        paymentMethod.get(position).setDrawableId(logo);
+        if(safeWriteJson()) {
+            paymentMethod.get(position).setDrawableId(old);
+        }
+    }
+
+    public void updateCategoryName(int position, String name) {
+        String old = category.get(position).getName();
+        category.get(position).setName(name);
+        if(safeWriteJson()) {
+            category.get(position).setName(old);
+        }
+    }
+    public void updateCategoryColorId(int position, int logo) {
+        int old = category.get(position).getColorId();
+        category.get(position).setColorId(logo);
+        if(safeWriteJson()) {
+            category.get(position).setColorId(old);
+        }
+    }
+
+    public void updateSubCategoryName(int categoryId, int position, String name) {
+        String old = category.get(categoryId).getSubCategories().get(position).getName();
+        category.get(categoryId).getSubCategories().get(position).setName(name);
+        if(safeWriteJson()) {
+            category.get(categoryId).getSubCategories().get(position).setName(old);
+        }
+    }
+
+    public void updateSubCategoryDrawId(int categoryId, int position, int logo) {
+        int old = category.get(categoryId).getSubCategories().get(position).getDrawableId();
+        category.get(categoryId).getSubCategories().get(position).setDrawableId(logo);
+        if(safeWriteJson()) {
+            category.get(categoryId).getSubCategories().get(position).setDrawableId(old);
+        }
     }
 }
