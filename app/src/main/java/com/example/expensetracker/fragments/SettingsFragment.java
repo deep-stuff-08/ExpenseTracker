@@ -1,4 +1,4 @@
-package com.example.expensetracker;
+package com.example.expensetracker.fragments;
 
 import android.os.Bundle;
 
@@ -11,6 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.expensetracker.adapters.SettingsEntryAdapter;
+import com.example.expensetracker.R;
+
 public class SettingsFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -21,7 +24,7 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        RecyclerView recycler = view.findViewById(R.id.settings_recycleview);
+        RecyclerView recycler = view.findViewById(R.id.settings_recycle_view);
         recycler.setAdapter(new SettingsEntryAdapter());
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         recycler.setVerticalScrollbarPosition(0);

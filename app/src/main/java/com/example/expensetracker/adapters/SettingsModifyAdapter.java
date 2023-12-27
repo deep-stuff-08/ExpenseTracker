@@ -1,8 +1,4 @@
-package com.example.expensetracker;
-
-import static com.example.expensetracker.POJO.SettingsType.CATEGORY;
-import static com.example.expensetracker.POJO.SettingsType.PAYMENT;
-import static com.example.expensetracker.POJO.SettingsType.SUBCATEGORY;
+package com.example.expensetracker.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,24 +9,24 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.expensetracker.POJO.Category;
-import com.example.expensetracker.POJO.PaymentType;
-import com.example.expensetracker.POJO.SettingsParent;
-import com.example.expensetracker.POJO.SettingsType;
-import com.example.expensetracker.POJO.SubCategory;
+import com.example.expensetracker.pojo.Category;
+import com.example.expensetracker.pojo.PaymentType;
+import com.example.expensetracker.pojo.SettingsParent;
+import com.example.expensetracker.pojo.SubCategory;
+import com.example.expensetracker.R;
+import com.example.expensetracker.SettingsUpdateListener;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public class SettingsModifyAdapter extends RecyclerView.Adapter<SettingsModifyAdapter.SettingsModifyViewHolder> {
     private final ArrayList<SettingsParent> settingsData;
 
-    private SettingsUpdateListener updateListener;
+    final private SettingsUpdateListener updateListener;
 
+    @SuppressWarnings("unchecked")
     public SettingsModifyAdapter(ArrayList<? extends SettingsParent> data, SettingsUpdateListener listener) {
         settingsData = (ArrayList<SettingsParent>) data;
         updateListener = listener;
@@ -72,13 +68,16 @@ public class SettingsModifyAdapter extends RecyclerView.Adapter<SettingsModifyAd
                 String newName = editText.getText().toString();
                 switch (item.getType()) {
                     case PAYMENT:
-                        t = ((PaymentType)item).getName();
+                        assert item instanceof PaymentType;
+                        t = item.getName();
                         break;
                     case CATEGORY:
-                        t = ((Category)item).getName();
+                        assert item instanceof Category;
+                        t = item.getName();
                         break;
                     case SUBCATEGORY:
-                        t = ((SubCategory)item).getName();
+                        assert item instanceof SubCategory;
+                        t = item.getName();
                         break;
                 }
                 if(!newName.equals(t)) {
@@ -96,9 +95,7 @@ public class SettingsModifyAdapter extends RecyclerView.Adapter<SettingsModifyAd
             AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
             builder.setTitle("Confirm Delete");
             builder.setMessage("Are you sure you want to delete '"+settingsData.get(holder.getAdapterPosition()).getName()+"'?");
-            builder.setPositiveButton("Yes", (dialogInterface, i) -> {
-                updateListener.onSettingsDeleteListener(holder.getAdapterPosition());
-            });
+            builder.setPositiveButton("Yes", (dialogInterface, i) -> updateListener.onSettingsDeleteListener(holder.getAdapterPosition()));
             builder.setNegativeButton("No", null);
             builder.show();
         });

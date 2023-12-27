@@ -35,7 +35,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/textview2"
             android:text="@string/default_exp_entry"
             android:textSize="16sp"/>
     </LinearLayout>

@@ -1,4 +1,4 @@
-package com.example.expensetracker;
+package com.example.expensetracker.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,16 +9,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.expensetracker.POJO.Category;
-import com.example.expensetracker.POJO.PaymentType;
-import com.example.expensetracker.POJO.SubCategory;
+import com.example.expensetracker.ExpenseSettings;
+import com.example.expensetracker.MainActivity;
+import com.example.expensetracker.pojo.Category;
+import com.example.expensetracker.pojo.PaymentType;
+import com.example.expensetracker.pojo.SubCategory;
+import com.example.expensetracker.R;
+import com.example.expensetracker.SettingsUpdateListener;
 
 import java.util.ArrayList;
 
@@ -190,7 +193,11 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
             builder.setView(diagView);
             builder.setTitle("Add New Item");
             builder.setPositiveButton("Add", (dialogInterface, i) -> {
-                nameListener.onSettingsAddListener(((EditText)diagView.findViewById(R.id.dialog_edittext)).getText().toString(), R.drawable.ic_launcher_foreground);
+                if(rootPosition == 1) {
+                    nameListener.onSettingsAddListener(((EditText) diagView.findViewById(R.id.dialog_edittext)).getText().toString(), R.color.grey);
+                } else {
+                    nameListener.onSettingsAddListener(((EditText) diagView.findViewById(R.id.dialog_edittext)).getText().toString(), R.drawable.ic_launcher_foreground);
+                }
             });
             builder.setNegativeButton("Cancel", null);
             AlertDialog dialog = builder.create();

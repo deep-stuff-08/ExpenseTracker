@@ -1,4 +1,4 @@
-package com.example.expensetracker;
+package com.example.expensetracker.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,13 +10,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.res.ResourcesCompat;
 
-import com.example.expensetracker.POJO.Category;
-import com.example.expensetracker.POJO.PaymentType;
-import com.example.expensetracker.POJO.SettingsParent;
-import com.example.expensetracker.POJO.SettingsType;
-import com.example.expensetracker.POJO.SubCategory;
+import com.example.expensetracker.pojo.Category;
+import com.example.expensetracker.pojo.PaymentType;
+import com.example.expensetracker.pojo.SettingsParent;
+import com.example.expensetracker.pojo.SubCategory;
+import com.example.expensetracker.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +24,7 @@ public class SpinnerCategoryAdapter extends ArrayAdapter<SettingsParent> {
 
     int backgroundColorId;
 
+    @SuppressWarnings("unchecked")
     public SpinnerCategoryAdapter(@NonNull Context context, ArrayList<? extends SettingsParent> data, int backgroundColorId) {
         super(context, android.R.layout.simple_spinner_item, (List<SettingsParent>) data);
         this.backgroundColorId = backgroundColorId;

@@ -2,12 +2,11 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph"
     app:startDestination="@id/homeFragment">
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.expensetracker.HomeFragment"
+        android:name="com.example.expensetracker.fragments.HomeFragment"
         android:label="Expense Tracker" >
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
@@ -18,12 +17,12 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.example.expensetracker.SettingsFragment"
+        android:name="com.example.expensetracker.fragments.SettingsFragment"
         android:label="Settings"
         tools:layout="@layout/fragment_settings" />
     <fragment
         android:id="@+id/addExpenseFragment"
-        android:name="com.example.expensetracker.AddExpenseFragment"
+        android:name="com.example.expensetracker.fragments.AddExpenseFragment"
         android:label="Add Expense"
         tools:layout="@layout/fragment_add_expense" />
 </navigation>

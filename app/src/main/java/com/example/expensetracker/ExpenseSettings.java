@@ -5,9 +5,9 @@ import android.util.JsonReader;
 import android.util.JsonWriter;
 import android.widget.Toast;
 
-import com.example.expensetracker.POJO.Category;
-import com.example.expensetracker.POJO.PaymentType;
-import com.example.expensetracker.POJO.SubCategory;
+import com.example.expensetracker.pojo.Category;
+import com.example.expensetracker.pojo.PaymentType;
+import com.example.expensetracker.pojo.SubCategory;
 
 import java.io.File;
 import java.io.FileInputStream;

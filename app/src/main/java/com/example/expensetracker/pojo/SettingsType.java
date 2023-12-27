@@ -1,4 +1,4 @@
-package com.example.expensetracker.POJO;
+package com.example.expensetracker.pojo;
 
 public enum SettingsType {
     PAYMENT,

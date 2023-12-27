@@ -1,4 +1,4 @@
-package com.example.expensetracker;
+package com.example.expensetracker.fragments;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -23,6 +23,10 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.example.expensetracker.adapters.SpinnerCategoryAdapter;
+import com.example.expensetracker.ExpenseSettings;
+import com.example.expensetracker.MainActivity;
+import com.example.expensetracker.R;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.ParseException;
@@ -30,7 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 
 public class AddExpenseFragment extends Fragment {
     private SimpleDateFormat sdfDate;
@@ -134,6 +137,7 @@ public class AddExpenseFragment extends Fragment {
         });
 
         CheckBox expenseShared = view.findViewById(R.id.expense_shared);
+        //noinspection ResultOfMethodCallIgnored
         expenseShared.isChecked();
         CheckBox expenseRepeat = view.findViewById(R.id.expense_repeat);
         if(getArguments() != null) {

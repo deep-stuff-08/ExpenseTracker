@@ -1,4 +1,4 @@
-package com.example.expensetracker.POJO;
+package com.example.expensetracker.pojo;
 
 import android.util.JsonReader;
 import android.util.JsonWriter;
@@ -6,16 +6,16 @@ import android.util.JsonWriter;
 import java.io.IOException;
 import java.util.Objects;
 
-public class PaymentType extends SettingsParent implements JsonIO {
-    private String name;
-    private int drawableId;
+public class SubCategory extends SettingsParent implements JsonIO {
+    String name;
+    int drawableId;
 
-    public PaymentType() {
-        name = "";
-        drawableId = 0;
+    public SubCategory() {
+        this.name = "";
+        this.drawableId = 0;
     }
 
-    public PaymentType(String name, int drawableId) {
+    public SubCategory(String name, int drawableId) {
         this.name = name;
         this.drawableId = drawableId;
     }
@@ -57,6 +57,6 @@ public class PaymentType extends SettingsParent implements JsonIO {
 
     @Override
     public SettingsType getType() {
-        return SettingsType.PAYMENT;
+        return SettingsType.SUBCATEGORY;
     }
 }

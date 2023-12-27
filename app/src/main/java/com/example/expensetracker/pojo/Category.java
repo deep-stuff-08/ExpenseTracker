@@ -1,4 +1,4 @@
-package com.example.expensetracker.POJO;
+package com.example.expensetracker.pojo;
 
 import android.util.JsonReader;
 import android.util.JsonWriter;
@@ -10,7 +10,7 @@ import java.util.Objects;
 public class Category extends SettingsParent implements JsonIO {
     private String name;
     private int colorId;
-    private ArrayList<SubCategory> subCategories;
+    final private ArrayList<SubCategory> subCategories;
 
     public Category(String name, int colorId, ArrayList<SubCategory> subCategories) {
         this.name = name;
@@ -42,10 +42,6 @@ public class Category extends SettingsParent implements JsonIO {
 
     public ArrayList<SubCategory> getSubCategories() {
         return subCategories;
-    }
-
-    public void setSubCategories(ArrayList<SubCategory> subCategories) {
-        this.subCategories = subCategories;
     }
 
     @Override

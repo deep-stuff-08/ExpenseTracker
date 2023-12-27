@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
     <color name="grey">#FF949494</color>
 
-    <color name="categoryRed">#FFCC1010</color>
     <color name="categoryBlue">#FF10CC10</color>
     <color name="categoryGreen">#FF1010CC</color>
     <color name="categoryYellow">#FFCCCC10</color>
     <color name="categoryOrange">#FFCC5510</color>
-    <color name="categoryMagenta">#FFCC10AA</color>
-    <color name="categoryCyan">#FF10CCCC</color>
 </resources>
