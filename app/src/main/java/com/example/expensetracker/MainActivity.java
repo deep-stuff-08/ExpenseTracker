@@ -16,6 +16,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.expensetracker.database.DBManager;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
@@ -28,10 +29,14 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
     private boolean isSettingsVisible;
     private ExpenseSettings expenseSettings;
+
+    private DBManager dbManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        dbManager = new DBManager(this);
+        dbManager.insert();
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
 
