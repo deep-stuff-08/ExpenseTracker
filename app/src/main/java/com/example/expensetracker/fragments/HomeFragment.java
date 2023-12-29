@@ -19,6 +19,8 @@ import com.example.expensetracker.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.Objects;
+
 public class HomeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,15 +30,15 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View cview = inflater.inflate(R.layout.fragment_home, container, false);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        RecyclerView recycler = cview.findViewById(R.id.recycleView);
+        RecyclerView recycler = view.findViewById(R.id.recycleView);
         recycler.setAdapter(new ExpEntryAdapter());
 
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         recycler.setVerticalScrollbarPosition(0);
 
-        return cview;
+        return view;
     }
 
     @Override
@@ -45,7 +47,11 @@ public class HomeFragment extends Fragment {
         view.findViewById(R.id.unconfirmed_parent).setOnClickListener(view2 -> Navigation.findNavController(view2).navigate(R.id.action_homeFragment_to_unconfirmedEntryFragment));
     }
 
-    public void setUnconfirmedVisible() {
-        getView().findViewById(R.id.unconfirmed_parent).setVisibility(View.VISIBLE);
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(((MainActivity)requireActivity()).getEntries().size() > 0) {
+            requireView().findViewById(R.id.unconfirmed_parent).setVisibility(View.VISIBLE);
+        }
     }
 }

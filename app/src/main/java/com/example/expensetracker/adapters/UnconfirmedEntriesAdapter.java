@@ -1,5 +1,6 @@
 package com.example.expensetracker.adapters;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,6 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expensetracker.R;
@@ -47,7 +49,16 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
             notifyItemChanged(position);
         });
         holder.delete.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        holder.delete.setOnClickListener(v -> {
+            entries.remove(position);
+            notifyItemRemoved(position);
+        });
         holder.confirm.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+        holder.confirm.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putInt("unconfirmedEntryId", position);
+            Navigation.findNavController(holder.itemView).navigate(R.id.action_unconfirmedEntryFragment_to_addExpenseFragment, bundle);
+        });
     }
 
     @Override

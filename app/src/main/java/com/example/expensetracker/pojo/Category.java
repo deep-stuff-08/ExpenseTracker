@@ -1,5 +1,6 @@
 package com.example.expensetracker.pojo;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 

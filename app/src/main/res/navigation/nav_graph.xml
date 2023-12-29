@@ -34,5 +34,9 @@
         android:name="com.example.expensetracker.fragments.UnconfirmedEntriesFragment"
         android:label="Unconfirmed Entries"
         tools:layout="@layout/fragment_unconfirmed_entries"
-        />
+        >
+        <action
+            android:id="@+id/action_unconfirmedEntryFragment_to_addExpenseFragment"
+            app:destination="@id/addExpenseFragment" />
+    </fragment>
 </navigation>

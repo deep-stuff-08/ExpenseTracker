@@ -2,6 +2,7 @@ package com.example.expensetracker;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -68,6 +69,19 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
+        } else {
+            SmsReader reader = new SmsReader();
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.YEAR, 2023);
+            c.set(Calendar.MONTH, 11);
+            c.set(Calendar.DAY_OF_MONTH, 27);
+            c.set(Calendar.HOUR_OF_DAY, 9);
+            c.set(Calendar.MINUTE, 40);
+            c.set(Calendar.SECOND, 30);
+            entries = reader.readMessagesSentAfter(this, c.getTime());
+        }
         NavController mNavigationController = Navigation.findNavController(this,R.id.fragment_container_view);
         NavigationUI.setupActionBarWithNavController(this, mNavigationController);
 
@@ -84,24 +98,6 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(callback);
 
         isSettingsVisible = true;
-
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
-        } else {
-            SmsReader reader = new SmsReader();
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.YEAR, 2023);
-            c.set(Calendar.MONTH, 11);
-            c.set(Calendar.DAY_OF_MONTH, 27);
-            c.set(Calendar.HOUR_OF_DAY, 9);
-            c.set(Calendar.MINUTE, 40);
-            c.set(Calendar.SECOND, 30);
-            entries = reader.readMessagesSentAfter(this, c.getTime());
-            if(entries.size() > 0) {
-                FragmentContainerView containerView = findViewById(R.id.fragment_container_view);
-                ((HomeFragment)containerView.getFragment()).setUnconfirmedVisible();
-            }
-        }
     }
 
     @Override
