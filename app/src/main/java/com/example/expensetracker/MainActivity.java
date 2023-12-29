@@ -2,7 +2,6 @@ package com.example.expensetracker;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -20,6 +19,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.expensetracker.fragments.HomeFragment;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
+import com.example.expensetracker.database.DBManager;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
@@ -36,10 +36,14 @@ public class MainActivity extends AppCompatActivity {
     private boolean isSettingsVisible;
     private ExpenseSettings expenseSettings;
     private ArrayList<UnconfirmedEntry> entries;
+    private DBManager dbManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        dbManager = new DBManager(this);
+        dbManager.insert();
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
 
@@ -82,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
             c.set(Calendar.SECOND, 30);
             entries = reader.readMessagesSentAfter(this, c.getTime());
         }
+
         NavController mNavigationController = Navigation.findNavController(this,R.id.fragment_container_view);
         NavigationUI.setupActionBarWithNavController(this, mNavigationController);
 
