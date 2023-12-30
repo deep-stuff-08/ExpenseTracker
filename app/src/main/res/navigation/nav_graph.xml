@@ -7,13 +7,17 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.expensetracker.fragments.HomeFragment"
-        android:label="Expense Tracker" >
+        android:label="Expense Tracker"
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
         <action
             android:id="@+id/action_homeFragment_to_addExpenseFragment"
             app:destination="@id/addExpenseFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_unconfirmedEntryFragment"
+            app:destination="@id/unconfirmedEntryFragment"/>
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -25,4 +29,14 @@
         android:name="com.example.expensetracker.fragments.AddExpenseFragment"
         android:label="Add Expense"
         tools:layout="@layout/fragment_add_expense" />
+    <fragment
+        android:id="@+id/unconfirmedEntryFragment"
+        android:name="com.example.expensetracker.fragments.UnconfirmedEntriesFragment"
+        android:label="Unconfirmed Entries"
+        tools:layout="@layout/fragment_unconfirmed_entries"
+        >
+        <action
+            android:id="@+id/action_unconfirmedEntryFragment_to_addExpenseFragment"
+            app:destination="@id/addExpenseFragment" />
+    </fragment>
 </navigation>

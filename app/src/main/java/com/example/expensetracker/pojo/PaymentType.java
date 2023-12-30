@@ -1,7 +1,11 @@
 package com.example.expensetracker.pojo;
 
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.util.JsonReader;
 import android.util.JsonWriter;
+
+import com.example.expensetracker.database.DBManager;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -9,6 +13,8 @@ import java.util.Objects;
 public class PaymentType extends SettingsParent implements JsonIO {
     private String name;
     private int drawableId;
+
+    private String tableName = "paymentMethod";
 
     public PaymentType() {
         name = "";
@@ -58,5 +64,18 @@ public class PaymentType extends SettingsParent implements JsonIO {
     @Override
     public SettingsType getType() {
         return SettingsType.PAYMENT;
+    }
+
+    public void insert()
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("Name", getName());
+        DBManager dbManager = DBManager.getDBManagerInstance();
+        dbManager.insert(contentValues, tableName);
+    }
+
+    public void getData()
+    {
+
     }
 }

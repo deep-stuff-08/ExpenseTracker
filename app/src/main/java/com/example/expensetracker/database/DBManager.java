@@ -11,20 +11,45 @@ public class DBManager extends SQLiteOpenHelper {
 
     public final  static String DATABASE_NAME = "DB_ExpenseTracker.db";
 
-    public DBManager(Context context)
+    private static DBManager dbManager = null;
+
+    private DBManager(Context context)
     {
         super(context, DATABASE_NAME, null, 1);
         onCreate();
-        insertDefaultEntries();
+     //   insertDefaultEntries();
+    }
+
+    public static DBManager getDBManagerInstance(Context context)
+    {
+        if(dbManager == null)
+        {
+            dbManager = new DBManager(context);
+        }
+        return dbManager;
+    }
+
+    public static DBManager getDBManagerInstance()
+    {
+        if(dbManager == null)
+        {
+            throw new RuntimeException();
+        }
+        return dbManager;
+    }
+
+    private SQLiteDatabase getDatabaseInstance()
+    {
+        return this.getWritableDatabase();
     }
 
     public void onCreate(SQLiteDatabase db)
     {
 
     }
-    public void onCreate()
+    private void onCreate()
     {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = getDatabaseInstance();
 
         // create table - category
         db.execSQL(
@@ -67,10 +92,16 @@ public class DBManager extends SQLiteOpenHelper {
 
     }
 
-    public boolean insertDefaultEntries()
+    // false - no record inserted
+    // true - record inserted successfully
+    private boolean insertDefaultEntries()
     {
-        SQLiteDatabase db = this.getWritableDatabase();
-
+        Cursor cursor = getData("category", null);
+        if (null != cursor)
+        {
+            return false;
+        }
+        SQLiteDatabase db = this.getDatabaseInstance();
         ContentValues contentValues = new ContentValues();
 
         // insert default values in "category" table
@@ -84,18 +115,12 @@ public class DBManager extends SQLiteOpenHelper {
         contentValues.put("Name", "Entertainment");
         db.insert("category", null, contentValues);
 
-
         // insert default values in "subCategory" table
         // category_id
 
         // enter sub Categories of Food
-        Cursor cursor = getData("category", "Name = 'Food'");
-        String category_id = null;
-        if (null != cursor)
-        {
-            cursor.moveToFirst();
-            category_id = cursor.getString(cursor.getColumnIndex("id"));
-        }
+        String category_id = getData("category", "Name = 'Food'", "id");
+
         contentValues.clear();
         contentValues.put("Name", "Restaurant");
         contentValues.put("category_id", category_id);
@@ -107,12 +132,8 @@ public class DBManager extends SQLiteOpenHelper {
         db.insert("subCategory", null, contentValues);
 
         // enter sub Categories of Housing
-        cursor = getData("category", "Name = 'Housing'");
-        if (null != cursor)
-        {
-            cursor.moveToFirst();
-            category_id = cursor.getString(cursor.getColumnIndex("id"));
-        }
+        category_id = getData("category", "Name = 'Housing'", "id");
+
         contentValues.clear();
         contentValues.put("Name", "Rent");
         contentValues.put("category_id", category_id);
@@ -134,14 +155,37 @@ public class DBManager extends SQLiteOpenHelper {
 
         return true;
     }
-    public boolean insert()
+    public boolean insert(ContentValues contentValues, String tableName)
     {
+        getDatabaseInstance().insert(tableName, null, contentValues);
         return true;
     }
 
-    public Cursor getData(String tableName, String condition) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from "+ tableName +" where " + condition, null );
-        return res;
+    public Cursor delete(String tableName, String condition) {
+        String query = "delete from "+ tableName;
+        query =  (null == condition) ? "" : " where " + condition;
+        Cursor cursor =  getDatabaseInstance().rawQuery( query,
+                null );
+        return cursor;
     }
+
+    public Cursor getData(String tableName, String condition) {
+        String query = "select * from "+ tableName;
+        query =  (null == condition) ? "" : " where " + condition;
+        Cursor cursor =  getDatabaseInstance().rawQuery( query,
+                null );
+        if(null != cursor)
+            cursor.moveToFirst();
+        return cursor;
+    }
+
+    private String getData(Cursor cursor, String columnName) {
+        return cursor.getString(cursor.getColumnIndex(columnName));
+    }
+
+    public String getData(String tableName, String condition, String columnName) {
+        Cursor cursor = getData(tableName, condition);
+        return getData(cursor, columnName);
+    }
+
 }

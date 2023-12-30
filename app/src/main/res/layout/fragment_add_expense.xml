@@ -8,12 +8,18 @@
     android:layout_marginLeft="@dimen/exp_margin_sides"
     android:layout_marginRight="@dimen/exp_margin_sides">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_alignParentTop="true"
+        android:id="@+id/expense_msg_body"/>
 
     <AutoCompleteTextView
         android:id="@+id/expense_name"
         android:layout_width="match_parent"
         android:layout_height="@dimen/exp_image_height"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/expense_msg_body"
         android:autofillHints="Expense Name"
         android:hint="@string/add_expense_name"
         android:inputType="text"

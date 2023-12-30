@@ -1,7 +1,12 @@
 package com.example.expensetracker.pojo;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.JsonReader;
 import android.util.JsonWriter;
+
+import com.example.expensetracker.database.DBManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,13 +14,23 @@ import java.util.Objects;
 
 public class Category extends SettingsParent implements JsonIO {
     private String name;
+
+    private  int id;
     private int colorId;
     final private ArrayList<SubCategory> subCategories;
+
+    private String tableName = "category";
 
     public Category(String name, int colorId, ArrayList<SubCategory> subCategories) {
         this.name = name;
         this.colorId = colorId;
         this.subCategories = subCategories;
+    }
+
+    public Category(int id, String name) {
+        this.name = name;
+        this.id = id;
+        this.subCategories = null;
     }
 
     public Category() {
@@ -82,5 +97,22 @@ public class Category extends SettingsParent implements JsonIO {
     @Override
     public SettingsType getType() {
         return SettingsType.CATEGORY;
+    }
+
+    public ArrayList<Category> insert()
+    {
+        DBManager dbManager = DBManager.getDBManagerInstance();
+        Cursor cursor = dbManager.getData(tableName, null);
+
+        ArrayList<Category> data = new ArrayList<>();
+
+        do {
+            String id = cursor.getString(cursor.getColumnIndex("id"));
+            String name = cursor.getString(cursor.getColumnIndex("name"));
+            Category cat = new Category(Integer.parseInt(id), name);
+            data.add(cat);
+        }while(cursor.moveToNext());
+
+        return data;
     }
 }

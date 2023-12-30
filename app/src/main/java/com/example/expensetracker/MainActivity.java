@@ -17,10 +17,14 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.expensetracker.database.DBManager;
+import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * -1 : File Write Error
@@ -30,13 +34,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean isSettingsVisible;
     private ExpenseSettings expenseSettings;
 
-    private DBManager dbManager;
+    public DBManager dbManager;
+    private ArrayList<UnconfirmedEntry> entries;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        dbManager = new DBManager(this);
-        dbManager.insert();
+        DBManager dbManager = DBManager.getDBManagerInstance(this);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
 
@@ -66,6 +70,19 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
+        } else {
+            SmsReader reader = new SmsReader();
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.YEAR, 2023);
+            c.set(Calendar.MONTH, 11);
+            c.set(Calendar.DAY_OF_MONTH, 27);
+            c.set(Calendar.HOUR_OF_DAY, 9);
+            c.set(Calendar.MINUTE, 40);
+            c.set(Calendar.SECOND, 30);
+            entries = reader.readMessagesSentAfter(this, c.getTime());
+        }
         NavController mNavigationController = Navigation.findNavController(this,R.id.fragment_container_view);
         NavigationUI.setupActionBarWithNavController(this, mNavigationController);
 
@@ -82,13 +99,6 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(callback);
 
         isSettingsVisible = true;
-
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
-        } else {
-            SmsReader reader = new SmsReader();
-            reader.readMessagesSentAfter(this, null);
-        }
     }
 
     @Override
@@ -107,7 +117,15 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if(R.id.menu_action_settings == item.getItemId()) {
             invalidateMenu();
-            Navigation.findNavController(this,R.id.fragment_container_view).navigate(R.id.action_homeFragment_to_settingsFragment);
+            Navigation.findNavController(this, R.id.fragment_container_view).navigate(R.id.action_homeFragment_to_settingsFragment);
+            return true;
+        } else if (R.id.menu_unconfirmed_entries == item.getItemId()) {
+            invalidateMenu();
+            NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
+            if(navController.getCurrentDestination().getId() != R.id.homeFragment) {
+                navController.navigateUp();
+            }
+            navController.navigate(R.id.action_homeFragment_to_unconfirmedEntryFragment);
             return true;
         } else {
             return super.onOptionsItemSelected(item);
@@ -121,6 +139,10 @@ public class MainActivity extends AppCompatActivity {
 
     public ExpenseSettings getSettings() {
         return expenseSettings;
+    }
+
+    public ArrayList<UnconfirmedEntry> getEntries() {
+        return entries;
     }
 
     public void terminateApplicationWithError(int errorCode) {

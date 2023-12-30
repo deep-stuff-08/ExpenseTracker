@@ -147,17 +147,19 @@ public class ExpenseSettings {
     }
 
     public void addPaymentMethod(PaymentType payment) {
-        paymentMethod.add(payment);
-        if(safeWriteJson()) {
-            paymentMethod.remove(payment);
-        }
+        payment.insert();
+        //paymentMethod.add(payment);
+        //if(safeWriteJson()) {
+        //    paymentMethod.remove(payment);
+        //}
     }
 
     public void addCategory(Category cat) {
-        category.add(cat);
+        cat.insert();
+        /*category.add(cat);
         if(safeWriteJson()) {
             category.remove(cat);
-        }
+        }*/
     }
 
     public void addSubCategory(int categoryId, SubCategory subCat) {
