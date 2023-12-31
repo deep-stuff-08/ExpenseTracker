@@ -5,6 +5,7 @@ import android.util.JsonReader;
 import android.util.JsonWriter;
 import android.widget.Toast;
 
+import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.PaymentType;
 import com.example.expensetracker.pojo.SubCategory;
@@ -15,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -28,6 +30,12 @@ public class ExpenseSettings {
         activityContext = context;
         paymentMethod = new ArrayList<>();
         category = new ArrayList<>();
+    }
+
+    private ExpenseSettings(Context context, ArrayList<PaymentType> paymentMethod, ArrayList<Category> category) {
+        activityContext = context;
+        this.paymentMethod = paymentMethod;
+        this.category = category;
     }
 
     private boolean safeWriteJson() {
@@ -55,6 +63,27 @@ public class ExpenseSettings {
         return s;
     }
 
+    private static void initializeDatabase(Context context)
+    {
+        DBManager dbManager = DBManager.createDBManagerInstance(context);
+
+        ExpenseSettings expenseSettingsWithDefaultValues = new ExpenseSettings(context, new ArrayList<PaymentType>(), new ArrayList<Category>());
+        if(!dbManager.isDatabaseSetup())
+        {
+            dbManager.onCreateSetup();
+            expenseSettingsWithDefaultValues.initToDefault();
+            dbManager.insertExpenseSettings(expenseSettingsWithDefaultValues);
+        }
+    }
+
+    public static ExpenseSettings readDataFromDatabase(Context context)
+    {
+        initializeDatabase(context);
+
+        // read back data
+        return new ExpenseSettings(context, DBManager.getPaymentData(), DBManager.getCategoryData());
+    }
+
     public static ExpenseSettings createWithParametersFromFile(Context context, File f) throws IOException {
         ExpenseSettings s = new ExpenseSettings(context);
         FileInputStream fis = new FileInputStream(f);
@@ -65,7 +94,7 @@ public class ExpenseSettings {
             if (Objects.equals(nextName, "PaymentMethod")) {
                 s.readPaymentMethod(reader);
             } else if(Objects.equals(nextName, "Category")) {
-                s.readCategory(reader);
+                s. readCategory(reader);
             }
         }
         reader.endObject();
@@ -74,25 +103,25 @@ public class ExpenseSettings {
 
     public void initToDefault() {
         //Payment Method
-        this.paymentMethod.add(new PaymentType("UPI", R.drawable.ic_launcher_foreground));
-        this.paymentMethod.add(new PaymentType("Cash", R.drawable.ic_launcher_foreground));
-        this.paymentMethod.add(new PaymentType("Credit Card", R.drawable.ic_launcher_foreground));
+        this.paymentMethod.add(new PaymentType(0, "UPI", R.drawable.ic_launcher_foreground));
+        this.paymentMethod.add(new PaymentType(0, "Cash", R.drawable.ic_launcher_foreground));
+        this.paymentMethod.add(new PaymentType(0, "Credit Card", R.drawable.ic_launcher_foreground));
 
-        this.category.add(new Category("Food", R.color.categoryOrange, new ArrayList<>(Arrays.asList(
-                new SubCategory("Restaurant", R.drawable.ic_launcher_foreground),
-                new SubCategory("Grocery", R.drawable.ic_launcher_foreground)
+        this.category.add(new Category(0, "Food", R.color.categoryOrange, new ArrayList<>(Arrays.asList(
+                new SubCategory(0,"Restaurant", 0, R.drawable.ic_launcher_foreground),
+                new SubCategory(0,"Grocery", 0, R.drawable.ic_launcher_foreground)
         ))));
-        this.category.add(new Category("Housing", R.color.categoryYellow, new ArrayList<>(Arrays.asList(
-                new SubCategory("Rent", R.drawable.ic_launcher_foreground),
-                new SubCategory("Electricity", R.drawable.ic_launcher_foreground)
+        this.category.add(new Category(0,"Housing", R.color.categoryYellow, new ArrayList<>(Arrays.asList(
+                new SubCategory(0,"Rent", 0, R.drawable.ic_launcher_foreground),
+                new SubCategory(0,"Electricity", 0, R.drawable.ic_launcher_foreground)
         ))));
-        this.category.add(new Category("Travel", R.color.categoryBlue, new ArrayList<>(Arrays.asList(
-                new SubCategory("Public", R.drawable.ic_launcher_foreground),
-                new SubCategory("Long Distance", R.drawable.ic_launcher_foreground)
+        this.category.add(new Category(0,"Travel", R.color.categoryBlue, new ArrayList<>(Arrays.asList(
+                new SubCategory(0,"Public", 0, R.drawable.ic_launcher_foreground),
+                new SubCategory(0,"Long Distance", 0, R.drawable.ic_launcher_foreground)
         ))));
-        this.category.add(new Category("Entertainment", R.color.categoryGreen, new ArrayList<>(Arrays.asList(
-                new SubCategory("Entry Fee", R.drawable.ic_launcher_foreground),
-                new SubCategory("Trip", R.drawable.ic_launcher_foreground)
+        this.category.add(new Category(0,"Entertainment", R.color.categoryGreen, new ArrayList<>(Arrays.asList(
+                new SubCategory(0,"Entry Fee", 0, R.drawable.ic_launcher_foreground),
+                new SubCategory(0,"Trip", 0, R.drawable.ic_launcher_foreground)
         ))));
     }
 
@@ -147,19 +176,17 @@ public class ExpenseSettings {
     }
 
     public void addPaymentMethod(PaymentType payment) {
-        payment.insert();
-        //paymentMethod.add(payment);
-        //if(safeWriteJson()) {
-        //    paymentMethod.remove(payment);
-        //}
+        paymentMethod.add(payment);
+        if(safeWriteJson()) {
+            paymentMethod.remove(payment);
+        }
     }
 
     public void addCategory(Category cat) {
-        cat.insert();
-        /*category.add(cat);
+        category.add(cat);
         if(safeWriteJson()) {
-            category.remove(cat);
-        }*/
+            paymentMethod.remove(cat);
+        }
     }
 
     public void addSubCategory(int categoryId, SubCategory subCat) {

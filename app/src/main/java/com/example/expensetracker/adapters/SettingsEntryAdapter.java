@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expensetracker.ExpenseSettings;
 import com.example.expensetracker.MainActivity;
+import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.PaymentType;
 import com.example.expensetracker.pojo.SubCategory;
@@ -141,13 +142,16 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
             public void onSettingsAddListener(String name, int logo) {
                 switch (rootPosition) {
                     case 0:
-                        settings.addPaymentMethod(new PaymentType(name, logo));
+                        //settings.addPaymentMethod(new PaymentType(0, name, logo));
+                        DBManager.insertPaymentType(new PaymentType(0, name, logo));
                         break;
                     case 1:
-                        settings.addCategory(new Category(name, logo, new ArrayList<>()));
+                        //settings.addCategory(new Category(0, name, logo, new ArrayList<>()));
+                        DBManager.insertCategory(new Category(0, name, logo, new ArrayList<>()));
                         break;
                     case 2:
-                        settings.addSubCategory(holder.hiddenCategory.getSelectedItemPosition(), new SubCategory(name, logo));
+                        //settings.addSubCategory(holder.hiddenCategory.getSelectedItemPosition(), new SubCategory(0, name, 0, logo));
+                        DBManager.insertSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition(), logo));
                         break;
                 }
                 if(holder.hidden.getAdapter() != null)

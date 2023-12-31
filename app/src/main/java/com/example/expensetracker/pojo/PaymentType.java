@@ -5,14 +5,19 @@ import android.database.Cursor;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
+import com.example.expensetracker.R;
 import com.example.expensetracker.database.DBManager;
+import com.example.expensetracker.database.DatabaseDetails;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class PaymentType extends SettingsParent implements JsonIO {
+    int id;
     private String name;
     private int drawableId;
+
 
     private String tableName = "paymentMethod";
 
@@ -21,9 +26,16 @@ public class PaymentType extends SettingsParent implements JsonIO {
         drawableId = 0;
     }
 
-    public PaymentType(String name, int drawableId) {
+    public PaymentType(int id, String name, int drawableId) {
+        this.id = id;
         this.name = name;
         this.drawableId = drawableId;
+    }
+
+    public PaymentType(String name) {
+        this.id = 0;
+        this.name = name;
+        this.drawableId = 0;
     }
 
     public String getName() {
@@ -66,16 +78,22 @@ public class PaymentType extends SettingsParent implements JsonIO {
         return SettingsType.PAYMENT;
     }
 
-    public void insert()
+
+
+    /*public static ArrayList<PaymentType> getPaymentType( )
     {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("Name", getName());
         DBManager dbManager = DBManager.getDBManagerInstance();
-        dbManager.insert(contentValues, tableName);
-    }
+        Cursor cursor = dbManager.getData(DatabaseDetails.PAYMENTTYPE_NAME, null);
 
-    public void getData()
-    {
-
+        ArrayList<PaymentType> data = new ArrayList<PaymentType>();
+        do {
+            int id = Integer.parseInt(cursor.getString(cursor.getColumnIndex("id")));
+            String name = cursor.getString(cursor.getColumnIndex("name"));
+            int drawableId = Integer.parseInt(cursor.getString(cursor.getColumnIndex("drawableId")));
+            PaymentType obj = new PaymentType(id, name, drawableId);
+            data.add(obj);
+        } while(cursor.moveToNext());
+        return data;
     }
+     */
 }

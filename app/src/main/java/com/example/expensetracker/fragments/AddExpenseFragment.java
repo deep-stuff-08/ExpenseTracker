@@ -177,7 +177,7 @@ public class AddExpenseFragment extends Fragment {
         Button expenseSubmit = view.findViewById(R.id.expense_submit);
         expenseSubmit.setOnClickListener(view1 -> {
 
-            Category category = new Category("Deep", 0, new ArrayList<>());
+            Category category = new Category(0, "Deep", 0, new ArrayList<>());
 
             boolean error = false;
             if(expenseName.getText().length() == 0) {

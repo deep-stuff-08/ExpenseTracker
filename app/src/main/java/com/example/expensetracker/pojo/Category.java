@@ -21,7 +21,8 @@ public class Category extends SettingsParent implements JsonIO {
 
     private String tableName = "category";
 
-    public Category(String name, int colorId, ArrayList<SubCategory> subCategories) {
+    public Category(int id, String name, int colorId, ArrayList<SubCategory> subCategories) {
+        this.id = id;
         this.name = name;
         this.colorId = colorId;
         this.subCategories = subCategories;
@@ -30,7 +31,7 @@ public class Category extends SettingsParent implements JsonIO {
     public Category(int id, String name) {
         this.name = name;
         this.id = id;
-        this.subCategories = null;
+        this.subCategories = new ArrayList<>();
     }
 
     public Category() {
@@ -99,20 +100,13 @@ public class Category extends SettingsParent implements JsonIO {
         return SettingsType.CATEGORY;
     }
 
-    public ArrayList<Category> insert()
+    /*
+    public static ArrayList<Category> getCategoryData()
     {
         DBManager dbManager = DBManager.getDBManagerInstance();
-        Cursor cursor = dbManager.getData(tableName, null);
-
-        ArrayList<Category> data = new ArrayList<>();
-
-        do {
-            String id = cursor.getString(cursor.getColumnIndex("id"));
-            String name = cursor.getString(cursor.getColumnIndex("name"));
-            Category cat = new Category(Integer.parseInt(id), name);
-            data.add(cat);
-        }while(cursor.moveToNext());
-
+        ArrayList<Category> data = new ArrayList<Category>();
+        dbManager.getCategoryData(data);
         return data;
     }
+     */
 }
