@@ -54,10 +54,10 @@ public class DBManager extends SQLiteOpenHelper {
             db.close();
         }
         catch (Exception e) { }
-        return db != null;
+        return db == null;
     }
 
-    private boolean isTablesCreated()
+    public boolean areTablesCreated()
     {
         Cursor cursor = getData(DatabaseDetails.CATEGORY_NAME, null);
         if (null == cursor)
@@ -85,25 +85,29 @@ public class DBManager extends SQLiteOpenHelper {
 
         return true;
     }
+    
     public boolean isDatabaseSetup()
     {
         boolean ret = isDatabaseCreated();
-        if(!ret) return false;
-        return isTablesCreated();
+        if(ret) return false;
+        return areTablesCreated();
     }
 
     public void onCreate(SQLiteDatabase db)
     {
 
     }
+
     public void onCreateSetup()
     {
+        Log.d("DATABASE_LOG", "onCreate: called");
+
         SQLiteDatabase db = getDatabaseInstance();
 
         // create table - category
         db.execSQL(
                 "create table IF NOT EXISTS " + DatabaseDetails.CATEGORY_NAME +
-                        "(id INTEGER PRIMARY KEY, name text NOT NULL)"
+                        "(id INTEGER PRIMARY KEY, name text NOT NULL, color_id INTEGER)"
         );
 
         // create table - subCategory
@@ -119,7 +123,7 @@ public class DBManager extends SQLiteOpenHelper {
         // create table - paymentMethod
         db.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.PAYMENTTYPE_NAME +
-                        "(id INTEGER PRIMARY KEY, name text NOT NULL,drawableId INTEGER DEFAULT 0)"
+                        "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
         );
 
         // create table - expenseTracker
@@ -133,7 +137,7 @@ public class DBManager extends SQLiteOpenHelper {
                         ")"
         );
 
-        Log.d("DATABASE_LOG", "onCreate: called");
+        Log.d("DATABASE_LOG", "onCreate: exit");
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
@@ -161,6 +165,7 @@ public class DBManager extends SQLiteOpenHelper {
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", cat.getName());
+        contentValues.put("color_id", cat.getColorId());
         DBManager dbManager = DBManager.getDBManagerInstance();
         boolean ret = dbManager.insert(contentValues, DatabaseDetails.CATEGORY_NAME);
         if(false == ret)
@@ -193,9 +198,66 @@ public class DBManager extends SQLiteOpenHelper {
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
-        contentValues.put("drawableId", p.getDrawableId());
+        contentValues.put("drawable_id", p.getDrawableId());
         DBManager dbManager = DBManager.getDBManagerInstance();
         dbManager.insert(contentValues, DatabaseDetails.PAYMENTTYPE_NAME);
+    }
+
+    public static void updatePaymentType(PaymentType p)
+    {
+        DBManager dbManager = DBManager.getDBManagerInstance();
+        String condition = "id = " + p.getId();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", p.getName());
+        contentValues.put("drawable_id", p.getDrawableId());
+        dbManager.update(DatabaseDetails.PAYMENTTYPE_NAME, contentValues, condition);
+    }
+
+    public static void updateCategory(Category c)
+    {
+        DBManager dbManager = DBManager.getDBManagerInstance();
+        String condition = "id = '" + c.getId() + "'";
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", c.getName());
+        contentValues.put("color_id", c.getColorId());
+        dbManager.update(DatabaseDetails.CATEGORY_NAME, contentValues, condition);
+    }
+
+    public static void updateSubCategory(SubCategory s)
+    {
+        DBManager dbManager = DBManager.getDBManagerInstance();
+        String condition = "id = " + s.getId();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", s.getName());
+        contentValues.put("category_id", s.getCategoryId());
+        dbManager.update(DatabaseDetails.SUBCATEGORY_NAME, contentValues ,condition);
+    }
+
+    public static void deletePaymentType(PaymentType p)
+    {
+        DBManager dbManager = DBManager.getDBManagerInstance();
+        String condition = "id = '" + p.getId() +"'";
+        dbManager.delete(DatabaseDetails.PAYMENTTYPE_NAME, condition);
+    }
+
+    public static void deleteCategory(Category c)
+    {
+        DBManager dbManager = DBManager.getDBManagerInstance();
+        int categoryId = c.getId();
+        for(SubCategory sCat: c.getSubCategories())
+        {
+            sCat.setCategoryId(categoryId);
+            deleteSubCategory(sCat);
+        }
+        String condition = "id = '" + c.getId() +"'";
+        dbManager.delete(DatabaseDetails.CATEGORY_NAME, condition);
+    }
+
+    public static void deleteSubCategory(SubCategory s)
+    {
+        DBManager dbManager = DBManager.getDBManagerInstance();
+        String condition = "id = '" + s.getId() +"'";
+        dbManager.delete(DatabaseDetails.SUBCATEGORY_NAME, condition);
     }
 
     public boolean insert(ContentValues contentValues, String tableName)
@@ -204,24 +266,36 @@ public class DBManager extends SQLiteOpenHelper {
         return true;
     }
 
-    public Cursor delete(String tableName, String condition) {
-        String query = "delete from "+ tableName;
-        query =  (null == condition) ? "" : " where " + condition;
-        Cursor cursor =  getDatabaseInstance().rawQuery( query,
-                null );
-        return cursor;
+    public int delete(String tableName, String condition) {
+        DBManager db = getDBManagerInstance();
+        int ret =  db.getDatabaseInstance().delete(tableName, condition, null);
+        Log.d("DATABASE_LOG", "delete: exiting" );
+        return ret;
+    }
+
+    public int update(String tableName, ContentValues cv, String condition) {
+        DBManager db = getDBManagerInstance();
+        int ret =  db.getDatabaseInstance().update(tableName, cv, condition, null);
+        Log.d("DATABASE_LOG", "update: exiting");
+        return ret;
     }
 
     public static Cursor getData(String tableName, String condition) {
-        DBManager db = getDBManagerInstance();
-        String query = "select * from "+ tableName;
-        query +=  (null == condition) ? "" : " where " + condition;
-        Log.d("DATABASE_LOG", "getData: query = " + query);
-        Cursor cursor =  db.getDatabaseInstance().rawQuery( query,
-                null );
-        if(null != cursor)
-            cursor.moveToFirst();
-        return cursor;
+        try {
+            DBManager db = getDBManagerInstance();
+            String query = "select * from " + tableName;
+            query += (null == condition) ? "" : " where " + condition;
+            Log.d("DATABASE_LOG", "getData: query = " + query);
+            Cursor cursor = db.getDatabaseInstance().rawQuery(query,
+                    null);
+            if (null != cursor)
+                cursor.moveToFirst();
+
+            return cursor;
+        }
+        catch(Exception e) {
+            return null;
+        }
     }
 
     public static ArrayList<Category> getCategoryData() {

@@ -40,6 +40,10 @@ public class Category extends SettingsParent implements JsonIO {
         this.subCategories = new ArrayList<>();
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }

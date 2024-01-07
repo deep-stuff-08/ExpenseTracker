@@ -81,9 +81,8 @@ public class SettingsModifyAdapter extends RecyclerView.Adapter<SettingsModifyAd
                         break;
                 }
                 if(!newName.equals(t)) {
-                    updateListener.onSettingsNameUpdateListener(holder.getAdapterPosition(), newName);
-                    updateListener.onSettingsLogoUpdateListener(holder.getAdapterPosition(), R.drawable.ic_launcher_foreground);
-                }
+                    updateListener.onSettingsUpdateListener(holder.getAdapterPosition(), newName, R.drawable.ic_launcher_foreground);
+                    }
             });
             builder.setNegativeButton("Cancel", null);
             AlertDialog dialog = builder.create();

@@ -68,7 +68,7 @@ public class ExpenseSettings {
         DBManager dbManager = DBManager.createDBManagerInstance(context);
 
         ExpenseSettings expenseSettingsWithDefaultValues = new ExpenseSettings(context, new ArrayList<PaymentType>(), new ArrayList<Category>());
-        if(!dbManager.isDatabaseSetup())
+        if(!dbManager.areTablesCreated())
         {
             dbManager.onCreateSetup();
             expenseSettingsWithDefaultValues.initToDefault();
@@ -82,6 +82,15 @@ public class ExpenseSettings {
 
         // read back data
         return new ExpenseSettings(context, DBManager.getPaymentData(), DBManager.getCategoryData());
+    }
+
+    public static void updateExpenseSettings(ExpenseSettings setting, ExpenseSettings newExpenseSettings)
+    {
+        setting.category.clear();
+        setting.category.addAll(newExpenseSettings.getCategory());
+
+        setting.paymentMethod.clear();
+        setting.paymentMethod.addAll(newExpenseSettings.getPaymentMethod());
     }
 
     public static ExpenseSettings createWithParametersFromFile(Context context, File f) throws IOException {

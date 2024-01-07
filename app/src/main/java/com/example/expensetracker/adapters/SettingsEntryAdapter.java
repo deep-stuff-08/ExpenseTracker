@@ -1,6 +1,7 @@
 package com.example.expensetracker.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,75 +86,85 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
         }
     }
 
+    private void updateNewExpenseSetting()
+    {
+        ExpenseSettings settings = ((MainActivity)currentContext).getSettings();
+        ExpenseSettings newExpenseSettings = ExpenseSettings.readDataFromDatabase(currentContext);
+        ExpenseSettings.updateExpenseSettings(settings, newExpenseSettings);
+    }
+
     private void setupListeners(ViewHolder holder, int rootPosition) {
        ExpenseSettings settings = ((MainActivity)currentContext).getSettings();
        holder.hiddenCategory.setAdapter(new SpinnerCategoryAdapter(currentContext, settings.getCategory(), 0));
        SettingsUpdateListener nameListener = new SettingsUpdateListener() {
             @Override
-            public void onSettingsNameUpdateListener(int position, String newName) {
+            public void onSettingsUpdateListener(int position, String newName, int newLogo) {
                 switch(rootPosition) {
                     case 0:
-                        settings.updatePaymentMethodName(position, newName);
+                        PaymentType p = settings.getPaymentMethod().get(position);
+                        p.setName(newName);
+                        p.setDrawableId(newLogo);
+                        DBManager.updatePaymentType(p);
                         break;
                     case 1:
-                        settings.updateCategoryName(position, newName);
+                        Category c = settings.getCategory().get(position);
+                        c.setName(newName);
+                        c.setColorId(newLogo);
+                        DBManager.updateCategory(c);
                         break;
                     case 2:
-                        settings.updateSubCategoryName(holder.hiddenCategory.getSelectedItemPosition(), position, newName);
+                        int categoryID = holder.hiddenCategory.getSelectedItemPosition();
+                        SubCategory s = settings.getCategory().get(categoryID).getSubCategories().get(position);
+                        s.setName(newName);
+                        s.setDrawableId(newLogo);
+                        DBManager.updateSubCategory(s);
                         break;
                 }
+
                 if(holder.hidden.getAdapter() != null)
                     holder.hidden.getAdapter().notifyItemChanged(position);
+
+                updateNewExpenseSetting();
             }
 
-            @Override
-            public void onSettingsLogoUpdateListener(int position, int newLogo) {
-                switch (rootPosition) {
-                    case 0:
-                        settings.updatePaymentMethodDrawId(position, newLogo);
-                        break;
-                    case 1:
-                        settings.updateCategoryColorId(position, newLogo);
-                        break;
-                    case 2:
-                        settings.updateSubCategoryDrawId(holder.hiddenCategory.getSelectedItemPosition(), position, newLogo);
-                        break;
-                }
-            }
 
             @Override
             public void onSettingsDeleteListener(int position) {
                 switch (rootPosition) {
                     case 0:
-                        settings.deletePaymentMethod(position);
+                        DBManager.deletePaymentType(settings.getPaymentMethod().get(position));
                         break;
                     case 1:
-                        settings.deleteCategory(position);
+                        DBManager.deleteCategory(settings.getCategory().get(position));
                         break;
                     case 2:
-                        settings.deleteSubCategory(holder.hiddenCategory.getSelectedItemPosition(), position);
+                        int categoryID = holder.hiddenCategory.getSelectedItemPosition();
+                        SubCategory s = settings.getCategory().get(categoryID).getSubCategories().get(position);
+                        DBManager.deleteSubCategory(s);
                         break;
                 }
                 if(holder.hidden.getAdapter() != null)
                     holder.hidden.getAdapter().notifyItemRemoved(position);
+
+                updateNewExpenseSetting();
             }
 
             @Override
             public void onSettingsAddListener(String name, int logo) {
                 switch (rootPosition) {
                     case 0:
-                        //settings.addPaymentMethod(new PaymentType(0, name, logo));
                         DBManager.insertPaymentType(new PaymentType(0, name, logo));
                         break;
                     case 1:
-                        //settings.addCategory(new Category(0, name, logo, new ArrayList<>()));
                         DBManager.insertCategory(new Category(0, name, logo, new ArrayList<>()));
                         break;
                     case 2:
-                        //settings.addSubCategory(holder.hiddenCategory.getSelectedItemPosition(), new SubCategory(0, name, 0, logo));
-                        DBManager.insertSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition(), logo));
+                        DBManager.insertSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
                         break;
                 }
+
+                updateNewExpenseSetting();
+
                 if(holder.hidden.getAdapter() != null)
                     holder.hidden.getAdapter().notifyItemInserted(holder.hidden.getAdapter().getItemCount() + 1);
             }
