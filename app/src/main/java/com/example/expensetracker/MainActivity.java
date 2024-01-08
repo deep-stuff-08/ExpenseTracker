@@ -12,7 +12,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentContainerView;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
@@ -20,6 +19,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.expensetracker.fragments.HomeFragment;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.example.expensetracker.database.DBManager;
+import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
@@ -42,36 +42,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        dbManager = new DBManager(this);
-        dbManager.insert();
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
 
-        File f = new File(getFilesDir(), getString(R.string.settings_filename));
-        if(!f.exists()) {
-            expenseSettings = ExpenseSettings.createWithDefaultParameters(this);
-            try {
-                expenseSettings.writeSettingsToJson(f);
-            } catch(IOException e) {
-                terminateApplicationWithError(-1);
-            }
-            Snackbar.make(findViewById(android.R.id.content), "Settings not found opening with default settings", Snackbar.LENGTH_LONG).show();
-        } else {
-            try {
-                expenseSettings = ExpenseSettings.createWithParametersFromFile(this, f);
-            } catch(IOException e) {
-                if(!f.delete()) {
-                    Log.d("MyTag", "This is Impossible");
-                }
-                expenseSettings = ExpenseSettings.createWithDefaultParameters(this);
-                try {
-                    expenseSettings.writeSettingsToJson(f);
-                    Snackbar.make(findViewById(android.R.id.content), "Error: Couldn't read settings file. Initializing with default settings", Snackbar.LENGTH_LONG).show();
-                } catch (IOException ex) {
-                    terminateApplicationWithError(-1);
-                }
-            }
-        }
+        expenseSettings = ExpenseSettings.readDataFromDatabase(this);
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
@@ -86,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
             c.set(Calendar.SECOND, 30);
             entries = reader.readMessagesSentAfter(this, c.getTime());
         }
-
         NavController mNavigationController = Navigation.findNavController(this,R.id.fragment_container_view);
         NavigationUI.setupActionBarWithNavController(this, mNavigationController);
 

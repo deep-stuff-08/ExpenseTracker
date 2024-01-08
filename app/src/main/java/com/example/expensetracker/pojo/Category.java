@@ -2,26 +2,40 @@ package com.example.expensetracker.pojo;
 
 import android.util.JsonReader;
 import android.util.JsonWriter;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class Category extends SettingsParent implements JsonIO {
     private String name;
+
+    private  int id;
     private int colorId;
     final private ArrayList<SubCategory> subCategories;
 
-    public Category(String name, int colorId, ArrayList<SubCategory> subCategories) {
+    private String tableName = "category";
+
+    public Category(int id, String name, int colorId, ArrayList<SubCategory> subCategories) {
+        this.id = id;
         this.name = name;
         this.colorId = colorId;
         this.subCategories = subCategories;
+    }
+
+    public Category(int id, String name) {
+        this.name = name;
+        this.id = id;
+        this.subCategories = new ArrayList<>();
     }
 
     public Category() {
         this.name = "";
         this.colorId = 0;
         this.subCategories = new ArrayList<>();
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
