@@ -6,8 +6,11 @@ import android.util.JsonWriter;
 import android.widget.Toast;
 
 import com.example.expensetracker.pojo.Category;
+import com.example.expensetracker.pojo.IncomeSource;
 import com.example.expensetracker.pojo.PaymentType;
 import com.example.expensetracker.pojo.SubCategory;
+import com.example.expensetracker.pojo.Type;
+import com.example.expensetracker.pojo.User;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,6 +52,28 @@ public class ExpenseSettings {
     public ArrayList<SubCategory> getSubCategory(int index) {
         return category.get(index).getSubCategories();
     }
+
+    public ArrayList<User> getUsers() {
+        return new ArrayList<>(Arrays.asList(
+                new User("Hrituja"),
+                new User("Darshan")
+        ));
+    }
+
+    public ArrayList<IncomeSource> getIncomeSources() {
+        return new ArrayList<>(Arrays.asList(
+                new IncomeSource("Salary"),
+                new IncomeSource("Investment")
+        ));
+    }
+
+    public ArrayList<Type> getTypes() {
+        return new ArrayList<>(Arrays.asList(
+                new Type("Income"),
+                new Type("Settlement")
+        ));
+    }
+
     public static ExpenseSettings createWithDefaultParameters(Context context) {
         ExpenseSettings s = new ExpenseSettings(context);
         s.initToDefault();

@@ -7,15 +7,17 @@ public class UnconfirmedEntry {
     private String body;
     private Date sentDate;
     private int value;
+    private boolean isCredited;
 
     public UnconfirmedEntry() {
     }
 
-    public UnconfirmedEntry(String sender, String body, Date sentDate, int value) {
+    public UnconfirmedEntry(String sender, String body, Date sentDate, int value, boolean isCredited) {
         this.sender = sender;
         this.body = body;
         this.sentDate = sentDate;
         this.value = value;
+        this.isCredited = isCredited;
     }
 
     public String getSender() {
@@ -48,5 +50,13 @@ public class UnconfirmedEntry {
 
     public void setValue(int value) {
         this.value = value;
+    }
+
+    public boolean isCredited() {
+        return isCredited;
+    }
+
+    public void setCredited(boolean credited) {
+        isCredited = credited;
     }
 }

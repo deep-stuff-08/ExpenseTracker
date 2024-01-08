@@ -29,7 +29,7 @@ public class SmsReader {
                 if(value != 0) {
                     String sender = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.ADDRESS));
                     Date date = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(Telephony.Sms.DATE)));
-                    entries.add(new UnconfirmedEntry(sender, body, date, value));
+                    entries.add(new UnconfirmedEntry(sender, body, date, Math.abs(value), value > 0));
                 }
             } while (cursor.moveToNext());
         }
@@ -47,11 +47,11 @@ public class SmsReader {
                         .replaceFirst("(?i)(RS|INR)(.?+)", "")
                         .trim();
                 value = Math.round(Float.parseFloat(amt));
-            }
-            if(Pattern.compile("(?i)(debited|spent)").matcher(body).find()) {
-                value *= -1;
-            } else if(!Pattern.compile("(?i)(credited|recived)").matcher(body).find()) {
-                throw new RuntimeException("Unknown Transaction");
+                if(Pattern.compile("(?i)(debited|spent)").matcher(body).find()) {
+                    value *= -1;
+                } else if(!Pattern.compile("(?i)(credited|recived)").matcher(body).find()) {
+                    Log.d("Unknown Transaction", body);
+                }
             }
         }
         return value;

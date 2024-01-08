@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +22,14 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.SimpleAdapter;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.expensetracker.adapters.SpinnerCategoryAdapter;
+import com.example.expensetracker.adapters.ComboBoxAdapter;
 import com.example.expensetracker.ExpenseSettings;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
@@ -39,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AddExpenseFragment extends Fragment {
     private SimpleDateFormat sdfDate;
@@ -46,7 +51,7 @@ public class AddExpenseFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sdfDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
+        sdfDate = new SimpleDateFormat("dd-MM-yy", Locale.getDefault());
         sdfTime = new SimpleDateFormat("hh:mm a", Locale.getDefault());
     }
 
@@ -89,29 +94,64 @@ public class AddExpenseFragment extends Fragment {
         int bgId = settings.getCategory().get(0).getColorId();
 
         Spinner expensePayment = view.findViewById(R.id.expense_payment);
-        SpinnerCategoryAdapter string_adt3 = new SpinnerCategoryAdapter(context, settings.getPaymentMethod(), bgId);
-        expensePayment.setAdapter(string_adt3);
+        ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), bgId);
+        expensePayment.setAdapter(adt_Payment);
 
         Spinner expenseCategory = view.findViewById(R.id.expense_category);
-        SpinnerCategoryAdapter string_adt = new SpinnerCategoryAdapter(context, settings.getCategory(), bgId);
-        expenseCategory.setAdapter(string_adt);
+        ComboBoxAdapter adt_Category = new ComboBoxAdapter(context, settings.getCategory(), bgId);
+        ComboBoxAdapter adt_Type = new ComboBoxAdapter(context, settings.getTypes(), R.color.grey);
+        expenseCategory.setAdapter(adt_Category);
 
         Spinner expenseSubCategory = view.findViewById(R.id.expense_subcategory);
-        SpinnerCategoryAdapter string_adt2 = new SpinnerCategoryAdapter(context, settings.getSubCategory(0), bgId);
-        expenseSubCategory.setAdapter(string_adt2);
+        ComboBoxAdapter adt_SubCategory = new ComboBoxAdapter(context, settings.getSubCategory(0), bgId);
+        ComboBoxAdapter adt_User = new ComboBoxAdapter(context, settings.getUsers(), R.color.grey);
+        ComboBoxAdapter adt_Income = new ComboBoxAdapter(context, settings.getIncomeSources(), R.color.grey);
+        expenseSubCategory.setAdapter(adt_SubCategory);
+
+        Spinner expenseShareType = view.findViewById(R.id.expense_sharing_type);
+        expenseShareType.setAdapter(new ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, new String[] {"Rs", "%"}) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View v = super.getView(position, convertView, parent);
+                TextView tv = ((TextView) v);
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View v = super.getDropDownView(position, convertView, parent);
+                TextView tv = ((TextView) v);
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+                return v;
+            }
+        });
+
         expenseCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                int bgId = settings.getCategory().get(position).getColorId();
-                expenseSubCategory.setAdapter(new SpinnerCategoryAdapter(requireContext(), settings.getSubCategory(position), bgId));
-                ((SpinnerCategoryAdapter)expensePayment.getAdapter()).setBackgroundColorId(bgId);
-                ((SpinnerCategoryAdapter) expensePayment.getAdapter()).notifyDataSetChanged();
+            public void onItemSelected(AdapterView<?> parent, View view2, int position, long id) {
+                if(((RadioButton)view.findViewById(R.id.expense_income_credit)).isChecked()) {
+                    if(position == 0) {
+                        expenseSubCategory.setAdapter(adt_Income);
+                    } else if(position == 1) {
+                        expenseSubCategory.setAdapter(adt_User);
+                    }
+                    ((ComboBoxAdapter) expensePayment.getAdapter()).setBackgroundColorId(R.color.grey);
+                    ((ComboBoxAdapter) expensePayment.getAdapter()).notifyDataSetChanged();
+                } else {// if(view.findViewById(R.id.expense_income_credit).isSelected()) {
+                    int bgId = settings.getCategory().get(position).getColorId();
+                    expenseSubCategory.setAdapter(new ComboBoxAdapter(requireContext(), settings.getSubCategory(position), bgId));
+                    ((ComboBoxAdapter) expensePayment.getAdapter()).setBackgroundColorId(bgId);
+                    ((ComboBoxAdapter) expensePayment.getAdapter()).notifyDataSetChanged();
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
+
         Calendar currentTime = Calendar.getInstance();
 
         EditText expenseDate = view.findViewById(R.id.expense_date);
@@ -164,8 +204,27 @@ public class AddExpenseFragment extends Fragment {
         });
 
         CheckBox expenseShared = view.findViewById(R.id.expense_shared);
-        //noinspection ResultOfMethodCallIgnored
-        expenseShared.isChecked();
+
+        RadioGroup expenseIncome = view.findViewById(R.id.expense_income);
+        expenseIncome.setOnCheckedChangeListener((group, checkedId) -> {
+            if(checkedId == R.id.expense_income_credit) {
+                expenseShared.setEnabled(false);
+                expenseCategory.setAdapter(adt_Type);
+                expenseSubCategory.setAdapter(adt_Income);
+            } else if(checkedId == R.id.expense_income_debit) {
+                expenseShared.setEnabled(true);
+                expenseCategory.setAdapter(adt_Category);
+                expenseSubCategory.setAdapter(adt_SubCategory);
+            }
+        });
+
+        if(unconfirmedEntry != null) {
+            RadioButton expenseIncomeCredit = view.findViewById(R.id.expense_income_credit);
+            expenseIncomeCredit.setChecked(unconfirmedEntry.isCredited());
+            RadioButton expenseIncomeDebit = view.findViewById(R.id.expense_income_debit);
+            expenseIncomeDebit.setChecked(!unconfirmedEntry.isCredited());
+        }
+
         CheckBox expenseRepeat = view.findViewById(R.id.expense_repeat);
         if(unconfirmedEntry == null) {
             if (getArguments() != null) {

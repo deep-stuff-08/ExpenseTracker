@@ -34,7 +34,7 @@ public class SettingsModifyAdapter extends RecyclerView.Adapter<SettingsModifyAd
     @NonNull
     @Override
     public SettingsModifyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.modify_methods, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_settings_modify, parent, false);
         return new SettingsModifyAdapter.SettingsModifyViewHolder(view);
     }
 
@@ -59,7 +59,7 @@ public class SettingsModifyAdapter extends RecyclerView.Adapter<SettingsModifyAd
         holder.imageView.setBackgroundColor(holder.itemView.getResources().getColor(bgRes, holder.itemView.getContext().getTheme()));
         holder.modifyBtn.setOnClickListener(view -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-            View diagview = View.inflate(view.getContext(), R.layout.edittext_dialog, null);
+            View diagview = View.inflate(view.getContext(), R.layout.dialog_edittext, null);
             builder.setView(diagview);
             builder.setTitle("Modify");
             builder.setPositiveButton("Ok", (dialogInterface, i) -> {

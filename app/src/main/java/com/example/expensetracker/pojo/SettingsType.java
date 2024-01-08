@@ -3,5 +3,8 @@ package com.example.expensetracker.pojo;
 public enum SettingsType {
     PAYMENT,
     CATEGORY,
-    SUBCATEGORY
+    SUBCATEGORY,
+    USER,
+    INCOME,
+    TYPE
 }

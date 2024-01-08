@@ -20,12 +20,12 @@ import com.example.expensetracker.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpinnerCategoryAdapter extends ArrayAdapter<SettingsParent> {
+public class ComboBoxAdapter extends ArrayAdapter<SettingsParent> {
 
     int backgroundColorId;
 
     @SuppressWarnings("unchecked")
-    public SpinnerCategoryAdapter(@NonNull Context context, ArrayList<? extends SettingsParent> data, int backgroundColorId) {
+    public ComboBoxAdapter(@NonNull Context context, ArrayList<? extends SettingsParent> data, int backgroundColorId) {
         super(context, android.R.layout.simple_spinner_item, (List<SettingsParent>) data);
         this.backgroundColorId = backgroundColorId;
     }
@@ -47,7 +47,7 @@ public class SpinnerCategoryAdapter extends ArrayAdapter<SettingsParent> {
 
     private View getFilledView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         if(convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.spinner_category_item, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_combobox, parent, false);
         }
 
         SettingsParent item = getItem(position);

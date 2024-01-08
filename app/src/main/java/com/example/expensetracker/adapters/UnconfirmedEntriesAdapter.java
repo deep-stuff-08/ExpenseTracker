@@ -16,9 +16,7 @@ import com.example.expensetracker.pojo.UnconfirmedEntry;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Locale;
-import java.util.zip.Inflater;
 
 public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedEntriesAdapter.ViewHolder> {
     private ArrayList<UnconfirmedEntry> entries;
@@ -32,7 +30,7 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.unconfirmed_entries, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_unconfirmed, parent, false);
         return new UnconfirmedEntriesAdapter.ViewHolder(view);
     }
 

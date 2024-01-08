@@ -36,13 +36,14 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
         dataList.add("Edit Payment Method");
         dataList.add("Edit Category");
         dataList.add("Edit Sub Category");
+        dataList.add("Edit User");
     }
 
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.settings_entry, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_settings, parent, false);
         currentContext = parent.getContext();
         return new ViewHolder(view);
     }
@@ -86,7 +87,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
 
     private void setupListeners(ViewHolder holder, int rootPosition) {
        ExpenseSettings settings = ((MainActivity)currentContext).getSettings();
-       holder.hiddenCategory.setAdapter(new SpinnerCategoryAdapter(currentContext, settings.getCategory(), 0));
+       holder.hiddenCategory.setAdapter(new ComboBoxAdapter(currentContext, settings.getCategory(), 0));
        SettingsUpdateListener nameListener = new SettingsUpdateListener() {
             @Override
             public void onSettingsNameUpdateListener(int position, String newName) {
@@ -165,6 +166,9 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
             case 2:
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getSubCategory(0), nameListener);
                 break;
+            case 3:
+                settingsModifyAdapter = new SettingsModifyAdapter(settings.getUsers(), nameListener);
+                break;
             default:
                 settingsModifyAdapter = new SettingsModifyAdapter(new ArrayList<>(), null);
                 break;
@@ -189,7 +193,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
 
         holder.hiddenButton.setOnClickListener(view -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(holder.itemView.getContext());
-            View diagView = View.inflate(holder.itemView.getContext(), R.layout.edittext_dialog, null);
+            View diagView = View.inflate(holder.itemView.getContext(), R.layout.dialog_edittext, null);
             builder.setView(diagView);
             builder.setTitle("Add New Item");
             builder.setPositiveButton("Add", (dialogInterface, i) -> {

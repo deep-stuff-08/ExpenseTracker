@@ -14,7 +14,7 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.exp_entry_row, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_expenses, parent, false);
         return new ViewHolder(view);
     }
     @Override
