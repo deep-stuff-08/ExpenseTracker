@@ -24,26 +24,21 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.example.expensetracker.adapters.ComboBoxAdapter;
 import com.example.expensetracker.ExpenseSettings;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
-import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AddExpenseFragment extends Fragment {
     private SimpleDateFormat sdfDate;
@@ -235,9 +230,6 @@ public class AddExpenseFragment extends Fragment {
         }
         Button expenseSubmit = view.findViewById(R.id.expense_submit);
         expenseSubmit.setOnClickListener(view1 -> {
-
-            Category category = new Category(0, "Deep", 0, new ArrayList<>());
-
             boolean error = false;
             if(expenseName.getText().length() == 0) {
                 expenseName.setError("Field not filled");
