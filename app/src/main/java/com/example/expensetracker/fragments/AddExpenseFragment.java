@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -22,6 +24,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -31,11 +34,14 @@ import com.example.expensetracker.adapters.ComboBoxAdapter;
 import com.example.expensetracker.ExpenseSettings;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
+import com.example.expensetracker.adapters.SharedUserAdapter;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -212,6 +218,11 @@ public class AddExpenseFragment extends Fragment {
                 expenseSubCategory.setAdapter(adt_SubCategory);
             }
         });
+
+        RecyclerView expenseSharedList = view.findViewById(R.id.expense_sharing_users);
+        expenseSharedList.setAdapter(new SharedUserAdapter(settings.getUsers()));
+        expenseSharedList.setLayoutManager(new LinearLayoutManager(getActivity()));
+        expenseSharedList.setVerticalScrollbarPosition(0);
 
         if(unconfirmedEntry != null) {
             RadioButton expenseIncomeCredit = view.findViewById(R.id.expense_income_credit);

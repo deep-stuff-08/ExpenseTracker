@@ -48,13 +48,13 @@ public class DBManager extends SQLiteOpenHelper {
 
     private boolean isDatabaseCreated()
     {
-        SQLiteDatabase db = null;
+
         try {
-            db = SQLiteDatabase.openDatabase(DatabaseDetails.DATABASE_NAME, null, SQLiteDatabase.OPEN_READONLY);
-            db.close();
+            SQLiteDatabase.openDatabase(DatabaseDetails.DATABASE_NAME, null, SQLiteDatabase.OPEN_READONLY).close();
+        } catch (Exception e) {
+            return false;
         }
-        catch (Exception e) { }
-        return db == null;
+        return true;
     }
 
     public boolean areTablesCreated()
@@ -168,7 +168,7 @@ public class DBManager extends SQLiteOpenHelper {
         contentValues.put("color_id", cat.getColorId());
         DBManager dbManager = DBManager.getDBManagerInstance();
         boolean ret = dbManager.insert(contentValues, DatabaseDetails.CATEGORY_NAME);
-        if(false == ret)
+        if(!ret)
         {
             throw new RuntimeException("Failed to insert data into database");
         }
@@ -188,7 +188,7 @@ public class DBManager extends SQLiteOpenHelper {
         contentValues.put("category_id", scat.getCategoryId());
         DBManager dbManager = DBManager.getDBManagerInstance();
         boolean ret = dbManager.insert(contentValues, DatabaseDetails.SUBCATEGORY_NAME);
-        if(false == ret)
+        if(!ret)
         {
             throw new RuntimeException("Failed to insert data into database");
         }
@@ -302,12 +302,11 @@ public class DBManager extends SQLiteOpenHelper {
         DBManager db = getDBManagerInstance();
         ArrayList<Category> data = new ArrayList<>();
         String query = "select * from "+ DatabaseDetails.CATEGORY_NAME;
-        Cursor cursor =  db.getDatabaseInstance().rawQuery( query,
-                null );
+        Cursor cursor =  db.getDatabaseInstance().rawQuery( query, null );
         if(null != cursor)
             cursor.moveToFirst();
 
-        ArrayList<SubCategory> subCategories = db.getSubCategoryData();
+        ArrayList<SubCategory> subCategories = getSubCategoryData();
 
         do {
             ArrayList<SubCategory> subCategoriesByCategory = new ArrayList<>();
@@ -322,6 +321,7 @@ public class DBManager extends SQLiteOpenHelper {
             }
             data.add(new Category(id, name, R.color.categoryYellow,subCategoriesByCategory));
         } while(cursor.moveToNext());
+        cursor.close();
         return  data;
     }
 
@@ -329,8 +329,7 @@ public class DBManager extends SQLiteOpenHelper {
         DBManager db = getDBManagerInstance();
         ArrayList<SubCategory>  data = new ArrayList<>();
         String query = "select * from "+ DatabaseDetails.SUBCATEGORY_NAME;
-        Cursor cursor =  db.getDatabaseInstance().rawQuery( query,
-                null );
+        Cursor cursor =  db.getDatabaseInstance().rawQuery( query, null );
         if(null != cursor)
             cursor.moveToFirst();
 
@@ -341,6 +340,7 @@ public class DBManager extends SQLiteOpenHelper {
             SubCategory obj = new SubCategory(Integer.parseInt(id), name, Integer.parseInt(categoryId), 0);
             data.add(obj);
         } while(cursor.moveToNext());
+        cursor.close();
         return data;
     }
 
@@ -348,8 +348,7 @@ public class DBManager extends SQLiteOpenHelper {
         DBManager db = getDBManagerInstance();
         ArrayList<PaymentType> data = new ArrayList<>();
         String query = "select * from "+ DatabaseDetails.PAYMENTTYPE_NAME;
-        Cursor cursor =  db.getDatabaseInstance().rawQuery( query,
-                null );
+        Cursor cursor =  db.getDatabaseInstance().rawQuery( query, null );
         if(null != cursor)
             cursor.moveToFirst();
 
@@ -359,6 +358,7 @@ public class DBManager extends SQLiteOpenHelper {
             PaymentType obj = new PaymentType(Integer.parseInt(id), name, 0);
             data.add(obj);
         } while(cursor.moveToNext());
+        cursor.close();
         return data;
     }
 
