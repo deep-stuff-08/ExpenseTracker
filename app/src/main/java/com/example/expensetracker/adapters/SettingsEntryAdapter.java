@@ -89,8 +89,8 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
     private void updateNewExpenseSetting()
     {
         ExpenseSettings settings = ((MainActivity)currentContext).getSettings();
-        ExpenseSettings newExpenseSettings = ExpenseSettings.readDataFromDatabase(currentContext);
-        ExpenseSettings.updateExpenseSettings(settings, newExpenseSettings);
+        ExpenseSettings newExpenseSettings = ExpenseSettings.createWithParametersFromDatabase(currentContext);
+        settings.updateExpenseSettings(newExpenseSettings);
     }
 
     private void setupListeners(ViewHolder holder, int rootPosition) {
@@ -104,27 +104,27 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         PaymentType p = settings.getPaymentMethod().get(position);
                         p.setName(newName);
                         p.setDrawableId(newLogo);
-                        DBManager.updatePaymentType(p);
+                        DBManager.getDBManagerInstance().updatePaymentType(p);
                         break;
                     case 1:
                         Category c = settings.getCategory().get(position);
                         c.setName(newName);
                         c.setColorId(newLogo);
-                        DBManager.updateCategory(c);
+                        DBManager.getDBManagerInstance().updateCategory(c);
                         break;
                     case 2:
                         int categoryID = holder.hiddenCategory.getSelectedItemPosition();
                         SubCategory s = settings.getCategory().get(categoryID).getSubCategories().get(position);
                         s.setName(newName);
                         s.setDrawableId(newLogo);
-                        DBManager.updateSubCategory(s);
+                        DBManager.getDBManagerInstance().updateSubCategory(s);
                         break;
                 }
 
+                updateNewExpenseSetting();
+
                 if(holder.hidden.getAdapter() != null)
                     holder.hidden.getAdapter().notifyItemChanged(position);
-
-                updateNewExpenseSetting();
             }
 
 
@@ -132,34 +132,35 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
             public void onSettingsDeleteListener(int position) {
                 switch (rootPosition) {
                     case 0:
-                        DBManager.deletePaymentType(settings.getPaymentMethod().get(position));
+                        DBManager.getDBManagerInstance().deletePaymentType(settings.getPaymentMethod().get(position));
                         break;
                     case 1:
-                        DBManager.deleteCategory(settings.getCategory().get(position));
+                        DBManager.getDBManagerInstance().deleteCategory(settings.getCategory().get(position));
                         break;
                     case 2:
                         int categoryID = holder.hiddenCategory.getSelectedItemPosition();
                         SubCategory s = settings.getCategory().get(categoryID).getSubCategories().get(position);
-                        DBManager.deleteSubCategory(s);
+                        DBManager.getDBManagerInstance().deleteSubCategory(s);
                         break;
                 }
-                if(holder.hidden.getAdapter() != null)
-                    holder.hidden.getAdapter().notifyItemRemoved(position);
 
                 updateNewExpenseSetting();
+
+                if(holder.hidden.getAdapter() != null)
+                    holder.hidden.getAdapter().notifyItemRemoved(position);
             }
 
             @Override
             public void onSettingsAddListener(String name, int logo) {
                 switch (rootPosition) {
                     case 0:
-                        DBManager.insertPaymentType(new PaymentType(0, name, logo));
+                        DBManager.getDBManagerInstance().insertPaymentType(new PaymentType(0, name, logo));
                         break;
                     case 1:
-                        DBManager.insertCategory(new Category(0, name, logo, new ArrayList<>()));
+                        DBManager.getDBManagerInstance().insertCategory(new Category(0, name, logo, new ArrayList<>()));
                         break;
                     case 2:
-                        DBManager.insertSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                        DBManager.getDBManagerInstance().insertSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
                         break;
                 }
 

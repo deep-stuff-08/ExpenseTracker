@@ -33,8 +33,6 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
     private boolean isSettingsVisible;
     private ExpenseSettings expenseSettings;
-
-    public DBManager dbManager;
     private ArrayList<UnconfirmedEntry> entries;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
 
-        expenseSettings = ExpenseSettings.readDataFromDatabase(this);
+        DBManager.createDBManagerInstance(this);
+        expenseSettings = ExpenseSettings.createWithParametersFromDatabase(this);
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
