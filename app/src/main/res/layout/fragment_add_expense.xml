@@ -146,33 +146,51 @@
                 android:text="@string/add_expense_shared_expense"
                 tools:ignore="VisualLintButtonSize" />
 
-            <TextView
-                android:text="Value"
-                android:textSize="24sp"
-                android:layout_below="@id/expense_shared"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/expense_value_2"
-                android:layout_toStartOf="@id/expense_sharing_type"/>
-
-            <Spinner
+            <RelativeLayout
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
                 android:layout_below="@id/expense_shared"
-                android:id="@+id/expense_sharing_type"/>
+                android:id="@+id/expense_shared_details">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/expense_sharing_users"
-                android:layout_below="@id/expense_value_2" />
+                <TextView
+                    android:text="Value"
+                    android:textSize="24sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true"
+                    android:id="@+id/expense_value_2"
+                    android:layout_toStartOf="@id/expense_sharing_type"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/expense_sharing_type"
+                    android:textSize="24sp"
+                    android:id="@+id/expense_sharing_value"
+                    />
+
+                <Spinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:id="@+id/expense_sharing_type"/>
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/expense_sharing_users"
+                    android:layout_below="@id/expense_sharing_value" />
+        </RelativeLayout>
 
             <CheckBox
                 android:id="@+id/expense_repeat"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/exp_image_height"
-                android:layout_below="@id/expense_sharing_users"
+                android:layout_below="@id/expense_shared_details"
                 android:textSize="24sp"
                 android:text="@string/add_expense_log"
                 tools:ignore="VisualLintButtonSize" />

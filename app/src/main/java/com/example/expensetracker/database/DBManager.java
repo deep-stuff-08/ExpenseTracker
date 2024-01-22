@@ -52,6 +52,7 @@ public class DBManager extends SQLiteOpenHelper {
         try {
             SQLiteDatabase.openDatabase(DatabaseDetails.DATABASE_NAME, null, SQLiteDatabase.OPEN_READONLY).close();
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
         return true;

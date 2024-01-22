@@ -1,27 +1,49 @@
 package com.example.expensetracker.adapters;
 
-import android.util.TypedValue;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expensetracker.R;
 import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.ViewHolder> {
-    ArrayList<User> nameList;
-    public SharedUserAdapter(ArrayList<User> names) {
-        nameList = names;
+    public interface ValueUpdateListener {
+        void valueUpdate(int newTotal);
+    }
+    ArrayList<String> nameList;
+    ArrayList<Integer> valueList;
+    ValueUpdateListener updateListener;
+    int itemCount = 1;
+    public SharedUserAdapter(ArrayList<User> names, ValueUpdateListener updateListener) {
+        nameList = new ArrayList<>();
+        names.forEach(user -> nameList.add(user.getName()));
+        valueList = new ArrayList<>();
+        valueList.add(0);
+        valueList.add(0);
+        this.updateListener = updateListener;
+    }
+
+    private int getValueTotal() {
+        int total = 0;
+        for(Integer i : valueList) {
+            total += i;
+        }
+        return total;
     }
     @NonNull
     @Override
@@ -32,38 +54,75 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ArrayList<String> s = new ArrayList<>();
-        nameList.forEach(user -> s.add(user.getName()));
-        holder.spinner.setAdapter(new ArrayAdapter<String>(holder.spinner.getContext(), android.R.layout.simple_spinner_item, s) {
-            @NonNull
+        if(position == 0) {
+            holder.autoCompleteTextViewName.setText("Me");
+            holder.autoCompleteTextViewName.setInputType(InputType.TYPE_NULL);
+            holder.autoCompleteTextViewName.setFocusable(false);
+            holder.autoCompleteTextViewName.setClickable(false);
+        } else {
+            holder.autoCompleteTextViewName.setAdapter(new ArrayAdapter<>(holder.autoCompleteTextViewName.getContext(), android.R.layout.simple_list_item_1, nameList));
+            holder.autoCompleteTextViewName.setThreshold(1);
+            holder.autoCompleteTextViewName.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (s.length() > 0 && holder.getAdapterPosition() == itemCount - 1) {
+                        notifyItemInserted(itemCount);
+                        itemCount += 1;
+                        valueList.add(0);
+                    }
+                }
+            });
+            holder.autoCompleteTextViewName.setOnFocusChangeListener((v, hasFocus) -> {
+                if(!hasFocus) {
+                    if(holder.autoCompleteTextViewName.getText().length() == 0 && holder.getAdapterPosition() < itemCount - 1) {
+                        notifyItemRemoved(holder.getAdapterPosition());
+                        itemCount -= 1;
+                        valueList.remove(holder.getAdapterPosition());
+                    }
+                }
+            });
+        }
+        holder.editTextValue.addTextChangedListener(new TextWatcher() {
             @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View v = super.getView(position, convertView, parent);
-                TextView tv = ((TextView) v);
-                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
-                return v;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
             }
 
             @Override
-            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                View v = super.getDropDownView(position, convertView, parent);
-                TextView tv = ((TextView) v);
-                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
-                return v;
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                valueList.set(holder.getAdapterPosition(), Integer.valueOf(s.toString()));
+                updateListener.valueUpdate(getValueTotal());
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return 1;
+        return itemCount + 1;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        Spinner spinner;
+        AutoCompleteTextView autoCompleteTextViewName;
+        EditText editTextValue;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            spinner = itemView.findViewById(R.id.shared_user);
+            autoCompleteTextViewName = itemView.findViewById(R.id.shared_user_name);
+            editTextValue = itemView.findViewById(R.id.shared_user_value);
         }
     }
 }

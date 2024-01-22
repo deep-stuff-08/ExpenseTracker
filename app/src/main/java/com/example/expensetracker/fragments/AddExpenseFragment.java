@@ -14,6 +14,9 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +30,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -92,6 +96,37 @@ public class AddExpenseFragment extends Fragment {
             expenseValue.setText(String.valueOf(unconfirmedEntry.getValue()));
         }
 
+        Spinner expenseShareType = view.findViewById(R.id.expense_sharing_type);
+
+        TextView valueStatus = view.findViewById(R.id.expense_sharing_value);
+        final int[] totalValue = {0};
+        final int[] actualValue = {0};
+        valueStatus.setText(getString(R.string.value_div, totalValue[0], actualValue[0]));
+        valueStatus.setTextColor(getResources().getColor(R.color.categoryGreen, context.getTheme()));
+        expenseValue.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                actualValue[0] = expenseValue.getText().length() == 0 ? 0 : Integer.parseInt(expenseValue.getText().toString());
+                int currentValue = expenseShareType.getSelectedItemPosition() == 0 ? actualValue[0] : 100;
+                valueStatus.setText(getString(R.string.value_div, totalValue[0], currentValue));
+                if(totalValue[0] == currentValue) {
+                    valueStatus.setTextColor(getResources().getColor(R.color.categoryGreen, context.getTheme()));
+                } else {
+                    valueStatus.setTextColor(getResources().getColor(R.color.categoryOrange, context.getTheme()));
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         int bgId = settings.getCategory().get(0).getColorId();
 
         Spinner expensePayment = view.findViewById(R.id.expense_payment);
@@ -109,7 +144,6 @@ public class AddExpenseFragment extends Fragment {
         ComboBoxAdapter adt_Income = new ComboBoxAdapter(context, settings.getIncomeSources(), R.color.grey);
         expenseSubCategory.setAdapter(adt_SubCategory);
 
-        Spinner expenseShareType = view.findViewById(R.id.expense_sharing_type);
         expenseShareType.setAdapter(new ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, new String[] {"Rs", "%"}) {
             @NonNull
             @Override
@@ -128,6 +162,8 @@ public class AddExpenseFragment extends Fragment {
                 return v;
             }
         });
+
+        CheckBox expenseShared = view.findViewById(R.id.expense_shared);
 
         expenseCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -204,11 +240,38 @@ public class AddExpenseFragment extends Fragment {
             dialog.show();
         });
 
-        CheckBox expenseShared = view.findViewById(R.id.expense_shared);
+        expenseShareType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                int currentValue = expenseShareType.getSelectedItemPosition() == 0 ? actualValue[0] : 100;
+                valueStatus.setText(getString(R.string.value_div, totalValue[0], currentValue));
+                if(totalValue[0] == currentValue) {
+                    valueStatus.setTextColor(getResources().getColor(R.color.categoryGreen, context.getTheme()));
+                } else {
+                    valueStatus.setTextColor(getResources().getColor(R.color.categoryOrange, context.getTheme()));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        RelativeLayout layout = view.findViewById(R.id.expense_shared_details);
+        expenseShared.setOnClickListener(v -> {
+            if(expenseShared.isChecked()) {
+                layout.setVisibility(View.VISIBLE);
+            } else {
+                layout.setVisibility(View.GONE);
+            }
+        });
 
         RadioGroup expenseIncome = view.findViewById(R.id.expense_income);
         expenseIncome.setOnCheckedChangeListener((group, checkedId) -> {
             if(checkedId == R.id.expense_income_credit) {
+                expenseShared.setChecked(false);
+                layout.setVisibility(View.GONE);
                 expenseShared.setEnabled(false);
                 expenseCategory.setAdapter(adt_Type);
                 expenseSubCategory.setAdapter(adt_Income);
@@ -220,7 +283,17 @@ public class AddExpenseFragment extends Fragment {
         });
 
         RecyclerView expenseSharedList = view.findViewById(R.id.expense_sharing_users);
-        expenseSharedList.setAdapter(new SharedUserAdapter(settings.getUsers()));
+        SharedUserAdapter sharedUserAdapter = new SharedUserAdapter(settings.getUsers(), newTotal -> {
+                totalValue[0] = newTotal;
+                int currentValue = expenseShareType.getSelectedItemPosition() == 0 ? actualValue[0] : 100;
+                valueStatus.setText(getString(R.string.value_div, totalValue[0], currentValue));
+                if(totalValue[0] == actualValue[0]) {
+                    valueStatus.setTextColor(getResources().getColor(R.color.categoryGreen, context.getTheme()));
+                } else {
+                    valueStatus.setTextColor(getResources().getColor(R.color.categoryOrange, context.getTheme()));
+                }
+        });
+        expenseSharedList.setAdapter(sharedUserAdapter);
         expenseSharedList.setLayoutManager(new LinearLayoutManager(getActivity()));
         expenseSharedList.setVerticalScrollbarPosition(0);
 

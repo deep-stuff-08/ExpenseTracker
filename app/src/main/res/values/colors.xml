@@ -2,8 +2,8 @@
 <resources>
     <color name="grey">#FF949494</color>
 
-    <color name="categoryBlue">#FF10CC10</color>
-    <color name="categoryGreen">#FF1010CC</color>
+    <color name="categoryGreen">#FF10CC10</color>
+    <color name="categoryBlue">#FF1010CC</color>
     <color name="categoryYellow">#FFCCCC10</color>
     <color name="categoryOrange">#FFCC5510</color>
 </resources>

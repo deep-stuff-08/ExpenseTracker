@@ -3,15 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <Spinner
+    <AutoCompleteTextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/shared_user"
-        android:layout_centerInParent="true"
         android:layout_toStartOf="@id/shared_user_value"
-        />
+        android:id="@+id/shared_user_name"/>
+
     <EditText
         android:layout_width="wrap_content"
+        android:ems="3"
+        android:inputType="numberDecimal"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerInParent="true"
