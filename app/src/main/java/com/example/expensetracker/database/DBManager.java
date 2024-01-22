@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.example.expensetracker.ExpenseSettings;
@@ -15,21 +14,40 @@ import com.example.expensetracker.pojo.SubCategory;
 
 import java.util.ArrayList;
 
-public class DBManager extends SQLiteOpenHelper {
-
-
+public class DBManager{
     private static DBManager dbManager = null;
-    private ArrayList<Category> data;
 
-    private DBManager(Context context)
+    private SQLiteDatabase sqLiteDatabase ;
+
+    private DBManager()
     {
-        super(context, DatabaseDetails.DATABASE_NAME, null, 1);
+
     }
 
-    public static DBManager createDBManagerInstance(Context context)
+    private static boolean isDatabaseCreated(Context context)
     {
-        dbManager = new DBManager(context);
-        return dbManager;
+        try {
+           SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY).close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public static void createDBManagerInstance(Context context)
+    {
+        boolean databaseCreated = isDatabaseCreated(context);
+        dbManager = new DBManager();
+        if(!databaseCreated)
+        {
+            dbManager.sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null);
+            dbManager.onCreateSetup();
+            dbManager.insertExpenseSettings(ExpenseSettings.createWithDefaultParameters(context));
+        } else {
+            dbManager.sqLiteDatabase = SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
+        }
     }
 
     public static DBManager getDBManagerInstance()
@@ -41,78 +59,42 @@ public class DBManager extends SQLiteOpenHelper {
         return dbManager;
     }
 
-    private SQLiteDatabase getDatabaseInstance()
-    {
-        return this.getWritableDatabase();
-    }
-
-    private boolean isDatabaseCreated()
-    {
-
-        try {
-            SQLiteDatabase.openDatabase(DatabaseDetails.DATABASE_NAME, null, SQLiteDatabase.OPEN_READONLY).close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    public boolean areTablesCreated()
-    {
-        Cursor cursor = getData(DatabaseDetails.CATEGORY_NAME, null);
-        if (null == cursor)
-        {
-            return false;
-        }
-
-        cursor = getData(DatabaseDetails.SUBCATEGORY_NAME, null);
-        if (null == cursor)
-        {
-            return false;
-        }
-
-        cursor = getData(DatabaseDetails.PAYMENTTYPE_NAME, null);
-        if (null == cursor)
-        {
-            return false;
-        }
-
-        cursor = getData(DatabaseDetails.EXPENSEENTRIES_NAME, null);
-        if (null == cursor)
-        {
-            return false;
-        }
-
-        return true;
-    }
-    
-    public boolean isDatabaseSetup()
-    {
-        boolean ret = isDatabaseCreated();
-        if(ret) return false;
-        return areTablesCreated();
-    }
-
-    public void onCreate(SQLiteDatabase db)
-    {
-
-    }
+//    public boolean areTablesCreated()
+//    {
+//        Cursor cursor = getData("*", DatabaseDetails.CATEGORY_NAME, null);
+//        if (null == cursor)
+//        {
+//            return false;
+//        }
+//
+//        cursor = getData("*",DatabaseDetails.SUBCATEGORY_NAME, null);
+//        if (null == cursor)
+//        {
+//            return false;
+//        }
+//
+//        cursor = getData("*",DatabaseDetails.PAYMENTTYPE_NAME, null);
+//        if (null == cursor)
+//        {
+//            return false;
+//        }
+//
+//        cursor = getData("*",DatabaseDetails.EXPENSEENTRIES_NAME, null);
+//        return null != cursor;
+//    }
 
     public void onCreateSetup()
     {
         Log.d("DATABASE_LOG", "onCreate: called");
 
-        SQLiteDatabase db = getDatabaseInstance();
-
         // create table - category
-        db.execSQL(
+        sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS " + DatabaseDetails.CATEGORY_NAME +
                         "(id INTEGER PRIMARY KEY, name text NOT NULL, color_id INTEGER)"
         );
 
         // create table - subCategory
-        db.execSQL(
+        sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.SUBCATEGORY_NAME +
                         "(" +
                             "id INTEGER PRIMARY KEY, name text NOT NULL, category_id INTEGER," +
@@ -122,13 +104,13 @@ public class DBManager extends SQLiteOpenHelper {
         );
 
         // create table - paymentMethod
-        db.execSQL(
+        sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.PAYMENTTYPE_NAME +
                         "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
         );
 
         // create table - expenseTracker
-        db.execSQL(
+        sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS " + DatabaseDetails.EXPENSEENTRIES_NAME +
                         "(" +
                             "id INTEGER PRIMARY KEY, name text NOT NULL," +
@@ -141,14 +123,9 @@ public class DBManager extends SQLiteOpenHelper {
         Log.d("DATABASE_LOG", "onCreate: exit");
     }
 
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
-    {
-
-    }
-
     // false - no record inserted
     // true - record inserted successfully
-    public boolean insertExpenseSettings(ExpenseSettings expenseSettings)
+    public void insertExpenseSettings(ExpenseSettings expenseSettings)
     {
         for(PaymentType l : expenseSettings.getPaymentMethod()) {
             insertPaymentType(l);
@@ -158,23 +135,21 @@ public class DBManager extends SQLiteOpenHelper {
             // update subcategory
             insertCategory(l);
         }
-
-        return true;
     }
 
-    public static void insertCategory(Category cat)
+    public void insertCategory(Category cat)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", cat.getName());
         contentValues.put("color_id", cat.getColorId());
-        DBManager dbManager = DBManager.getDBManagerInstance();
-        boolean ret = dbManager.insert(contentValues, DatabaseDetails.CATEGORY_NAME);
-        if(!ret)
-        {
+        boolean ret = this.insert(contentValues, DatabaseDetails.CATEGORY_NAME);
+        if(!ret) {
             throw new RuntimeException("Failed to insert data into database");
         }
 
-        int catID = Integer.parseInt(getData(DatabaseDetails.CATEGORY_NAME, "name = '" + cat.getName() + "' ", "id"));
+        Cursor cursor = getData("id", DatabaseDetails.CATEGORY_NAME, "name = '" + cat.getName() + "' ");
+        assert cursor != null;
+        int catID = Integer.parseInt(cursor.getString(0));
         for(SubCategory sCat: cat.getSubCategories())
         {
             sCat.setCategoryId(catID);
@@ -182,68 +157,61 @@ public class DBManager extends SQLiteOpenHelper {
         }
     }
 
-    public static void insertSubCategory(SubCategory scat)
+    public void insertSubCategory(SubCategory scat)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", scat.getName());
         contentValues.put("category_id", scat.getCategoryId());
-        DBManager dbManager = DBManager.getDBManagerInstance();
-        boolean ret = dbManager.insert(contentValues, DatabaseDetails.SUBCATEGORY_NAME);
+        boolean ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_NAME);
         if(!ret)
         {
             throw new RuntimeException("Failed to insert data into database");
         }
     }
 
-    public static void insertPaymentType(PaymentType p)
+    public void insertPaymentType(PaymentType p)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
         contentValues.put("drawable_id", p.getDrawableId());
-        DBManager dbManager = DBManager.getDBManagerInstance();
-        dbManager.insert(contentValues, DatabaseDetails.PAYMENTTYPE_NAME);
+        this.insert(contentValues, DatabaseDetails.PAYMENTTYPE_NAME);
     }
 
-    public static void updatePaymentType(PaymentType p)
+    public void updatePaymentType(PaymentType p)
     {
-        DBManager dbManager = DBManager.getDBManagerInstance();
         String condition = "id = " + p.getId();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
         contentValues.put("drawable_id", p.getDrawableId());
-        dbManager.update(DatabaseDetails.PAYMENTTYPE_NAME, contentValues, condition);
+        this.update(DatabaseDetails.PAYMENTTYPE_NAME, contentValues, condition);
     }
 
-    public static void updateCategory(Category c)
+    public void updateCategory(Category c)
     {
-        DBManager dbManager = DBManager.getDBManagerInstance();
         String condition = "id = '" + c.getId() + "'";
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", c.getName());
         contentValues.put("color_id", c.getColorId());
-        dbManager.update(DatabaseDetails.CATEGORY_NAME, contentValues, condition);
+        this.update(DatabaseDetails.CATEGORY_NAME, contentValues, condition);
     }
 
-    public static void updateSubCategory(SubCategory s)
+    public void updateSubCategory(SubCategory s)
     {
-        DBManager dbManager = DBManager.getDBManagerInstance();
         String condition = "id = " + s.getId();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", s.getName());
         contentValues.put("category_id", s.getCategoryId());
-        dbManager.update(DatabaseDetails.SUBCATEGORY_NAME, contentValues ,condition);
+        this.update(DatabaseDetails.SUBCATEGORY_NAME, contentValues ,condition);
     }
 
-    public static void deletePaymentType(PaymentType p)
+    public void deletePaymentType(PaymentType p)
     {
-        DBManager dbManager = DBManager.getDBManagerInstance();
         String condition = "id = '" + p.getId() +"'";
-        dbManager.delete(DatabaseDetails.PAYMENTTYPE_NAME, condition);
+        this.delete(DatabaseDetails.PAYMENTTYPE_NAME, condition);
     }
 
-    public static void deleteCategory(Category c)
+    public void deleteCategory(Category c)
     {
-        DBManager dbManager = DBManager.getDBManagerInstance();
         int categoryId = c.getId();
         for(SubCategory sCat: c.getSubCategories())
         {
@@ -251,43 +219,119 @@ public class DBManager extends SQLiteOpenHelper {
             deleteSubCategory(sCat);
         }
         String condition = "id = '" + c.getId() +"'";
-        dbManager.delete(DatabaseDetails.CATEGORY_NAME, condition);
+        this.delete(DatabaseDetails.CATEGORY_NAME, condition);
     }
 
-    public static void deleteSubCategory(SubCategory s)
+    public void deleteSubCategory(SubCategory s)
     {
-        DBManager dbManager = DBManager.getDBManagerInstance();
         String condition = "id = '" + s.getId() +"'";
-        dbManager.delete(DatabaseDetails.SUBCATEGORY_NAME, condition);
+        this.delete(DatabaseDetails.SUBCATEGORY_NAME, condition);
     }
 
     public boolean insert(ContentValues contentValues, String tableName)
     {
-        getDatabaseInstance().insert(tableName, null, contentValues);
+        sqLiteDatabase.insert(tableName, null, contentValues);
         return true;
     }
 
-    public int delete(String tableName, String condition) {
-        DBManager db = getDBManagerInstance();
-        int ret =  db.getDatabaseInstance().delete(tableName, condition, null);
+    public void delete(String tableName, String condition) {
+        sqLiteDatabase.delete(tableName, condition, null);
         Log.d("DATABASE_LOG", "delete: exiting" );
-        return ret;
     }
 
     public int update(String tableName, ContentValues cv, String condition) {
-        DBManager db = getDBManagerInstance();
-        int ret =  db.getDatabaseInstance().update(tableName, cv, condition, null);
+        int ret =  sqLiteDatabase.update(tableName, cv, condition, null);
         Log.d("DATABASE_LOG", "update: exiting");
         return ret;
     }
 
-    public static Cursor getData(String tableName, String condition) {
+    public ArrayList<Category> getCategoryData() {
+        ArrayList<Category> data = new ArrayList<>();
+        String query = "select id, name, color_id from "+ DatabaseDetails.CATEGORY_NAME;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery( query,null )) {
+            if(null == cursor)
+            {
+                throw new RuntimeException("cursor is null");
+            }
+
+            ArrayList<SubCategory> subCategories = this.getSubCategoryData();
+            cursor.moveToFirst();
+            do {
+                ArrayList<SubCategory> subCategoriesByCategory = new ArrayList<>();
+                int id = cursor.getInt(0);
+                String name = cursor.getString(1);
+
+                for (SubCategory subCat: subCategories) {
+                    if(subCat.getCategoryId() == id)
+                    {
+                        subCategoriesByCategory.add(new SubCategory(subCat.getId(), subCat.getName(), subCat.getCategoryId(), subCat.getDrawableId()));
+                    }
+                }
+                data.add(new Category(id, name, R.color.categoryYellow,subCategoriesByCategory));
+            } while(cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return data;
+    }
+
+    public ArrayList<SubCategory> getSubCategoryData() {
+        ArrayList<SubCategory>  data = new ArrayList<>();
+        String query = "select id, name, category_id from "+ DatabaseDetails.SUBCATEGORY_NAME;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery( query,
+                null )) {
+            if (null != cursor)
+                cursor.moveToFirst();
+
+            do {
+                assert cursor != null;
+                String id = cursor.getString(0);
+                String name = cursor.getString(1);
+                String categoryId = cursor.getString(2);
+                SubCategory obj = new SubCategory(Integer.parseInt(id), name, Integer.parseInt(categoryId), 0);
+                data.add(obj);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    public ArrayList<PaymentType> getPaymentData() {
+        ArrayList<PaymentType> data = new ArrayList<>();
+        String query = "select id, name from "+ DatabaseDetails.PAYMENTTYPE_NAME;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
+                null)) {
+            if (null != cursor)
+                cursor.moveToFirst();
+
+            do {
+                assert cursor != null;
+                String id = cursor.getString(0);
+                String name = cursor.getString(1);
+                PaymentType obj = new PaymentType(Integer.parseInt(id), name, 0);
+                data.add(obj);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    public Cursor getData(String columnName, String tableName, String condition) {
         try {
-            DBManager db = getDBManagerInstance();
-            String query = "select * from " + tableName;
+            columnName =  (null == columnName) ? "*" :columnName;
+            String query = "select " + columnName +" from " + tableName;
             query += (null == condition) ? "" : " where " + condition;
             Log.d("DATABASE_LOG", "getData: query = " + query);
-            Cursor cursor = db.getDatabaseInstance().rawQuery(query,
+            Cursor cursor = sqLiteDatabase.rawQuery(query,
                     null);
             if (null != cursor)
                 cursor.moveToFirst();
@@ -298,78 +342,4 @@ public class DBManager extends SQLiteOpenHelper {
             return null;
         }
     }
-
-    public static ArrayList<Category> getCategoryData() {
-        DBManager db = getDBManagerInstance();
-        ArrayList<Category> data = new ArrayList<>();
-        String query = "select * from "+ DatabaseDetails.CATEGORY_NAME;
-        Cursor cursor =  db.getDatabaseInstance().rawQuery( query, null );
-        if(null != cursor)
-            cursor.moveToFirst();
-
-        ArrayList<SubCategory> subCategories = getSubCategoryData();
-
-        do {
-            ArrayList<SubCategory> subCategoriesByCategory = new ArrayList<>();
-            int id = Integer.parseInt(cursor.getString(cursor.getColumnIndex("id")));
-            String name = cursor.getString(cursor.getColumnIndex("name"));
-
-            for (SubCategory subCat: subCategories) {
-                if(subCat.getCategoryId() == id)
-                {
-                    subCategoriesByCategory.add(new SubCategory(subCat.getId(), subCat.getName(), subCat.getCategoryId(), subCat.getDrawableId()));
-                }
-            }
-            data.add(new Category(id, name, R.color.categoryYellow,subCategoriesByCategory));
-        } while(cursor.moveToNext());
-        cursor.close();
-        return  data;
-    }
-
-    public static ArrayList<SubCategory> getSubCategoryData() {
-        DBManager db = getDBManagerInstance();
-        ArrayList<SubCategory>  data = new ArrayList<>();
-        String query = "select * from "+ DatabaseDetails.SUBCATEGORY_NAME;
-        Cursor cursor =  db.getDatabaseInstance().rawQuery( query, null );
-        if(null != cursor)
-            cursor.moveToFirst();
-
-        do {
-            String id = cursor.getString(cursor.getColumnIndex("id"));
-            String name = cursor.getString(cursor.getColumnIndex("name"));
-            String categoryId = cursor.getString(cursor.getColumnIndex("category_id"));
-            SubCategory obj = new SubCategory(Integer.parseInt(id), name, Integer.parseInt(categoryId), 0);
-            data.add(obj);
-        } while(cursor.moveToNext());
-        cursor.close();
-        return data;
-    }
-
-    public static ArrayList<PaymentType> getPaymentData() {
-        DBManager db = getDBManagerInstance();
-        ArrayList<PaymentType> data = new ArrayList<>();
-        String query = "select * from "+ DatabaseDetails.PAYMENTTYPE_NAME;
-        Cursor cursor =  db.getDatabaseInstance().rawQuery( query, null );
-        if(null != cursor)
-            cursor.moveToFirst();
-
-        do {
-            String id = cursor.getString(cursor.getColumnIndex("id"));
-            String name = cursor.getString(cursor.getColumnIndex("name"));
-            PaymentType obj = new PaymentType(Integer.parseInt(id), name, 0);
-            data.add(obj);
-        } while(cursor.moveToNext());
-        cursor.close();
-        return data;
-    }
-
-    private static String getData(Cursor cursor, String columnName) {
-        return cursor.getString(cursor.getColumnIndex(columnName));
-    }
-
-    public static String getData(String tableName, String condition, String columnName) {
-        Cursor cursor = DBManager.getData(tableName, condition);
-        return getData(cursor, columnName);
-    }
-
 }

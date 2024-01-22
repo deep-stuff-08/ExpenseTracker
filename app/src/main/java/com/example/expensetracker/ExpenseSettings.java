@@ -19,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -88,34 +87,19 @@ public class ExpenseSettings {
         return s;
     }
 
-    private static void initializeDatabase(Context context)
+    public static ExpenseSettings createWithParametersFromDatabase(Context context)
     {
-        DBManager dbManager = DBManager.createDBManagerInstance(context);
-
-        ExpenseSettings expenseSettingsWithDefaultValues = new ExpenseSettings(context, new ArrayList<PaymentType>(), new ArrayList<Category>());
-        if(!dbManager.areTablesCreated())
-        {
-            dbManager.onCreateSetup();
-            expenseSettingsWithDefaultValues.initToDefault();
-            dbManager.insertExpenseSettings(expenseSettingsWithDefaultValues);
-        }
+        DBManager db = DBManager.getDBManagerInstance();
+        return new ExpenseSettings(context, db.getPaymentData(), db.getCategoryData());
     }
 
-    public static ExpenseSettings readDataFromDatabase(Context context)
+    public void updateExpenseSettings(ExpenseSettings newExpenseSettings)
     {
-        initializeDatabase(context);
+        this.category.clear();
+        this.category.addAll(newExpenseSettings.getCategory());
 
-        // read back data
-        return new ExpenseSettings(context, DBManager.getPaymentData(), DBManager.getCategoryData());
-    }
-
-    public static void updateExpenseSettings(ExpenseSettings setting, ExpenseSettings newExpenseSettings)
-    {
-        setting.category.clear();
-        setting.category.addAll(newExpenseSettings.getCategory());
-
-        setting.paymentMethod.clear();
-        setting.paymentMethod.addAll(newExpenseSettings.getPaymentMethod());
+        this.paymentMethod.clear();
+        this.paymentMethod.addAll(newExpenseSettings.getPaymentMethod());
     }
 
     public static ExpenseSettings createWithParametersFromFile(Context context, File f) throws IOException {
