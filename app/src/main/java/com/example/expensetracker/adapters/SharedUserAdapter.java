@@ -17,9 +17,6 @@ import com.example.expensetracker.R;
 import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
 
 public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.ViewHolder> {
     public interface ValueUpdateListener {
@@ -55,7 +52,7 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         if(position == 0) {
-            holder.autoCompleteTextViewName.setText("Me");
+            holder.autoCompleteTextViewName.setText(R.string.expense_share_user_me);
             holder.autoCompleteTextViewName.setInputType(InputType.TYPE_NULL);
             holder.autoCompleteTextViewName.setFocusable(false);
             holder.autoCompleteTextViewName.setClickable(false);

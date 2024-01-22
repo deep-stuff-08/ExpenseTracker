@@ -7,5 +7,5 @@ public enum SettingsType {
     USER,
     INCOME,
     TYPE,
-    EXPENSEENTRY
+    EXPENSE_ENTRY
 }

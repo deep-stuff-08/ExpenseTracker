@@ -13,19 +13,11 @@ public class Category extends SettingsParent implements JsonIO {
     private int colorId;
     final private ArrayList<SubCategory> subCategories;
 
-    private String tableName = "category";
-
     public Category(int id, String name, int colorId, ArrayList<SubCategory> subCategories) {
         this.id = id;
         this.name = name;
         this.colorId = colorId;
         this.subCategories = subCategories;
-    }
-
-    public Category(int id, String name) {
-        this.name = name;
-        this.id = id;
-        this.subCategories = new ArrayList<>();
     }
 
     public Category() {

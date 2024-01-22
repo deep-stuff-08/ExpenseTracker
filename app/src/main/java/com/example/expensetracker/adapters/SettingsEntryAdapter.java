@@ -1,7 +1,6 @@
 package com.example.expensetracker.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +17,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expensetracker.ExpenseSettings;
 import com.example.expensetracker.MainActivity;
+import com.example.expensetracker.R;
+import com.example.expensetracker.SettingsUpdateListener;
 import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.PaymentType;
 import com.example.expensetracker.pojo.SubCategory;
-import com.example.expensetracker.R;
-import com.example.expensetracker.SettingsUpdateListener;
 
 import java.util.ArrayList;
 

@@ -3,7 +3,6 @@ package com.example.expensetracker;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -16,17 +15,12 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
-import com.example.expensetracker.fragments.HomeFragment;
-import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
-import com.google.android.material.snackbar.Snackbar;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Objects;
 
 /**
  * -1 : File Write Error
@@ -36,8 +30,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean isSettingsVisible;
     private ExpenseSettings expenseSettings;
     private ArrayList<UnconfirmedEntry> entries;
-    private DBManager dbManager;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (R.id.menu_unconfirmed_entries == item.getItemId()) {
             invalidateMenu();
             NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
-            if(navController.getCurrentDestination().getId() != R.id.homeFragment) {
+            if(Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
                 navController.navigateUp();
             }
             navController.navigate(R.id.action_homeFragment_to_unconfirmedEntryFragment);

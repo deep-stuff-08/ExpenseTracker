@@ -7,10 +7,8 @@ import android.util.Log;
 
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,7 +18,6 @@ public class SmsReader {
         Cursor cursor = context.getContentResolver().query(Telephony.Sms.CONTENT_URI, new String[]{Telephony.Sms.BODY, Telephony.Sms.DATE, Telephony.Sms.ADDRESS, Telephony.Sms.DATE}, Telephony.Sms.DATE+">="+dateAfter.getTime(), null, null);
         assert cursor != null;
         cursor.moveToFirst();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy hh:mm:ss", Locale.getDefault());
         ArrayList<UnconfirmedEntry> entries = new ArrayList<>();
         if(cursor.getCount() > 0) {
             do {

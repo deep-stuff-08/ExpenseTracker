@@ -19,12 +19,12 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedEntriesAdapter.ViewHolder> {
-    private ArrayList<UnconfirmedEntry> entries;
-    private SimpleDateFormat sdf;
+    private final ArrayList<UnconfirmedEntry> entries;
+    private final SimpleDateFormat sdf;
     private int mExpandedPosition = -1;
 
-    public UnconfirmedEntriesAdapter(ArrayList<UnconfirmedEntry> newentries) {
-        entries = newentries;
+    public UnconfirmedEntriesAdapter(ArrayList<UnconfirmedEntry> newEntries) {
+        entries = newEntries;
         sdf = new SimpleDateFormat("dd/MM/yy hh:mm:ss", Locale.getDefault());
     }
     @NonNull

@@ -59,30 +59,6 @@ public class DBManager{
         return dbManager;
     }
 
-//    public boolean areTablesCreated()
-//    {
-//        Cursor cursor = getData("*", DatabaseDetails.CATEGORY_NAME, null);
-//        if (null == cursor)
-//        {
-//            return false;
-//        }
-//
-//        cursor = getData("*",DatabaseDetails.SUBCATEGORY_NAME, null);
-//        if (null == cursor)
-//        {
-//            return false;
-//        }
-//
-//        cursor = getData("*",DatabaseDetails.PAYMENTTYPE_NAME, null);
-//        if (null == cursor)
-//        {
-//            return false;
-//        }
-//
-//        cursor = getData("*",DatabaseDetails.EXPENSEENTRIES_NAME, null);
-//        return null != cursor;
-//    }
-
     public void onCreateSetup()
     {
         Log.d("DATABASE_LOG", "onCreate: called");
@@ -105,13 +81,13 @@ public class DBManager{
 
         // create table - paymentMethod
         sqLiteDatabase.execSQL(
-                "create table IF NOT EXISTS  " + DatabaseDetails.PAYMENTTYPE_NAME +
+                "create table IF NOT EXISTS  " + DatabaseDetails.PAYMENT_TYPE_NAME +
                         "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
         );
 
         // create table - expenseTracker
         sqLiteDatabase.execSQL(
-                "create table IF NOT EXISTS " + DatabaseDetails.EXPENSEENTRIES_NAME +
+                "create table IF NOT EXISTS " + DatabaseDetails.EXPENSE_ENTRIES_NAME +
                         "(" +
                             "id INTEGER PRIMARY KEY, name text NOT NULL," +
                             "value REAL NOT NULL, category_id INTEGER NOT NULL," +
@@ -174,7 +150,7 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
         contentValues.put("drawable_id", p.getDrawableId());
-        this.insert(contentValues, DatabaseDetails.PAYMENTTYPE_NAME);
+        this.insert(contentValues, DatabaseDetails.PAYMENT_TYPE_NAME);
     }
 
     public void updatePaymentType(PaymentType p)
@@ -183,7 +159,7 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
         contentValues.put("drawable_id", p.getDrawableId());
-        this.update(DatabaseDetails.PAYMENTTYPE_NAME, contentValues, condition);
+        this.update(DatabaseDetails.PAYMENT_TYPE_NAME, contentValues, condition);
     }
 
     public void updateCategory(Category c)
@@ -207,7 +183,7 @@ public class DBManager{
     public void deletePaymentType(PaymentType p)
     {
         String condition = "id = '" + p.getId() +"'";
-        this.delete(DatabaseDetails.PAYMENTTYPE_NAME, condition);
+        this.delete(DatabaseDetails.PAYMENT_TYPE_NAME, condition);
     }
 
     public void deleteCategory(Category c)
@@ -304,7 +280,7 @@ public class DBManager{
 
     public ArrayList<PaymentType> getPaymentData() {
         ArrayList<PaymentType> data = new ArrayList<>();
-        String query = "select id, name from "+ DatabaseDetails.PAYMENTTYPE_NAME;
+        String query = "select id, name from "+ DatabaseDetails.PAYMENT_TYPE_NAME;
         try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
                 null)) {
             if (null != cursor)

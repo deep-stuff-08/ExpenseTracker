@@ -26,9 +26,9 @@ public class UnconfirmedEntriesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_unconfirmed_entries, container, false);
 
         RecyclerView recycler = view.findViewById(R.id.unconfirmed_recycleView);
-        recycler.setAdapter(new UnconfirmedEntriesAdapter(((MainActivity)getActivity()).getEntries()));
+        recycler.setAdapter(new UnconfirmedEntriesAdapter(((MainActivity)requireActivity()).getEntries()));
 
-        recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recycler.setLayoutManager(new LinearLayoutManager(requireActivity()));
         recycler.setVerticalScrollbarPosition(0);
 
         return view;
