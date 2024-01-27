@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expensetracker.R;
+import com.example.expensetracker.pojo.Expense;
 import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
@@ -23,22 +24,22 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
         void valueUpdate(int newTotal);
     }
     ArrayList<String> nameList;
-    ArrayList<Integer> valueList;
+    ArrayList<Expense.SharedUser> sharedUserList;
     ValueUpdateListener updateListener;
     int itemCount = 1;
     public SharedUserAdapter(ArrayList<User> names, ValueUpdateListener updateListener) {
         nameList = new ArrayList<>();
         names.forEach(user -> nameList.add(user.getName()));
-        valueList = new ArrayList<>();
-        valueList.add(0);
-        valueList.add(0);
+        sharedUserList = new ArrayList<>();
+        sharedUserList.add(new Expense.SharedUser("Me", 0));
+        sharedUserList.add(new Expense.SharedUser());
         this.updateListener = updateListener;
     }
 
     private int getValueTotal() {
         int total = 0;
-        for(Integer i : valueList) {
-            total += i;
+        for(Expense.SharedUser i : sharedUserList) {
+            total += i.getValue();
         }
         return total;
     }
@@ -47,6 +48,11 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_shared_user, parent, false);
         return new ViewHolder(view);
+    }
+
+    @NonNull
+    public ArrayList<Expense.SharedUser> getSharedUserList() {
+        return sharedUserList;
     }
 
     @Override
@@ -75,7 +81,8 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
                     if (s.length() > 0 && holder.getAdapterPosition() == itemCount - 1) {
                         notifyItemInserted(itemCount);
                         itemCount += 1;
-                        valueList.add(0);
+                        sharedUserList.get(holder.getAdapterPosition()).setName(holder.autoCompleteTextViewName.getText().toString());
+                        sharedUserList.add(new Expense.SharedUser());
                     }
                 }
             });
@@ -84,7 +91,7 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
                     if(holder.autoCompleteTextViewName.getText().length() == 0 && holder.getAdapterPosition() < itemCount - 1) {
                         notifyItemRemoved(holder.getAdapterPosition());
                         itemCount -= 1;
-                        valueList.remove(holder.getAdapterPosition());
+                        sharedUserList.remove(holder.getAdapterPosition());
                     }
                 }
             });
@@ -102,7 +109,7 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
 
             @Override
             public void afterTextChanged(Editable s) {
-                valueList.set(holder.getAdapterPosition(), Integer.valueOf(s.toString()));
+                sharedUserList.get(holder.getAdapterPosition()).setValue(Integer.valueOf(s.toString()));
                 updateListener.valueUpdate(getValueTotal());
             }
         });

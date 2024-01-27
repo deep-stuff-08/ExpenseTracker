@@ -1,5 +1,6 @@
 package com.example.expensetracker.fragments;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -25,14 +26,12 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
 import com.example.expensetracker.adapters.ComboBoxAdapter;
 import com.example.expensetracker.ExpenseSettings;
@@ -45,9 +44,14 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
 
 public class AddExpenseFragment extends Fragment {
     private SimpleDateFormat sdfDate;
@@ -326,10 +330,34 @@ public class AddExpenseFragment extends Fragment {
             if(unconfirmedEntryId >= 0) {
                 ((MainActivity)requireActivity()).getEntries().remove(unconfirmedEntryId);
             }
+            ArrayList<String> newUsers = new ArrayList<>();
             try {
-                Expense expense = new Expense(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), !expenseIncomeCredit.isChecked(), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), checkBoxIsShared.isChecked());
+                ArrayList<Expense.SharedUser> sharedUserList =  ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList();
+                HashMap<String, Integer> userMap = new HashMap<>();
+                for(Expense.SharedUser sharedUser : sharedUserList) {
+                    if(userMap.containsKey(sharedUser.getName())) {
+                        userMap.replace(sharedUser.getName(), userMap.getOrDefault(sharedUser.getName(), 0) + sharedUser.getValue());
+                    } else {
+                        userMap.put(sharedUser.getName(), sharedUser.getValue());
+                    }
+                }
+                sharedUserList.clear();
+                Set<String> s = new HashSet<>();
+                settings.getUsers().forEach(user -> s.add(user.getName()));
+                for(String name : userMap.keySet()) {
+                    if(!s.contains(name)) {
+                        newUsers.add(name);
+                    }
+                    sharedUserList.add(new Expense.SharedUser(name, userMap.getOrDefault(name, 0)));
+                }
+                Expense expense = new Expense(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), !expenseIncomeCredit.isChecked(), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), sharedUserList);
             } catch (ParseException e) {
                 e.printStackTrace();
+            }
+            if(!newUsers.isEmpty()) {
+                new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc")
+                        .setPositiveButton("Yes", (dialog, which) -> {})
+                        .setNegativeButton("No", (dialog, which) -> {}).show();
             }
             if (checkBoxIsRepeat.isChecked()) {
                 Bundle bundle = new Bundle();
