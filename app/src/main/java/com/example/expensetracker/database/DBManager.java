@@ -63,15 +63,28 @@ public class DBManager{
     {
         Log.d("DATABASE_LOG", "onCreate: called");
 
+        // COMMON TABLES
+        // create table - paymentMethod
+        sqLiteDatabase.execSQL(
+                "create table IF NOT EXISTS  " + DatabaseDetails.PAYMENT_TYPE +
+                        "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
+        );
+
+        // TABLES AS PER DEBIT/CREDIT TYPE
         // create table - category
         sqLiteDatabase.execSQL(
-                "create table IF NOT EXISTS " + DatabaseDetails.CATEGORY_NAME +
+                "create table IF NOT EXISTS " + DatabaseDetails.CATEGORY_EXPENSE +
+                        "(id INTEGER PRIMARY KEY, name text NOT NULL, color_id INTEGER)"
+        );
+
+        sqLiteDatabase.execSQL(
+                "create table IF NOT EXISTS " + DatabaseDetails.CATEGORY_INCOME +
                         "(id INTEGER PRIMARY KEY, name text NOT NULL, color_id INTEGER)"
         );
 
         // create table - subCategory
         sqLiteDatabase.execSQL(
-                "create table IF NOT EXISTS  " + DatabaseDetails.SUBCATEGORY_NAME +
+                "create table IF NOT EXISTS  " + DatabaseDetails.SUBCATEGORY_EXPENSE +
                         "(" +
                             "id INTEGER PRIMARY KEY, name text NOT NULL, category_id INTEGER," +
                             "FOREIGN KEY(category_id)" +
@@ -79,20 +92,33 @@ public class DBManager{
                         ")"
         );
 
-        // create table - paymentMethod
         sqLiteDatabase.execSQL(
-                "create table IF NOT EXISTS  " + DatabaseDetails.PAYMENT_TYPE_NAME +
-                        "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
+                "create table IF NOT EXISTS  " + DatabaseDetails.SUBCATEGORY_INCOME +
+                        "(" +
+                        "id INTEGER PRIMARY KEY, name text NOT NULL, category_id INTEGER," +
+                        "FOREIGN KEY(category_id)" +
+                        "REFERENCES category(id) " +
+                        ")"
         );
 
         // create table - expenseTracker
         sqLiteDatabase.execSQL(
-                "create table IF NOT EXISTS " + DatabaseDetails.EXPENSE_ENTRIES_NAME +
+                "create table IF NOT EXISTS " + DatabaseDetails.EXPENSE_ENTRIES +
                         "(" +
                             "id INTEGER PRIMARY KEY, name text NOT NULL," +
                             "value REAL NOT NULL, category_id INTEGER NOT NULL," +
                             "subCategory_id INTEGER NOT NULL," +
                             "paymentMethod_id INTEGER, dateTime TEXT, isSharedExpense INTEGER" +
+                        ")"
+        );
+
+        sqLiteDatabase.execSQL(
+                "create table IF NOT EXISTS " + DatabaseDetails.INCOME_ENTRIES +
+                        "(" +
+                        "id INTEGER PRIMARY KEY, name text NOT NULL," +
+                        "value REAL NOT NULL, category_id INTEGER NOT NULL," +
+                        "subCategory_id INTEGER NOT NULL," +
+                        "paymentMethod_id INTEGER, dateTime TEXT, isSharedExpense INTEGER" +
                         ")"
         );
 
@@ -107,7 +133,7 @@ public class DBManager{
             insertPaymentType(l);
         }
 
-        for(Category l : expenseSettings.getCategory()) {
+        for(Category l : expenseSettings.getExpenseCategory()) {
             // update subcategory
             insertCategory(l);
         }
@@ -118,12 +144,12 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", cat.getName());
         contentValues.put("color_id", cat.getColorId());
-        boolean ret = this.insert(contentValues, DatabaseDetails.CATEGORY_NAME);
+        boolean ret = this.insert(contentValues, DatabaseDetails.CATEGORY_EXPENSE);
         if(!ret) {
             throw new RuntimeException("Failed to insert data into database");
         }
 
-        Cursor cursor = getData("id", DatabaseDetails.CATEGORY_NAME, "name = '" + cat.getName() + "' ");
+        Cursor cursor = getData("id", DatabaseDetails.CATEGORY_EXPENSE, "name = '" + cat.getName() + "' ");
         assert cursor != null;
         int catID = Integer.parseInt(cursor.getString(0));
         for(SubCategory sCat: cat.getSubCategories())
@@ -138,7 +164,7 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", scat.getName());
         contentValues.put("category_id", scat.getCategoryId());
-        boolean ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_NAME);
+        boolean ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_EXPENSE);
         if(!ret)
         {
             throw new RuntimeException("Failed to insert data into database");
@@ -150,7 +176,7 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
         contentValues.put("drawable_id", p.getDrawableId());
-        this.insert(contentValues, DatabaseDetails.PAYMENT_TYPE_NAME);
+        this.insert(contentValues, DatabaseDetails.PAYMENT_TYPE);
     }
 
     public void updatePaymentType(PaymentType p)
@@ -159,7 +185,7 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
         contentValues.put("drawable_id", p.getDrawableId());
-        this.update(DatabaseDetails.PAYMENT_TYPE_NAME, contentValues, condition);
+        this.update(DatabaseDetails.PAYMENT_TYPE, contentValues, condition);
     }
 
     public void updateCategory(Category c)
@@ -168,7 +194,7 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", c.getName());
         contentValues.put("color_id", c.getColorId());
-        this.update(DatabaseDetails.CATEGORY_NAME, contentValues, condition);
+        this.update(DatabaseDetails.CATEGORY_EXPENSE, contentValues, condition);
     }
 
     public void updateSubCategory(SubCategory s)
@@ -177,13 +203,13 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", s.getName());
         contentValues.put("category_id", s.getCategoryId());
-        this.update(DatabaseDetails.SUBCATEGORY_NAME, contentValues ,condition);
+        this.update(DatabaseDetails.SUBCATEGORY_EXPENSE, contentValues ,condition);
     }
 
     public void deletePaymentType(PaymentType p)
     {
         String condition = "id = '" + p.getId() +"'";
-        this.delete(DatabaseDetails.PAYMENT_TYPE_NAME, condition);
+        this.delete(DatabaseDetails.PAYMENT_TYPE, condition);
     }
 
     public void deleteCategory(Category c)
@@ -195,13 +221,13 @@ public class DBManager{
             deleteSubCategory(sCat);
         }
         String condition = "id = '" + c.getId() +"'";
-        this.delete(DatabaseDetails.CATEGORY_NAME, condition);
+        this.delete(DatabaseDetails.CATEGORY_EXPENSE, condition);
     }
 
     public void deleteSubCategory(SubCategory s)
     {
         String condition = "id = '" + s.getId() +"'";
-        this.delete(DatabaseDetails.SUBCATEGORY_NAME, condition);
+        this.delete(DatabaseDetails.SUBCATEGORY_EXPENSE, condition);
     }
 
     public boolean insert(ContentValues contentValues, String tableName)
@@ -221,9 +247,9 @@ public class DBManager{
         return ret;
     }
 
-    public ArrayList<Category> getCategoryData() {
+    public ArrayList<Category> getDebitCategoryData() {
         ArrayList<Category> data = new ArrayList<>();
-        String query = "select id, name, color_id from "+ DatabaseDetails.CATEGORY_NAME;
+        String query = "select id, name, color_id from "+ DatabaseDetails.CATEGORY_EXPENSE;
         try(Cursor cursor =  sqLiteDatabase.rawQuery( query,null )) {
             if(null == cursor)
             {
@@ -254,9 +280,14 @@ public class DBManager{
         return data;
     }
 
+    public ArrayList<Category> getCreditCategoryData() {
+        ArrayList<Category> data = new ArrayList<>();
+        return data;
+    }
+
     public ArrayList<SubCategory> getSubCategoryData() {
         ArrayList<SubCategory>  data = new ArrayList<>();
-        String query = "select id, name, category_id from "+ DatabaseDetails.SUBCATEGORY_NAME;
+        String query = "select id, name, category_id from "+ DatabaseDetails.SUBCATEGORY_EXPENSE;
         try(Cursor cursor =  sqLiteDatabase.rawQuery( query,
                 null )) {
             if (null != cursor)
@@ -280,7 +311,7 @@ public class DBManager{
 
     public ArrayList<PaymentType> getPaymentData() {
         ArrayList<PaymentType> data = new ArrayList<>();
-        String query = "select id, name from "+ DatabaseDetails.PAYMENT_TYPE_NAME;
+        String query = "select id, name from "+ DatabaseDetails.PAYMENT_TYPE;
         try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
                 null)) {
             if (null != cursor)

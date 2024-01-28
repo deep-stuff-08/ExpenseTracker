@@ -95,7 +95,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
 
     private void setupListeners(ViewHolder holder, int rootPosition) {
        ExpenseSettings settings = ((MainActivity)currentContext).getSettings();
-       holder.hiddenCategory.setAdapter(new ComboBoxAdapter(currentContext, settings.getCategory(), 0));
+       holder.hiddenCategory.setAdapter(new ComboBoxAdapter(currentContext, settings.getExpenseCategory(), 0));
        SettingsUpdateListener nameListener = new SettingsUpdateListener() {
             @Override
             public void onSettingsUpdateListener(int position, String newName, int newLogo) {
@@ -107,14 +107,14 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         DBManager.getDBManagerInstance().updatePaymentType(p);
                         break;
                     case 1:
-                        Category c = settings.getCategory().get(position);
+                        Category c = settings.getExpenseCategory().get(position);
                         c.setName(newName);
                         c.setColorId(newLogo);
                         DBManager.getDBManagerInstance().updateCategory(c);
                         break;
                     case 2:
                         int categoryID = holder.hiddenCategory.getSelectedItemPosition();
-                        SubCategory s = settings.getCategory().get(categoryID).getSubCategories().get(position);
+                        SubCategory s = settings.getExpenseCategory().get(categoryID).getSubCategories().get(position);
                         s.setName(newName);
                         s.setDrawableId(newLogo);
                         DBManager.getDBManagerInstance().updateSubCategory(s);
@@ -135,11 +135,11 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         DBManager.getDBManagerInstance().deletePaymentType(settings.getPaymentMethod().get(position));
                         break;
                     case 1:
-                        DBManager.getDBManagerInstance().deleteCategory(settings.getCategory().get(position));
+                        DBManager.getDBManagerInstance().deleteCategory(settings.getExpenseCategory().get(position));
                         break;
                     case 2:
                         int categoryID = holder.hiddenCategory.getSelectedItemPosition();
-                        SubCategory s = settings.getCategory().get(categoryID).getSubCategories().get(position);
+                        SubCategory s = settings.getExpenseCategory().get(categoryID).getSubCategories().get(position);
                         DBManager.getDBManagerInstance().deleteSubCategory(s);
                         break;
                 }
@@ -176,10 +176,10 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getPaymentMethod(), nameListener);
                 break;
             case 1:
-                settingsModifyAdapter = new SettingsModifyAdapter(settings.getCategory(), nameListener);
+                settingsModifyAdapter = new SettingsModifyAdapter(settings.getExpenseCategory(), nameListener);
                 break;
             case 2:
-                settingsModifyAdapter = new SettingsModifyAdapter(settings.getSubCategory(0), nameListener);
+                settingsModifyAdapter = new SettingsModifyAdapter(settings.getExpenseSubCategory(0), nameListener);
                 break;
             case 3:
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getUsers(), nameListener);
@@ -196,7 +196,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if(rootPosition == 2) {
-                    holder.hidden.setAdapter(new SettingsModifyAdapter(settings.getSubCategory(position), nameListener));
+                    holder.hidden.setAdapter(new SettingsModifyAdapter(settings.getExpenseSubCategory(position), nameListener));
                 }
             }
             @Override
