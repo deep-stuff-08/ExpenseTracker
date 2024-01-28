@@ -26,18 +26,22 @@ import java.util.Objects;
 public class ExpenseSettings {
     private final Context activityContext;
     private final ArrayList<PaymentType> paymentMethod;
-    private final ArrayList<Category> category;
+    private final ArrayList<Category> expenseCategory;
+
+    private final ArrayList<Category> incomeCategory;
 
     private ExpenseSettings(Context context) {
         activityContext = context;
         paymentMethod = new ArrayList<>();
-        category = new ArrayList<>();
+        expenseCategory = new ArrayList<>();
+        incomeCategory = new ArrayList<>();
     }
 
-    private ExpenseSettings(Context context, ArrayList<PaymentType> paymentMethod, ArrayList<Category> category) {
+    private ExpenseSettings(Context context, ArrayList<PaymentType> paymentMethod, ArrayList<Category> expenseCategory, ArrayList<Category> incomeCategory) {
         activityContext = context;
         this.paymentMethod = paymentMethod;
-        this.category = category;
+        this.expenseCategory = expenseCategory;
+        this.incomeCategory = incomeCategory;
     }
 
     private boolean safeWriteJson() {
@@ -53,31 +57,26 @@ public class ExpenseSettings {
     public ArrayList<PaymentType> getPaymentMethod() {
         return paymentMethod;
     }
-    public ArrayList<Category> getCategory() {
-        return category;
-    }
-    public ArrayList<SubCategory> getSubCategory(int index) {
-        return category.get(index).getSubCategories();
+    public ArrayList<Category> getExpenseCategory() {
+        return expenseCategory;
     }
 
-    public ArrayList<User> getUsers() {
+    public ArrayList<Category> getIncomeCategory() {
+       return incomeCategory;
+    }
+
+    public ArrayList<SubCategory> getExpenseSubCategory(int index) {
+        return expenseCategory.get(index).getSubCategories();
+    }
+
+    public ArrayList<SubCategory> getExpenseSubCategory(int index) {
+        return incomeCategory.get(index).getSubCategories();
+    }
+
+	public ArrayList<User> getUsers() {
         return new ArrayList<>(Arrays.asList(
                 new User("Hrituja"),
                 new User("Darshan")
-        ));
-    }
-
-    public ArrayList<IncomeSource> getIncomeSources() {
-        return new ArrayList<>(Arrays.asList(
-                new IncomeSource("Salary"),
-                new IncomeSource("Investment")
-        ));
-    }
-
-    public ArrayList<Type> getTypes() {
-        return new ArrayList<>(Arrays.asList(
-                new Type("Income"),
-                new Type("Settlement")
         ));
     }
 
@@ -90,13 +89,16 @@ public class ExpenseSettings {
     public static ExpenseSettings createWithParametersFromDatabase(Context context)
     {
         DBManager db = DBManager.getDBManagerInstance();
-        return new ExpenseSettings(context, db.getPaymentData(), db.getCategoryData());
+        return new ExpenseSettings(context, db.getPaymentData(), db.getExpenseCategoryData(), db.getIncomeCategoryData());
     }
 
     public void updateExpenseSettings(ExpenseSettings newExpenseSettings)
     {
-        this.category.clear();
-        this.category.addAll(newExpenseSettings.getCategory());
+        this.expenseCategory.clear();
+        this.expenseCategory.addAll(newExpenseSettings.getExpenseCategory());
+
+        this.incomeCategory.clear();
+        this.incomeCategory.addAll(newExpenseSettings.getIncomeCategory());
 
         this.paymentMethod.clear();
         this.paymentMethod.addAll(newExpenseSettings.getPaymentMethod());
@@ -125,19 +127,19 @@ public class ExpenseSettings {
         this.paymentMethod.add(new PaymentType(0, "Cash", R.drawable.ic_launcher_foreground));
         this.paymentMethod.add(new PaymentType(0, "Credit Card", R.drawable.ic_launcher_foreground));
 
-        this.category.add(new Category(0, "Food", R.color.categoryOrange, new ArrayList<>(Arrays.asList(
+        this.expenseCategory.add(new Category(0, "Food", R.color.categoryOrange, new ArrayList<>(Arrays.asList(
                 new SubCategory(0,"Restaurant", 0, R.drawable.ic_launcher_foreground),
                 new SubCategory(0,"Grocery", 0, R.drawable.ic_launcher_foreground)
         ))));
-        this.category.add(new Category(0,"Housing", R.color.categoryYellow, new ArrayList<>(Arrays.asList(
+        this.expenseCategory.add(new Category(0,"Housing", R.color.categoryYellow, new ArrayList<>(Arrays.asList(
                 new SubCategory(0,"Rent", 0, R.drawable.ic_launcher_foreground),
                 new SubCategory(0,"Electricity", 0, R.drawable.ic_launcher_foreground)
         ))));
-        this.category.add(new Category(0,"Travel", R.color.categoryBlue, new ArrayList<>(Arrays.asList(
+        this.expenseCategory.add(new Category(0,"Travel", R.color.categoryBlue, new ArrayList<>(Arrays.asList(
                 new SubCategory(0,"Public", 0, R.drawable.ic_launcher_foreground),
                 new SubCategory(0,"Long Distance", 0, R.drawable.ic_launcher_foreground)
         ))));
-        this.category.add(new Category(0,"Entertainment", R.color.categoryGreen, new ArrayList<>(Arrays.asList(
+        this.expenseCategory.add(new Category(0,"Entertainment", R.color.categoryGreen, new ArrayList<>(Arrays.asList(
                 new SubCategory(0,"Entry Fee", 0, R.drawable.ic_launcher_foreground),
                 new SubCategory(0,"Trip", 0, R.drawable.ic_launcher_foreground)
         ))));
@@ -179,7 +181,7 @@ public class ExpenseSettings {
         while(reader.hasNext()) {
             Category category1 = new Category();
             category1.readFromJson(reader);
-            category.add(category1);
+            expenseCategory.add(category1);
         }
         reader.endArray();
     }
@@ -187,7 +189,7 @@ public class ExpenseSettings {
     private void writeCategory(JsonWriter writer) throws IOException {
         writer.name("Category");
         writer.beginArray();
-        for(Category l : category) {
+        for(Category l : expenseCategory) {
             l.writeToJson(writer);
         }
         writer.endArray();
@@ -201,16 +203,16 @@ public class ExpenseSettings {
     }
 
     public void addCategory(Category cat) {
-        category.add(cat);
+        expenseCategory.add(cat);
         if(safeWriteJson()) {
             paymentMethod.remove(cat);
         }
     }
 
     public void addSubCategory(int categoryId, SubCategory subCat) {
-        category.get(categoryId).getSubCategories().add(subCat);
+        expenseCategory.get(categoryId).getSubCategories().add(subCat);
         if(safeWriteJson()) {
-            category.get(categoryId).getSubCategories().remove(subCat);
+            expenseCategory.get(categoryId).getSubCategories().remove(subCat);
         }
     }
 
@@ -222,16 +224,16 @@ public class ExpenseSettings {
     }
 
     public void deleteCategory(int position) {
-        Category old = category.remove(position);
+        Category old = expenseCategory.remove(position);
         if(safeWriteJson()) {
-            category.add(position, old);
+            expenseCategory.add(position, old);
         }
     }
 
     public void deleteSubCategory(int categoryId, int position) {
-        SubCategory old = category.get(categoryId).getSubCategories().remove(position);
+        SubCategory old = expenseCategory.get(categoryId).getSubCategories().remove(position);
         if(safeWriteJson()) {
-            category.get(categoryId).getSubCategories().add(position, old);
+            expenseCategory.get(categoryId).getSubCategories().add(position, old);
         }
     }
 
@@ -251,33 +253,33 @@ public class ExpenseSettings {
     }
 
     public void updateCategoryName(int position, String name) {
-        String old = category.get(position).getName();
-        category.get(position).setName(name);
+        String old = expenseCategory.get(position).getName();
+        expenseCategory.get(position).setName(name);
         if(safeWriteJson()) {
-            category.get(position).setName(old);
+            expenseCategory.get(position).setName(old);
         }
     }
     public void updateCategoryColorId(int position, int logo) {
-        int old = category.get(position).getColorId();
-        category.get(position).setColorId(logo);
+        int old = expenseCategory.get(position).getColorId();
+        expenseCategory.get(position).setColorId(logo);
         if(safeWriteJson()) {
-            category.get(position).setColorId(old);
+            expenseCategory.get(position).setColorId(old);
         }
     }
 
     public void updateSubCategoryName(int categoryId, int position, String name) {
-        String old = category.get(categoryId).getSubCategories().get(position).getName();
-        category.get(categoryId).getSubCategories().get(position).setName(name);
+        String old = expenseCategory.get(categoryId).getSubCategories().get(position).getName();
+        expenseCategory.get(categoryId).getSubCategories().get(position).setName(name);
         if(safeWriteJson()) {
-            category.get(categoryId).getSubCategories().get(position).setName(old);
+            expenseCategory.get(categoryId).getSubCategories().get(position).setName(old);
         }
     }
 
     public void updateSubCategoryDrawId(int categoryId, int position, int logo) {
-        int old = category.get(categoryId).getSubCategories().get(position).getDrawableId();
-        category.get(categoryId).getSubCategories().get(position).setDrawableId(logo);
+        int old = expenseCategory.get(categoryId).getSubCategories().get(position).getDrawableId();
+        expenseCategory.get(categoryId).getSubCategories().get(position).setDrawableId(logo);
         if(safeWriteJson()) {
-            category.get(categoryId).getSubCategories().get(position).setDrawableId(old);
+            expenseCategory.get(categoryId).getSubCategories().get(position).setDrawableId(old);
         }
     }
 }

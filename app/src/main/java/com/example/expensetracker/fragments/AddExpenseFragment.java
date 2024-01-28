@@ -92,11 +92,11 @@ public class AddExpenseFragment extends Fragment {
         ExpenseSettings settings = ((MainActivity)requireActivity()).getSettings();
         Calendar currentTime = Calendar.getInstance();
 
-        int bgId = settings.getCategory().get(0).getColorId();
+        int bgId = settings.getExpenseCategory().get(0).getColorId();
         ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), bgId);
-        ComboBoxAdapter adt_Category = new ComboBoxAdapter(context, settings.getCategory(), bgId);
+        ComboBoxAdapter adt_Category = new ComboBoxAdapter(context, settings.getExpenseCategory(), bgId);
         ComboBoxAdapter adt_Type = new ComboBoxAdapter(context, settings.getTypes(), R.color.grey);
-        ComboBoxAdapter adt_SubCategory = new ComboBoxAdapter(context, settings.getSubCategory(0), bgId);
+        ComboBoxAdapter adt_SubCategory = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0), bgId);
         ComboBoxAdapter adt_User = new ComboBoxAdapter(context, settings.getUsers(), R.color.grey);
         ComboBoxAdapter adt_Income = new ComboBoxAdapter(context, settings.getIncomeSources(), R.color.grey);
 
@@ -176,8 +176,8 @@ public class AddExpenseFragment extends Fragment {
                     ((ComboBoxAdapter) spinnerPayment.getAdapter()).setBackgroundColorId(R.color.grey);
                     ((ComboBoxAdapter) spinnerPayment.getAdapter()).notifyDataSetChanged();
                 } else {
-                    int bgId = settings.getCategory().get(position).getColorId();
-                    spinnerSubCategory.setAdapter(new ComboBoxAdapter(requireContext(), settings.getSubCategory(position), bgId));
+                    int bgId = settings.getExpenseCategory().get(position).getColorId();
+                    spinnerSubCategory.setAdapter(new ComboBoxAdapter(requireContext(), settings.getExpenseSubCategory(position), bgId));
                     ((ComboBoxAdapter) spinnerPayment.getAdapter()).setBackgroundColorId(bgId);
                     ((ComboBoxAdapter) spinnerPayment.getAdapter()).notifyDataSetChanged();
                 }
