@@ -94,10 +94,10 @@ public class AddExpenseFragment extends Fragment {
         int bgId = settings.getExpenseCategory().get(0).getColorId();
         ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), bgId);
         ComboBoxAdapter adt_Category = new ComboBoxAdapter(context, settings.getExpenseCategory(), bgId);
-        ComboBoxAdapter adt_Type = new ComboBoxAdapter(context, settings.getTypes(), R.color.grey);
+        ComboBoxAdapter adt_Type = new ComboBoxAdapter(context, settings.getExpenseCategory(), R.color.grey);
         ComboBoxAdapter adt_SubCategory = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0), bgId);
         ComboBoxAdapter adt_User = new ComboBoxAdapter(context, settings.getUsers(), R.color.grey);
-        ComboBoxAdapter adt_Income = new ComboBoxAdapter(context, settings.getIncomeSources(), R.color.grey);
+        ComboBoxAdapter adt_Income = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0), R.color.grey);
 
         //Setup Name
         ArrayAdapter<String> adt = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, new String[]{"Deep", "Fee"});

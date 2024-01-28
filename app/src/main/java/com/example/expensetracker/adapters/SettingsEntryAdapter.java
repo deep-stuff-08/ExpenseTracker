@@ -91,7 +91,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
     private void updateNewExpenseSetting()
     {
         ExpenseSettings settings = ((MainActivity)currentContext).getSettings();
-        ExpenseSettings newExpenseSettings = ExpenseSettings.createWithParametersFromDatabase(currentContext);
+        ExpenseSettings newExpenseSettings = ExpenseSettings.createWithParametersFromDatabase();
         settings.updateExpenseSettings(newExpenseSettings);
     }
 

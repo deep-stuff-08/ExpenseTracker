@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(findViewById(R.id.toolbar));
 
         DBManager.createDBManagerInstance(this);
-        expenseSettings = ExpenseSettings.createWithParametersFromDatabase(this);
+        expenseSettings = ExpenseSettings.createWithParametersFromDatabase();
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
