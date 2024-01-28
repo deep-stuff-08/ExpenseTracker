@@ -91,13 +91,13 @@ public class AddExpenseFragment extends Fragment {
         ExpenseSettings settings = ((MainActivity)requireActivity()).getSettings();
         Calendar currentTime = Calendar.getInstance();
 
-        int bgId = settings.getExpenseCategory().get(0).getColorId();
-        ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), bgId);
-        ComboBoxAdapter adt_Category = new ComboBoxAdapter(context, settings.getExpenseCategory(), bgId);
-        ComboBoxAdapter adt_Type = new ComboBoxAdapter(context, settings.getExpenseCategory(), R.color.grey);
-        ComboBoxAdapter adt_SubCategory = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0), bgId);
-        ComboBoxAdapter adt_User = new ComboBoxAdapter(context, settings.getUsers(), R.color.grey);
-        ComboBoxAdapter adt_Income = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0), R.color.grey);
+        int expBgId = settings.getExpenseCategory().get(0).getColorId();
+        int incBgId = settings.getIncomeCategory().get(0).getColorId();
+        ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), expBgId);
+        ComboBoxAdapter adt_ExpenseCategory = new ComboBoxAdapter(context, settings.getExpenseCategory(), expBgId);
+        ComboBoxAdapter adt_ExpenseSubCategory = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0), expBgId);
+        ComboBoxAdapter adt_IncomeCategory = new ComboBoxAdapter(context, settings.getExpenseCategory(), incBgId);
+        ComboBoxAdapter adt_IncomeSubCategory = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0), incBgId);
 
         //Setup Name
         ArrayAdapter<String> adt = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, new String[]{"Deep", "Fee"});
@@ -152,27 +152,24 @@ public class AddExpenseFragment extends Fragment {
                 checkBoxIsShared.setChecked(false);
                 layoutShared.setVisibility(View.GONE);
                 checkBoxIsShared.setEnabled(false);
-                spinnerCategory.setAdapter(adt_Type);
-                spinnerSubCategory.setAdapter(adt_Income);
+                spinnerCategory.setAdapter(adt_IncomeCategory);
+                spinnerSubCategory.setAdapter(adt_IncomeSubCategory);
             } else if(checkedId == R.id.expense_income_debit) {
                 checkBoxIsShared.setEnabled(true);
-                spinnerCategory.setAdapter(adt_Category);
-                spinnerSubCategory.setAdapter(adt_SubCategory);
+                spinnerCategory.setAdapter(adt_ExpenseCategory);
+                spinnerSubCategory.setAdapter(adt_ExpenseSubCategory);
             }
         });
 
         //Setup Category / Income Type
-        spinnerCategory.setAdapter(adt_Category);
+        spinnerCategory.setAdapter(adt_ExpenseCategory);
         spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view2, int position, long id) {
                 if(((RadioButton)view.findViewById(R.id.expense_income_credit)).isChecked()) {
-                    if(position == 0) {
-                        spinnerSubCategory.setAdapter(adt_Income);
-                    } else if(position == 1) {
-                        spinnerSubCategory.setAdapter(adt_User);
-                    }
-                    ((ComboBoxAdapter) spinnerPayment.getAdapter()).setBackgroundColorId(R.color.grey);
+                    int bgId = settings.getExpenseCategory().get(position).getColorId();
+                    spinnerSubCategory.setAdapter(new ComboBoxAdapter(requireContext(), settings.getIncomeSubCategory(position), bgId));
+                    ((ComboBoxAdapter) spinnerPayment.getAdapter()).setBackgroundColorId(bgId);
                     ((ComboBoxAdapter) spinnerPayment.getAdapter()).notifyDataSetChanged();
                 } else {
                     int bgId = settings.getExpenseCategory().get(position).getColorId();
@@ -186,7 +183,7 @@ public class AddExpenseFragment extends Fragment {
         });
 
         //Setup SubCategory
-        spinnerSubCategory.setAdapter(adt_SubCategory);
+        spinnerSubCategory.setAdapter(adt_ExpenseSubCategory);
 
         //Setup Payment Type
         spinnerPayment.setAdapter(adt_Payment);

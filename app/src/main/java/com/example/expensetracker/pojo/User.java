@@ -20,4 +20,12 @@ public class User extends SettingsParent {
     public String getName() {
         return name;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setLogo(int logo) {
+        this.logo = logo;
+    }
 }
