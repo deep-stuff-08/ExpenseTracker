@@ -36,7 +36,6 @@ public class Entry {
     }
     private String name;
     private int value;
-    private boolean isDebit;
     private int categoryId;
     private int subCategoryId;
     private int paymentId;
@@ -44,10 +43,9 @@ public class Entry {
     private Date time;
     private ArrayList<SharedUser> sharedUsersList;
 
-    public Entry(String name, int value, boolean isDebit, int categoryId, int subCategoryId, int paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
+    public Entry(String name, int value, int categoryId, int subCategoryId, int paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
         this.name = name;
         this.value = value;
-        this.isDebit = isDebit;
         this.categoryId = categoryId;
         this.subCategoryId = subCategoryId;
         this.paymentId = paymentId;
@@ -70,14 +68,6 @@ public class Entry {
 
     public void setValue(int value) {
         this.value = value;
-    }
-
-    public boolean isDebit() {
-        return isDebit;
-    }
-
-    public void setDebit(boolean debit) {
-        isDebit = debit;
     }
 
     public int getCategoryId() {

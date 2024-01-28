@@ -113,25 +113,25 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         Category ec = settings.getExpenseCategory().get(position);
                         ec.setName(newName);
                         ec.setColorId(newLogo);
-                        DBManager.getDBManagerInstance().updateCategory(ec);
+                        DBManager.getDBManagerInstance().updateExpenseCategory(ec);
                         break;
                     case 2: //Expense Sub-Category
                         SubCategory es = settings.getExpenseCategory().get(holder.hiddenCategory.getSelectedItemPosition()).getSubCategories().get(position);
                         es.setName(newName);
                         es.setDrawableId(newLogo);
-                        DBManager.getDBManagerInstance().updateSubCategory(es);
+                        DBManager.getDBManagerInstance().updateExpenseSubCategory(es);
                         break;
                     case 3: //Income Category
                         Category ic = settings.getIncomeCategory().get(position);
                         ic.setName(newName);
                         ic.setColorId(newLogo);
-                        DBManager.getDBManagerInstance().updateCategory(ic);
+                        DBManager.getDBManagerInstance().updateIncomeCategory(ic);
                         break;
                     case 4: //Income Sub-Category
                         SubCategory is = settings.getIncomeCategory().get(holder.hiddenCategory.getSelectedItemPosition()).getSubCategories().get(position);
                         is.setName(newName);
                         is.setDrawableId(newLogo);
-                        DBManager.getDBManagerInstance().updateSubCategory(is);
+                        DBManager.getDBManagerInstance().updateIncomeSubCategory(is);
                         break;
                     case 5: //Users
                         User u = settings.getUsers().get(position);
@@ -155,16 +155,16 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         DBManager.getDBManagerInstance().deletePaymentType(settings.getPaymentMethod().get(position));
                         break;
                     case 1: //Expense Category
-                        DBManager.getDBManagerInstance().deleteCategory(settings.getExpenseCategory().get(position));
+                        DBManager.getDBManagerInstance().deleteExpenseCategory(settings.getExpenseCategory().get(position));
                         break;
                     case 2: //Expense Sub-Category
-                        DBManager.getDBManagerInstance().deleteSubCategory(settings.getExpenseCategory().get(holder.hiddenCategory.getSelectedItemPosition()).getSubCategories().get(position));
+                        DBManager.getDBManagerInstance().deleteExpenseSubCategory(settings.getExpenseCategory().get(holder.hiddenCategory.getSelectedItemPosition()).getSubCategories().get(position));
                         break;
                     case 3: //Income Category
-                        DBManager.getDBManagerInstance().deleteCategory(settings.getIncomeCategory().get(position));
+                        DBManager.getDBManagerInstance().deleteIncomeCategory(settings.getIncomeCategory().get(position));
                         break;
                     case 4: //Income Sub-Category
-                        DBManager.getDBManagerInstance().deleteSubCategory(settings.getIncomeCategory().get(holder.hiddenCategory.getSelectedItemPosition()).getSubCategories().get(position));
+                        DBManager.getDBManagerInstance().deleteIncomeSubCategory(settings.getIncomeCategory().get(holder.hiddenCategory.getSelectedItemPosition()).getSubCategories().get(position));
                         break;
                     case 5: //Users
                         //TODO

@@ -11,6 +11,7 @@ import com.example.expensetracker.R;
 import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.PaymentType;
 import com.example.expensetracker.pojo.SubCategory;
+import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
 
@@ -133,116 +134,20 @@ public class DBManager{
 
         for(Category l : expenseSettings.getExpenseCategory()) {
             // update subcategory
-            insertCategory(l);
+            insertExpenseCategory(l);
         }
     }
 
-    public void insertCategory(Category cat)
+    public void insertIncomeSettings(ExpenseSettings expenseSettings)
     {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("name", cat.getName());
-        contentValues.put("color_id", cat.getColorId());
-        boolean ret = this.insert(contentValues, DatabaseDetails.CATEGORY_EXPENSE);
-        if(!ret) {
-            throw new RuntimeException("Failed to insert data into database");
+        for(PaymentType l : expenseSettings.getPaymentMethod()) {
+            insertPaymentType(l);
         }
 
-        Cursor cursor = getData("id", DatabaseDetails.CATEGORY_EXPENSE, "name = '" + cat.getName() + "' ");
-        assert cursor != null;
-        int catID = Integer.parseInt(cursor.getString(0));
-        for(SubCategory sCat: cat.getSubCategories())
-        {
-            sCat.setCategoryId(catID);
-            insertSubCategory(sCat);
+        for(Category l : expenseSettings.getExpenseCategory()) {
+            // update subcategory
+            insertIncomeCategory(l);
         }
-    }
-
-    public void insertSubCategory(SubCategory scat)
-    {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("name", scat.getName());
-        contentValues.put("category_id", scat.getCategoryId());
-        boolean ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_EXPENSE);
-        if(!ret)
-        {
-            throw new RuntimeException("Failed to insert data into database");
-        }
-    }
-
-    public void insertPaymentType(PaymentType p)
-    {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("name", p.getName());
-        contentValues.put("drawable_id", p.getDrawableId());
-        this.insert(contentValues, DatabaseDetails.PAYMENT_TYPE);
-    }
-
-    public void updatePaymentType(PaymentType p)
-    {
-        String condition = "id = " + p.getId();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("name", p.getName());
-        contentValues.put("drawable_id", p.getDrawableId());
-        this.update(DatabaseDetails.PAYMENT_TYPE, contentValues, condition);
-    }
-
-    public void updateCategory(Category c)
-    {
-        String condition = "id = '" + c.getId() + "'";
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("name", c.getName());
-        contentValues.put("color_id", c.getColorId());
-        this.update(DatabaseDetails.CATEGORY_EXPENSE, contentValues, condition);
-    }
-
-    public void updateSubCategory(SubCategory s)
-    {
-        String condition = "id = " + s.getId();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("name", s.getName());
-        contentValues.put("category_id", s.getCategoryId());
-        this.update(DatabaseDetails.SUBCATEGORY_EXPENSE, contentValues ,condition);
-    }
-
-    public void deletePaymentType(PaymentType p)
-    {
-        String condition = "id = '" + p.getId() +"'";
-        this.delete(DatabaseDetails.PAYMENT_TYPE, condition);
-    }
-
-    public void deleteCategory(Category c)
-    {
-        int categoryId = c.getId();
-        for(SubCategory sCat: c.getSubCategories())
-        {
-            sCat.setCategoryId(categoryId);
-            deleteSubCategory(sCat);
-        }
-        String condition = "id = '" + c.getId() +"'";
-        this.delete(DatabaseDetails.CATEGORY_EXPENSE, condition);
-    }
-
-    public void deleteSubCategory(SubCategory s)
-    {
-        String condition = "id = '" + s.getId() +"'";
-        this.delete(DatabaseDetails.SUBCATEGORY_EXPENSE, condition);
-    }
-
-    public boolean insert(ContentValues contentValues, String tableName)
-    {
-        sqLiteDatabase.insert(tableName, null, contentValues);
-        return true;
-    }
-
-    public void delete(String tableName, String condition) {
-        sqLiteDatabase.delete(tableName, condition, null);
-        Log.d("DATABASE_LOG", "delete: exiting" );
-    }
-
-    public int update(String tableName, ContentValues cv, String condition) {
-        int ret =  sqLiteDatabase.update(tableName, cv, condition, null);
-        Log.d("DATABASE_LOG", "update: exiting");
-        return ret;
     }
 
     public ArrayList<Category> getExpenseCategoryData() {
@@ -254,7 +159,7 @@ public class DBManager{
                 throw new RuntimeException("cursor is null");
             }
 
-            ArrayList<SubCategory> subCategories = this.getSubCategoryData();
+            ArrayList<SubCategory> subCategories = this.getExpenseSubCategoryData();
             cursor.moveToFirst();
             do {
                 ArrayList<SubCategory> subCategoriesByCategory = new ArrayList<>();
@@ -278,13 +183,122 @@ public class DBManager{
         return data;
     }
 
+    public void insertExpenseCategory(Category cat)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", cat.getName());
+        contentValues.put("color_id", cat.getColorId());
+        boolean ret = this.insert(contentValues, DatabaseDetails.CATEGORY_EXPENSE);
+        if(!ret) {
+            throw new RuntimeException("Failed to insert data into database");
+        }
+
+        Cursor cursor = getData("id", DatabaseDetails.CATEGORY_EXPENSE, "name = '" + cat.getName() + "' ");
+        assert cursor != null;
+        int catID = Integer.parseInt(cursor.getString(0));
+        for(SubCategory sCat: cat.getExpenseSubCategories())
+        {
+            sCat.setCategoryId(catID);
+            insertExpenseSubCategory(sCat);
+        }
+    }
+
+    public void updateExpenseCategory(Category c)
+    {
+        String condition = "id = '" + c.getId() + "'";
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", c.getName());
+        contentValues.put("color_id", c.getColorId());
+        this.update(DatabaseDetails.CATEGORY_EXPENSE, contentValues, condition);
+    }
+
+    public void deleteExpenseCategory(Category c)
+    {
+        int categoryId = c.getId();
+        for(SubCategory sCat: c.getExpenseSubCategories())
+        {
+            sCat.setCategoryId(categoryId);
+            deleteExpenseSubCategory(sCat);
+        }
+        String condition = "id = '" + c.getId() +"'";
+        this.delete(DatabaseDetails.CATEGORY_EXPENSE, condition);
+    }
+
     public ArrayList<Category> getIncomeCategoryData() {
         ArrayList<Category> data = new ArrayList<>();
-        data.add(new Category());
+        String query = "select id, name, color_id from "+ DatabaseDetails.CATEGORY_INCOME;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery( query,null )) {
+            if(null == cursor)
+            {
+                throw new RuntimeException("cursor is null");
+            }
+
+            ArrayList<SubCategory> subCategories = this.getIncomeSubCategoryData();
+            cursor.moveToFirst();
+            do {
+                ArrayList<SubCategory> subCategoriesByCategory = new ArrayList<>();
+                int id = cursor.getInt(0);
+                String name = cursor.getString(1);
+
+                for (SubCategory subCat: subCategories) {
+                    if(subCat.getCategoryId() == id)
+                    {
+                        subCategoriesByCategory.add(new SubCategory(subCat.getId(), subCat.getName(), subCat.getCategoryId(), subCat.getDrawableId()));
+                    }
+                }
+                data.add(new Category(id, name, R.color.categoryYellow,subCategoriesByCategory));
+            } while(cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
         return data;
     }
 
-    public ArrayList<SubCategory> getSubCategoryData() {
+    public void insertIncomeCategory(Category cat)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", cat.getName());
+        contentValues.put("color_id", cat.getColorId());
+        boolean ret = this.insert(contentValues, DatabaseDetails.CATEGORY_INCOME);
+        if(!ret) {
+            throw new RuntimeException("Failed to insert data into database");
+        }
+
+        Cursor cursor = getData("id", DatabaseDetails.CATEGORY_INCOME, "name = '" + cat.getName() + "' ");
+        assert cursor != null;
+        int catID = Integer.parseInt(cursor.getString(0));
+        for(SubCategory sCat: cat.getExpenseSubCategories())
+        {
+            sCat.setCategoryId(catID);
+            insertIncomeSubCategory(sCat);
+        }
+    }
+
+    public void updateIncomeCategory(Category c)
+    {
+        String condition = "id = '" + c.getId() + "'";
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", c.getName());
+        contentValues.put("color_id", c.getColorId());
+        this.update(DatabaseDetails.CATEGORY_INCOME, contentValues, condition);
+    }
+
+    public void deleteIncomeCategory(Category c)
+    {
+        int categoryId = c.getId();
+        for(SubCategory sCat: c.getExpenseSubCategories())
+        {
+            sCat.setCategoryId(categoryId);
+            deleteExpenseSubCategory(sCat);
+        }
+        String condition = "id = '" + c.getId() +"'";
+        this.delete(DatabaseDetails.CATEGORY_INCOME, condition);
+    }
+
+    public ArrayList<SubCategory> getExpenseSubCategoryData() {
         ArrayList<SubCategory>  data = new ArrayList<>();
         String query = "select id, name, category_id from "+ DatabaseDetails.SUBCATEGORY_EXPENSE;
         try(Cursor cursor =  sqLiteDatabase.rawQuery( query,
@@ -308,6 +322,84 @@ public class DBManager{
         return data;
     }
 
+    public void insertExpenseSubCategory(SubCategory scat)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", scat.getName());
+        contentValues.put("category_id", scat.getCategoryId());
+        boolean ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_EXPENSE);
+        if(!ret)
+        {
+            throw new RuntimeException("Failed to insert data into database");
+        }
+    }
+
+    public void updateExpenseSubCategory(SubCategory s)
+    {
+        String condition = "id = " + s.getId();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", s.getName());
+        contentValues.put("category_id", s.getCategoryId());
+        this.update(DatabaseDetails.SUBCATEGORY_EXPENSE, contentValues ,condition);
+    }
+
+    public void deleteExpenseSubCategory(SubCategory s)
+    {
+        String condition = "id = '" + s.getId() +"'";
+        this.delete(DatabaseDetails.SUBCATEGORY_EXPENSE, condition);
+    }
+
+    public ArrayList<SubCategory> getIncomeSubCategoryData() {
+        ArrayList<SubCategory>  data = new ArrayList<>();
+        String query = "select id, name, category_id from "+ DatabaseDetails.SUBCATEGORY_INCOME;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery( query,
+                null )) {
+            if (null != cursor)
+                cursor.moveToFirst();
+
+            do {
+                assert cursor != null;
+                String id = cursor.getString(0);
+                String name = cursor.getString(1);
+                String categoryId = cursor.getString(2);
+                SubCategory obj = new SubCategory(Integer.parseInt(id), name, Integer.parseInt(categoryId), 0);
+                data.add(obj);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    public void insertIncomeSubCategory(SubCategory scat)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", scat.getName());
+        contentValues.put("category_id", scat.getCategoryId());
+        boolean ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_INCOME);
+        if(!ret)
+        {
+            throw new RuntimeException("Failed to insert data into database");
+        }
+    }
+
+    public void updateIncomeSubCategory(SubCategory s)
+    {
+        String condition = "id = " + s.getId();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", s.getName());
+        contentValues.put("category_id", s.getCategoryId());
+        this.update(DatabaseDetails.SUBCATEGORY_INCOME, contentValues ,condition);
+    }
+
+    public void deleteIncomeSubCategory(SubCategory s)
+    {
+        String condition = "id = '" + s.getId() +"'";
+        this.delete(DatabaseDetails.SUBCATEGORY_INCOME, condition);
+    }
+
     public ArrayList<PaymentType> getPaymentData() {
         ArrayList<PaymentType> data = new ArrayList<>();
         String query = "select id, name from "+ DatabaseDetails.PAYMENT_TYPE;
@@ -329,6 +421,68 @@ public class DBManager{
             e.printStackTrace();
         }
         return data;
+    }
+
+    public void insertPaymentType(PaymentType p)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", p.getName());
+        contentValues.put("drawable_id", p.getDrawableId());
+        this.insert(contentValues, DatabaseDetails.PAYMENT_TYPE);
+    }
+
+    public void updatePaymentType(PaymentType p)
+    {
+        String condition = "id = " + p.getId();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", p.getName());
+        contentValues.put("drawable_id", p.getDrawableId());
+        this.update(DatabaseDetails.PAYMENT_TYPE, contentValues, condition);
+    }
+
+    public void deletePaymentType(PaymentType p)
+    {
+        String condition = "id = '" + p.getId() +"'";
+        this.delete(DatabaseDetails.PAYMENT_TYPE, condition);
+    }
+
+    public ArrayList<User> getUserData() {
+        ArrayList<User> data = new ArrayList<>();
+        data.add(new User("Hrituja"));
+
+        return data;
+    }
+
+    public void insertUser(User u)
+    {
+
+    }
+
+    public void updateUser(User u)
+    {
+
+    }
+
+    public void deleteUser(User u)
+    {
+
+    }
+
+    public boolean insert(ContentValues contentValues, String tableName)
+    {
+        sqLiteDatabase.insert(tableName, null, contentValues);
+        return true;
+    }
+
+    public void delete(String tableName, String condition) {
+        sqLiteDatabase.delete(tableName, condition, null);
+        Log.d("DATABASE_LOG", "delete: exiting" );
+    }
+
+    public int update(String tableName, ContentValues cv, String condition) {
+        int ret =  sqLiteDatabase.update(tableName, cv, condition, null);
+        Log.d("DATABASE_LOG", "update: exiting");
+        return ret;
     }
 
     public Cursor getData(String columnName, String tableName, String condition) {
