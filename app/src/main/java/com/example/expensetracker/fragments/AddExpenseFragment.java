@@ -292,7 +292,7 @@ public class AddExpenseFragment extends Fragment {
             if(totalValue[0] == actualValue[0]) {
                 textSharingValue.setTextColor(getResources().getColor(R.color.categoryGreen, context.getTheme()));
             } else {
-                textValue.setTextColor(getResources().getColor(R.color.categoryOrange, context.getTheme()));
+                textSharingValue.setTextColor(getResources().getColor(R.color.categoryOrange, context.getTheme()));
             }
         }));
         listSharedUsers.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -325,7 +325,6 @@ public class AddExpenseFragment extends Fragment {
             if(error) {
                 return;
             }
-            Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
             if(unconfirmedEntryId >= 0) {
                 ((MainActivity)requireActivity()).getEntries().remove(unconfirmedEntryId);
             }
@@ -336,7 +335,7 @@ public class AddExpenseFragment extends Fragment {
                 for(Entry.SharedUser sharedUser : sharedUserList) {
                     if(userMap.containsKey(sharedUser.getName())) {
                         userMap.replace(sharedUser.getName(), userMap.getOrDefault(sharedUser.getName(), 0) + sharedUser.getValue());
-                    } else {
+                    } else if(!sharedUser.getName().isEmpty()){
                         userMap.put(sharedUser.getName(), sharedUser.getValue());
                     }
                 }
@@ -344,7 +343,7 @@ public class AddExpenseFragment extends Fragment {
                 Set<String> s = new HashSet<>();
                 settings.getUsers().forEach(user -> s.add(user.getName()));
                 for(String name : userMap.keySet()) {
-                    if(!s.contains(name)) {
+                    if(!s.contains(name) && !"Me".equals(name)) {
                         newUsers.add(name);
                     }
                     sharedUserList.add(new Entry.SharedUser(name, userMap.getOrDefault(name, 0)));
@@ -353,18 +352,33 @@ public class AddExpenseFragment extends Fragment {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            if(!newUsers.isEmpty()) {
-                new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc")
-                        .setPositiveButton("Yes", (dialog, which) -> {})
-                        .setNegativeButton("No", (dialog, which) -> {}).show();
-            }
-            if (checkBoxIsRepeat.isChecked()) {
-                Bundle bundle = new Bundle();
-                bundle.putBoolean("isLogMultiOn", true);
-                Navigation.findNavController(view).navigate(R.id.addExpenseFragment, bundle, new NavOptions.Builder().setPopUpTo(R.id.addExpenseFragment, true).build());
+            if(newUsers.size() > 0) {
+                StringBuilder userList = new StringBuilder();
+                for(int i = 0; i < newUsers.size(); i++) {
+                    userList.append(i).append(") ").append(newUsers.get(i)).append("\n");
+                }
+                new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc.\n" + userList)
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            onSuccessfulSubmit(view, checkBoxIsRepeat);
+                        })
+                        .setCancelable(true)
+                        .setNegativeButton("No", (dialog, which) -> {
+                            onSuccessfulSubmit(view, checkBoxIsRepeat);
+                        }).show();
             } else {
-                requireActivity().getOnBackPressedDispatcher().onBackPressed();
+                onSuccessfulSubmit(view, checkBoxIsRepeat);
             }
         });
+    }
+
+    private void onSuccessfulSubmit(View view, CheckBox isRepeat) {
+        Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
+        if (isRepeat.isChecked()) {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("isLogMultiOn", true);
+            Navigation.findNavController(view).navigate(R.id.entryFragment, bundle, new NavOptions.Builder().setPopUpTo(R.id.entryFragment, true).build());
+        } else {
+            requireActivity().getOnBackPressedDispatcher().onBackPressed();
+        }
     }
 }

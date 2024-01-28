@@ -44,7 +44,7 @@ public class DBManager{
         {
             dbManager.sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null);
             dbManager.onCreateSetup();
-            dbManager.insertExpenseSettings(ExpenseSettings.createWithDefaultParameters(context));
+            dbManager.insertExpenseSettings(ExpenseSettings.createWithDefaultParameters());
         } else {
             dbManager.sqLiteDatabase = SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
         }
@@ -125,8 +125,6 @@ public class DBManager{
         Log.d("DATABASE_LOG", "onCreate: exit");
     }
 
-    // false - no record inserted
-    // true - record inserted successfully
     public void insertExpenseSettings(ExpenseSettings expenseSettings)
     {
         for(PaymentType l : expenseSettings.getPaymentMethod()) {
@@ -247,7 +245,7 @@ public class DBManager{
         return ret;
     }
 
-    public ArrayList<Category> getDebitCategoryData() {
+    public ArrayList<Category> getExpenseCategoryData() {
         ArrayList<Category> data = new ArrayList<>();
         String query = "select id, name, color_id from "+ DatabaseDetails.CATEGORY_EXPENSE;
         try(Cursor cursor =  sqLiteDatabase.rawQuery( query,null )) {
@@ -280,8 +278,9 @@ public class DBManager{
         return data;
     }
 
-    public ArrayList<Category> getCreditCategoryData() {
+    public ArrayList<Category> getIncomeCategoryData() {
         ArrayList<Category> data = new ArrayList<>();
+        data.add(new Category());
         return data;
     }
 

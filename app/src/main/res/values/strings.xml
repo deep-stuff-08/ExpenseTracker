@@ -21,4 +21,6 @@
     <string name="unconfirmed_entries">Unconfimed Entries</string>
     <string name="value_div">%1$d / %2$d</string>
     <string name="expense_share_user_me">Me</string>
+    <string name="settle_swap">Swap</string>
+    <string name="incomeorexpensetab">IncomeOrExpense</string>
 </resources>

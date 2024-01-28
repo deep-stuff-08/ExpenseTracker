@@ -17,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="true"
+        android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
         tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
