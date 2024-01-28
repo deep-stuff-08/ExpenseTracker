@@ -44,7 +44,7 @@ public class DBManager{
         {
             dbManager.sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null);
             dbManager.onCreateSetup();
-            dbManager.insertExpenseSettings(ExpenseSettings.createWithDefaultParameters(context));
+            dbManager.insertExpenseSettings(ExpenseSettings.createWithDefaultParameters());
         } else {
             dbManager.sqLiteDatabase = SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
         }
@@ -280,6 +280,7 @@ public class DBManager{
 
     public ArrayList<Category> getIncomeCategoryData() {
         ArrayList<Category> data = new ArrayList<>();
+        data.add(new Category());
         return data;
     }
 

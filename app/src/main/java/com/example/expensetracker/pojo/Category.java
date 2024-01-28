@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Category extends SettingsParent implements JsonIO {
+public class Category extends SettingsParent {
     private String name;
 
     private  int id;
@@ -48,41 +48,6 @@ public class Category extends SettingsParent implements JsonIO {
 
     public ArrayList<SubCategory> getSubCategories() {
         return subCategories;
-    }
-
-    @Override
-    public void readFromJson(JsonReader reader) throws IOException {
-        reader.beginObject();
-        this.subCategories.clear();
-        if (Objects.equals(reader.nextName(), "name")) {
-            this.name = reader.nextString();
-        }
-        if (Objects.equals(reader.nextName(), "colorId")) {
-            this.colorId = reader.nextInt();
-        }
-        if(Objects.equals(reader.nextName(), "subcategories")) {
-            reader.beginArray();
-            while(reader.hasNext()) {
-                SubCategory subCategory = new SubCategory();
-                subCategory.readFromJson(reader);
-                this.subCategories.add(subCategory);
-            }
-            reader.endArray();
-        }
-        reader.endObject();
-    }
-    @Override
-    public void writeToJson(JsonWriter writer) throws IOException {
-        writer.beginObject();
-        writer.name("name").value(this.name);
-        writer.name("colorId").value(this.colorId);
-        writer.name("subcategories");
-        writer.beginArray();
-        for(SubCategory subCategory : subCategories) {
-            subCategory.writeToJson(writer);
-        }
-        writer.endArray();
-        writer.endObject();
     }
 
     @Override
