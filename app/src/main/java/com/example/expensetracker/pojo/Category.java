@@ -1,10 +1,6 @@
 package com.example.expensetracker.pojo;
 
-import android.util.JsonReader;
-import android.util.JsonWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class Category extends SettingsParent {
     private String name;
@@ -46,7 +42,7 @@ public class Category extends SettingsParent {
         this.colorId = colorId;
     }
 
-    public ArrayList<SubCategory> getSubCategories() {
+    public ArrayList<SubCategory> getExpenseSubCategories() {
         return subCategories;
     }
 

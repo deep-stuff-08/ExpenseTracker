@@ -348,7 +348,7 @@ public class AddExpenseFragment extends Fragment {
                     }
                     sharedUserList.add(new Entry.SharedUser(name, userMap.getOrDefault(name, 0)));
                 }
-                Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), !expenseIncomeCredit.isChecked(), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), sharedUserList);
+                Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), sharedUserList);
             } catch (ParseException e) {
                 e.printStackTrace();
             }

@@ -1,7 +1,5 @@
 package com.example.expensetracker;
 
-import android.content.Context;
-
 import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.PaymentType;
@@ -41,11 +39,11 @@ public class ExpenseSettings {
     }
 
     public ArrayList<SubCategory> getExpenseSubCategory(int index) {
-        return expenseCategory.get(index).getSubCategories();
+        return expenseCategory.get(index).getExpenseSubCategories();
     }
 
     public ArrayList<SubCategory> getIncomeSubCategory(int index) {
-        return incomeCategory.get(index).getSubCategories();
+        return incomeCategory.get(index).getExpenseSubCategories();
     }
 
 	public ArrayList<User> getUsers() {

@@ -112,14 +112,14 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         Category c = settings.getExpenseCategory().get(position);
                         c.setName(newName);
                         c.setColorId(newLogo);
-                        DBManager.getDBManagerInstance().updateCategory(c);
+                        DBManager.getDBManagerInstance().updateExpenseCategory(c);
                         break;
                     case 3:
                         int categoryID = holder.hiddenCategory.getSelectedItemPosition();
-                        SubCategory s = settings.getExpenseCategory().get(categoryID).getSubCategories().get(position);
+                        SubCategory s = settings.getExpenseCategory().get(categoryID).getExpenseSubCategories().get(position);
                         s.setName(newName);
                         s.setDrawableId(newLogo);
-                        DBManager.getDBManagerInstance().updateSubCategory(s);
+                        DBManager.getDBManagerInstance().updateExpenseSubCategory(s);
                         break;
                 }
 
@@ -137,12 +137,12 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         DBManager.getDBManagerInstance().deletePaymentType(settings.getPaymentMethod().get(position));
                         break;
                     case 1:
-                        DBManager.getDBManagerInstance().deleteCategory(settings.getExpenseCategory().get(position));
+                        DBManager.getDBManagerInstance().deleteExpenseCategory(settings.getExpenseCategory().get(position));
                         break;
                     case 3:
                         int categoryID = holder.hiddenCategory.getSelectedItemPosition();
-                        SubCategory s = settings.getExpenseCategory().get(categoryID).getSubCategories().get(position);
-                        DBManager.getDBManagerInstance().deleteSubCategory(s);
+                        SubCategory s = settings.getExpenseCategory().get(categoryID).getExpenseSubCategories().get(position);
+                        DBManager.getDBManagerInstance().deleteExpenseSubCategory(s);
                         break;
                 }
 
@@ -159,10 +159,10 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         DBManager.getDBManagerInstance().insertPaymentType(new PaymentType(0, name, logo));
                         break;
                     case 1:
-                        DBManager.getDBManagerInstance().insertCategory(new Category(0, name, logo, new ArrayList<>()));
+                        DBManager.getDBManagerInstance().insertExpenseCategory(new Category(0, name, logo, new ArrayList<>()));
                         break;
                     case 3:
-                        DBManager.getDBManagerInstance().insertSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                        DBManager.getDBManagerInstance().insertExpenseSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
                         break;
                 }
 
