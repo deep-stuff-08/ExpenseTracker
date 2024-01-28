@@ -35,9 +35,11 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
     public SettingsEntryAdapter() {
         dataList = new ArrayList<>();
         dataList.add("Edit Payment Method");
-        dataList.add("Edit Category");
-        dataList.add("Edit Sub Category");
-        dataList.add("Edit User");
+        dataList.add("Edit Expense Categories");
+        dataList.add("Edit Income Categories");
+        dataList.add("Edit Expense Sub-Categories");
+        dataList.add("Edit Income Sub-Categories");
+        dataList.add("Edit Users");
     }
 
 
@@ -53,7 +55,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
         final boolean isExpanded = position==mExpandedPosition;
         holder.hidden.setVisibility(isExpanded?View.VISIBLE:View.GONE);
         holder.hiddenButton.setVisibility(isExpanded?View.VISIBLE:View.GONE);
-        holder.hiddenCategory.setVisibility(isExpanded && position == 2?View.VISIBLE:View.GONE);
+        holder.hiddenCategory.setVisibility(isExpanded && (position == 3 || position == 4)?View.VISIBLE:View.GONE);
         holder.itemView.setActivated(isExpanded);
         holder.itemView.setOnClickListener(v -> {
             notifyItemChanged(mExpandedPosition);
@@ -112,7 +114,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         c.setColorId(newLogo);
                         DBManager.getDBManagerInstance().updateCategory(c);
                         break;
-                    case 2:
+                    case 3:
                         int categoryID = holder.hiddenCategory.getSelectedItemPosition();
                         SubCategory s = settings.getCategory().get(categoryID).getSubCategories().get(position);
                         s.setName(newName);
@@ -137,7 +139,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                     case 1:
                         DBManager.getDBManagerInstance().deleteCategory(settings.getCategory().get(position));
                         break;
-                    case 2:
+                    case 3:
                         int categoryID = holder.hiddenCategory.getSelectedItemPosition();
                         SubCategory s = settings.getCategory().get(categoryID).getSubCategories().get(position);
                         DBManager.getDBManagerInstance().deleteSubCategory(s);
@@ -159,7 +161,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                     case 1:
                         DBManager.getDBManagerInstance().insertCategory(new Category(0, name, logo, new ArrayList<>()));
                         break;
-                    case 2:
+                    case 3:
                         DBManager.getDBManagerInstance().insertSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
                         break;
                 }
@@ -175,13 +177,13 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
             case 0:
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getPaymentMethod(), nameListener);
                 break;
-            case 1:
+            case 1: case 2:
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getCategory(), nameListener);
                 break;
-            case 2:
+            case 3: case 4:
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getSubCategory(0), nameListener);
                 break;
-            case 3:
+            case 5:
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getUsers(), nameListener);
                 break;
             default:
@@ -195,7 +197,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
         holder.hiddenCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(rootPosition == 2) {
+                if(rootPosition == 3 || rootPosition == 4) {
                     holder.hidden.setAdapter(new SettingsModifyAdapter(settings.getSubCategory(position), nameListener));
                 }
             }

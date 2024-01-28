@@ -78,10 +78,10 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    if (s.length() > 0 && holder.getAdapterPosition() == itemCount - 1) {
-                        notifyItemInserted(itemCount);
+                    sharedUserList.get(holder.getAdapterPosition()).setName(holder.autoCompleteTextViewName.getText().toString());
+                    if (s.length() > 0 && holder.getAdapterPosition() == itemCount) {
+                        notifyItemInserted(itemCount + 1);
                         itemCount += 1;
-                        sharedUserList.get(holder.getAdapterPosition()).setName(holder.autoCompleteTextViewName.getText().toString());
                         sharedUserList.add(new Expense.SharedUser());
                     }
                 }
@@ -109,7 +109,11 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
 
             @Override
             public void afterTextChanged(Editable s) {
-                sharedUserList.get(holder.getAdapterPosition()).setValue(Integer.valueOf(s.toString()));
+                int num = 0;
+                if(s.length() > 0) {
+                    num = Integer.parseInt(s.toString());
+                }
+                sharedUserList.get(holder.getAdapterPosition()).setValue(num);
                 updateListener.valueUpdate(getValueTotal());
             }
         });
