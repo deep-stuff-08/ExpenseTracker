@@ -2,7 +2,6 @@ package com.example.expensetracker.fragments;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -38,7 +37,7 @@ import com.example.expensetracker.ExpenseSettings;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.adapters.SharedUserAdapter;
-import com.example.expensetracker.pojo.Expense;
+import com.example.expensetracker.pojo.Entry;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -332,9 +331,9 @@ public class AddExpenseFragment extends Fragment {
             }
             ArrayList<String> newUsers = new ArrayList<>();
             try {
-                ArrayList<Expense.SharedUser> sharedUserList =  ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList();
+                ArrayList<Entry.SharedUser> sharedUserList =  ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList();
                 HashMap<String, Integer> userMap = new HashMap<>();
-                for(Expense.SharedUser sharedUser : sharedUserList) {
+                for(Entry.SharedUser sharedUser : sharedUserList) {
                     if(userMap.containsKey(sharedUser.getName())) {
                         userMap.replace(sharedUser.getName(), userMap.getOrDefault(sharedUser.getName(), 0) + sharedUser.getValue());
                     } else {
@@ -348,9 +347,9 @@ public class AddExpenseFragment extends Fragment {
                     if(!s.contains(name)) {
                         newUsers.add(name);
                     }
-                    sharedUserList.add(new Expense.SharedUser(name, userMap.getOrDefault(name, 0)));
+                    sharedUserList.add(new Entry.SharedUser(name, userMap.getOrDefault(name, 0)));
                 }
-                Expense expense = new Expense(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), !expenseIncomeCredit.isChecked(), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), sharedUserList);
+                Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), !expenseIncomeCredit.isChecked(), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), sharedUserList);
             } catch (ParseException e) {
                 e.printStackTrace();
             }

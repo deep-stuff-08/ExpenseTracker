@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expensetracker.R;
-import com.example.expensetracker.pojo.Expense;
+import com.example.expensetracker.pojo.Entry;
 import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
@@ -24,21 +24,21 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
         void valueUpdate(int newTotal);
     }
     ArrayList<String> nameList;
-    ArrayList<Expense.SharedUser> sharedUserList;
+    ArrayList<Entry.SharedUser> sharedUserList;
     ValueUpdateListener updateListener;
     int itemCount = 1;
     public SharedUserAdapter(ArrayList<User> names, ValueUpdateListener updateListener) {
         nameList = new ArrayList<>();
         names.forEach(user -> nameList.add(user.getName()));
         sharedUserList = new ArrayList<>();
-        sharedUserList.add(new Expense.SharedUser("Me", 0));
-        sharedUserList.add(new Expense.SharedUser());
+        sharedUserList.add(new Entry.SharedUser("Me", 0));
+        sharedUserList.add(new Entry.SharedUser());
         this.updateListener = updateListener;
     }
 
     private int getValueTotal() {
         int total = 0;
-        for(Expense.SharedUser i : sharedUserList) {
+        for(Entry.SharedUser i : sharedUserList) {
             total += i.getValue();
         }
         return total;
@@ -51,7 +51,7 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
     }
 
     @NonNull
-    public ArrayList<Expense.SharedUser> getSharedUserList() {
+    public ArrayList<Entry.SharedUser> getSharedUserList() {
         return sharedUserList;
     }
 
@@ -82,7 +82,7 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
                         notifyItemInserted(itemCount);
                         itemCount += 1;
                         sharedUserList.get(holder.getAdapterPosition()).setName(holder.autoCompleteTextViewName.getText().toString());
-                        sharedUserList.add(new Expense.SharedUser());
+                        sharedUserList.add(new Entry.SharedUser());
                     }
                 }
             });
