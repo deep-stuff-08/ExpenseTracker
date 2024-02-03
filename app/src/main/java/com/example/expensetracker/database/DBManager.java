@@ -442,7 +442,9 @@ public class DBManager{
     public ArrayList<User> getUserData() {
         ArrayList<User> data = new ArrayList<>();
         data.add(new User("Hrituja"));
-
+        data.add(new User("Deep"));
+        data.add(new User("Darshan"));
+        data.add(new User("Rushikesh"));
         return data;
     }
 

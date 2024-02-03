@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.example.expensetracker.MainActivity;
@@ -40,13 +41,49 @@ public class TransferFragment extends Fragment {
         Spinner spinnerFrom = view.findViewById(R.id.spinner_from);
         ImageButton btnSwap = view.findViewById(R.id.btn_swap);
         TextView txtValue = view.findViewById(R.id.edit_value);
+        Button btnSubmit = view.findViewById(R.id.btn_submit);
 
+        ArrayList<String> me = new ArrayList<>();
+        ((MainActivity)requireActivity()).getSettings().getPaymentMethod().forEach(type -> me.add("Me (" + type.getName() + ")"));
         ArrayList<String> users = new ArrayList<>();
         ((MainActivity)requireActivity()).getSettings().getUsers().forEach(user -> users.add(user.getName()));
-        users.add("Me");
 
-        spinnerTo.setAdapter(new TransferUserAdapter(requireContext(), users));
-        spinnerFrom.setAdapter(new TransferUserAdapter(requireContext(), users));
+        TransferUserAdapter combinedUserTo = new TransferUserAdapter(me, users);
+        TransferUserAdapter combinedUserFrom = new TransferUserAdapter(me, users);
+
+        spinnerTo.setAdapter(combinedUserTo);
+        spinnerFrom.setAdapter(combinedUserFrom);
+
+        spinnerTo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ((TransferUserAdapter)spinnerFrom.getAdapter()).setEnableUsers(id == 0);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spinnerFrom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ((TransferUserAdapter)spinnerTo.getAdapter()).setEnableUsers(id == 0);
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        btnSwap.setOnClickListener(v -> {
+            boolean from = ((TransferUserAdapter)spinnerFrom.getAdapter()).getEnableUsers();
+            ((TransferUserAdapter)spinnerFrom.getAdapter()).setEnableUsers(((TransferUserAdapter)spinnerTo.getAdapter()).getEnableUsers());
+            ((TransferUserAdapter)spinnerTo.getAdapter()).setEnableUsers(from);
+
+            int froms = spinnerFrom.getSelectedItemPosition();
+            spinnerFrom.setSelection(spinnerTo.getSelectedItemPosition());
+            spinnerTo.setSelection(froms);
+        });
 
         return view;
     }
