@@ -37,8 +37,10 @@ import com.example.expensetracker.Settings;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.adapters.SharedUserAdapter;
+import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.Entry;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
+import com.example.expensetracker.pojo.User;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.ParseException;
@@ -297,51 +299,58 @@ public class AddExpenseFragment extends Fragment {
                 ((MainActivity)requireActivity()).getEntries().remove(unconfirmedEntry);
             }
             ArrayList<String> newUsers = new ArrayList<>();
+            Entry entry;
             try {
                 ArrayList<Entry.SharedUser> sharedUserList =  ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList();
-                HashMap<String, Integer> userMap = new HashMap<>();
-                for(Entry.SharedUser sharedUser : sharedUserList) {
-                    if(userMap.containsKey(sharedUser.getName())) {
-                        Integer a = userMap.get(sharedUser.getName());
-                        userMap.replace(sharedUser.getName(), a == null ? 0 : a + sharedUser.getValue());
-                    } else if(!sharedUser.getName().isEmpty()){
-                        userMap.put(sharedUser.getName(), sharedUser.getValue());
-                    }
-                }
+//                HashMap<String, Integer> userMap = new HashMap<>();
+//                for(Entry.SharedUser sharedUser : sharedUserList) {
+//                    if(userMap.containsKey(sharedUser.getUser().getName())) {
+//                        Integer a = userMap.get(sharedUser.getUser().getName());
+//                        userMap.replace(sharedUser.getUser().getName(), a == null ? 0 : a + sharedUser.getValue());
+//                    } else if(!sharedUser.getUser().getName().isEmpty()){
+//                        userMap.put(sharedUser.getUser().getName(), sharedUser.getValue());
+//                    }
+//                }
                 sharedUserList.clear();
-                Set<String> s = new HashSet<>();
-                settings.getUsers().forEach(user -> s.add(user.getName()));
-                for(String name : userMap.keySet()) {
-                    if(!s.contains(name) && !"Me".equals(name)) {
-                        newUsers.add(name);
+                sharedUserList.add(new Entry.SharedUser(new User(1, "Hrituja"), 100));
+//                Set<String> s = new HashSet<>();
+//                settings.getUsers().forEach(user -> s.add(user.getName()));
+//                for(String name : userMap.keySet()) {
+//                    if(!s.contains(name) && !"Me".equals(name)) {
+//                        newUsers.add(name);
+//                    }
+//                    Integer a = userMap.get(name);
+//                    sharedUserList.add(new Entry.SharedUser(new User(0, "Hrituja"), 100));
+//                }
+                entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), checkBoxIsShared.isChecked(), sharedUserList);
+
+                if(newUsers.size() > 0) {
+                    StringBuilder userList = new StringBuilder();
+                    for(int i = 0; i < newUsers.size(); i++) {
+                        userList.append(i).append(") ").append(newUsers.get(i)).append("\n");
                     }
-                    Integer a = userMap.get(name);
-                    sharedUserList.add(new Entry.SharedUser(name, a == null ? 0 : a));
+                    new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc.\n" + userList)
+                            .setPositiveButton("Yes", (dialog, which) -> {
+                                for(int i = 0; i < newUsers.size(); i++) {
+                                    DBManager.getDBManagerInstance().insertUser(new User(0, newUsers.get(i)));
+                                }
+                                onSuccessfulSubmit(entry, view, checkBoxIsRepeat);
+                            })
+                            .setCancelable(true)
+                            .setNegativeButton("No", (dialog, which) -> {
+                                onSuccessfulSubmit(entry, view, checkBoxIsRepeat);
+                            }).show();
+                } else {
+                    onSuccessfulSubmit(entry, view, checkBoxIsRepeat);
                 }
-                Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), sharedUserList);
             } catch (ParseException e) {
                 e.printStackTrace();
-            }
-            if(newUsers.size() > 0) {
-                StringBuilder userList = new StringBuilder();
-                for(int i = 0; i < newUsers.size(); i++) {
-                    userList.append(i).append(") ").append(newUsers.get(i)).append("\n");
-                }
-                new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc.\n" + userList)
-                        .setPositiveButton("Yes", (dialog, which) -> {
-                            onSuccessfulSubmit(view, checkBoxIsRepeat);
-                        })
-                        .setCancelable(true)
-                        .setNegativeButton("No", (dialog, which) -> {
-                            onSuccessfulSubmit(view, checkBoxIsRepeat);
-                        }).show();
-            } else {
-                onSuccessfulSubmit(view, checkBoxIsRepeat);
             }
         });
     }
 
-    private void onSuccessfulSubmit(View view, CheckBox isRepeat) {
+    private void onSuccessfulSubmit(Entry entry, View view, CheckBox isRepeat) {
+        DBManager.getDBManagerInstance().insertExpenseEntries(entry);
         Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
         if (isRepeat.isChecked()) {
             Bundle bundle = new Bundle();

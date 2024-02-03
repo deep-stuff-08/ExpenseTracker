@@ -9,6 +9,7 @@ import android.util.Log;
 import com.example.expensetracker.Settings;
 import com.example.expensetracker.R;
 import com.example.expensetracker.pojo.Category;
+import com.example.expensetracker.pojo.Entry;
 import com.example.expensetracker.pojo.PaymentType;
 import com.example.expensetracker.pojo.SubCategory;
 import com.example.expensetracker.pojo.User;
@@ -71,6 +72,11 @@ public class DBManager{
                         "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
         );
 
+        sqLiteDatabase.execSQL(
+                "create table IF NOT EXISTS  " + DatabaseDetails.USERS +
+                        "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
+        );
+
         // TABLES AS PER Expense/Income TYPE
         // create table - category
         sqLiteDatabase.execSQL(
@@ -106,20 +112,49 @@ public class DBManager{
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS " + DatabaseDetails.EXPENSE_ENTRIES +
                         "(" +
-                            "id INTEGER PRIMARY KEY, name text NOT NULL," +
-                            "value REAL NOT NULL, category_id INTEGER NOT NULL," +
+                            "id INTEGER PRIMARY KEY, " +
+                            "name text NOT NULL," +
+                            "value REAL NOT NULL, " +
+                            "category_id INTEGER NOT NULL," +
                             "subCategory_id INTEGER NOT NULL," +
-                            "paymentMethod_id INTEGER, dateTime TEXT, isSharedExpense INTEGER" +
+                            "paymentMethod_id INTEGER, " +
+                            "date REAL, " +
+                            "time REAL, " +
+                            "isSharedExpense INTEGER" +
+                        ")"
+        );
+
+        sqLiteDatabase.execSQL(
+                "create table IF NOT EXISTS  " + DatabaseDetails.EXPENSE_SHARED +
+                        "( " +
+                        "id INTEGER PRIMARY KEY, " +
+                        "Expense_entries_id INTEGER NOT NULL, " +
+                        "user_id INTEGER, " +
+                        "value INTEGER" +
                         ")"
         );
 
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS " + DatabaseDetails.INCOME_ENTRIES +
                         "(" +
-                        "id INTEGER PRIMARY KEY, name text NOT NULL," +
-                        "value REAL NOT NULL, category_id INTEGER NOT NULL," +
+                        "id INTEGER PRIMARY KEY, " +
+                        "name text NOT NULL," +
+                        "value REAL NOT NULL, " +
+                        "category_id INTEGER NOT NULL," +
                         "subCategory_id INTEGER NOT NULL," +
-                        "paymentMethod_id INTEGER, dateTime TEXT, isSharedExpense INTEGER" +
+                        "paymentMethod_id INTEGER, " +
+                        "date REAL, " +
+                        "time REAL " +
+                        ")"
+        );
+
+        sqLiteDatabase.execSQL(
+                "create table IF NOT EXISTS " + DatabaseDetails.TRANSFER +
+                        "(" +
+                        "id INTEGER PRIMARY KEY, " +
+                        "sender_id INTEGER NOT NULL, " +
+                        "receiver_id INTEGER NOT NULL, " +
+                        "value INTEGER NOT NULL " +
                         ")"
         );
 
@@ -181,17 +216,13 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", cat.getName());
         contentValues.put("color_id", cat.getColorId());
-        boolean ret = this.insert(contentValues, DatabaseDetails.CATEGORY_EXPENSE);
-        if(!ret) {
+        long catID = this.insert(contentValues, DatabaseDetails.CATEGORY_EXPENSE);
+        if(catID == -1) {
             throw new RuntimeException("Failed to insert data into database");
         }
-
-        Cursor cursor = getData("id", DatabaseDetails.CATEGORY_EXPENSE, "name = '" + cat.getName() + "' ");
-        assert cursor != null;
-        int catID = Integer.parseInt(cursor.getString(0));
         for(SubCategory sCat: cat.getSubCategories())
         {
-            sCat.setCategoryId(catID);
+            sCat.setCategoryId((int)catID);
             insertExpenseSubCategory(sCat);
         }
     }
@@ -255,17 +286,13 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", cat.getName());
         contentValues.put("color_id", cat.getColorId());
-        boolean ret = this.insert(contentValues, DatabaseDetails.CATEGORY_INCOME);
-        if(!ret) {
+        long catID = this.insert(contentValues, DatabaseDetails.CATEGORY_INCOME);
+        if(catID == -1) {
             throw new RuntimeException("Failed to insert data into database");
         }
-
-        Cursor cursor = getData("id", DatabaseDetails.CATEGORY_INCOME, "name = '" + cat.getName() + "' ");
-        assert cursor != null;
-        int catID = Integer.parseInt(cursor.getString(0));
         for(SubCategory sCat: cat.getSubCategories())
         {
-            sCat.setCategoryId(catID);
+            sCat.setCategoryId((int)catID);
             insertIncomeSubCategory(sCat);
         }
     }
@@ -320,8 +347,8 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", scat.getName());
         contentValues.put("category_id", scat.getCategoryId());
-        boolean ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_EXPENSE);
-        if(!ret)
+        long ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_EXPENSE);
+        if(ret == -1)
         {
             throw new RuntimeException("Failed to insert data into database");
         }
@@ -371,8 +398,8 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", scat.getName());
         contentValues.put("category_id", scat.getCategoryId());
-        boolean ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_INCOME);
-        if(!ret)
+        long ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_INCOME);
+        if(ret == -1)
         {
             throw new RuntimeException("Failed to insert data into database");
         }
@@ -441,30 +468,118 @@ public class DBManager{
 
     public ArrayList<User> getUserData() {
         ArrayList<User> data = new ArrayList<>();
-        data.add(new User("Hrituja"));
+        String query = "select id, name from "+ DatabaseDetails.USERS;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
+                null)) {
+            if (null != cursor)
+                cursor.moveToFirst();
 
+            do {
+                assert cursor != null;
+                String id = cursor.getString(0);
+                String name = cursor.getString(1);
+                User obj = new User(Integer.parseInt(id), name);
+                data.add(obj);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
         return data;
     }
 
     public void insertUser(User u)
     {
-
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", u.getName());
+        contentValues.put("drawable_id", u.getDrawableId());
+        this.insert(contentValues, DatabaseDetails.USERS);
     }
 
     public void updateUser(User u)
     {
-
+        String condition = "id = " + u.getId();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", u.getName());
+        contentValues.put("drawable_id", u.getDrawableId());
+        this.update(DatabaseDetails.USERS, contentValues, condition);
     }
 
     public void deleteUser(User u)
     {
-
+        String condition = "id = '" + u.getId() +"'";
+        this.delete(DatabaseDetails.USERS, condition);
     }
 
-    public boolean insert(ContentValues contentValues, String tableName)
+    public void insertSharedUserEntries(Entry.SharedUser sharedUser, long expenseEntriesId)
     {
-        sqLiteDatabase.insert(tableName, null, contentValues);
-        return true;
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("expense_entries_id", expenseEntriesId);
+        contentValues.put("user_id", sharedUser.getUser().getId());
+        contentValues.put("value", sharedUser.getValue());
+        this.insert(contentValues, DatabaseDetails.EXPENSE_SHARED);
+    }
+
+    public void insertExpenseEntries(Entry entry)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", entry.getName());
+        contentValues.put("value", entry.getValue());
+        contentValues.put("category_id", entry.getCategoryId());
+        contentValues.put("subCategory_id", entry.getSubCategoryId());
+        contentValues.put("paymentMethod_id", entry.getPaymentId());
+        contentValues.put("date", entry.getDate().toString());
+        contentValues.put("time", entry.getTime().toString());
+        contentValues.put("isSharedExpense", entry.getIsShared());
+
+        long id = this.insert(contentValues, DatabaseDetails.EXPENSE_ENTRIES);
+        if(id == -1)
+        {
+            throw  new RuntimeException();
+        }
+
+        entry.getSharedUsersList().forEach(sharedUser ->
+        {
+            insertSharedUserEntries(sharedUser, id);
+        });
+    }
+
+    public void insertIncomeEntries(Entry entry)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name", entry.getName());
+        contentValues.put("value", entry.getValue());
+        contentValues.put("category_id", entry.getCategoryId());
+        contentValues.put("subCategory_id", entry.getSubCategoryId());
+        contentValues.put("paymentMethod_id", entry.getPaymentId());
+        contentValues.put("date", entry.getDate().toString());
+        contentValues.put("time", entry.getTime().toString());
+
+        long id = this.insert(contentValues, DatabaseDetails.INCOME_ENTRIES);
+        if(id == -1)
+        {
+            throw  new RuntimeException();
+        }
+    }
+
+    public void insertTransferEntries(int sender_user_id, int receiver_user_id, int value)
+    {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("sender_id", sender_user_id);
+        contentValues.put("receiver_id", receiver_user_id);
+        contentValues.put("value", value);
+
+        long id = this.insert(contentValues, DatabaseDetails.TRANSFER);
+        if(id == -1)
+        {
+            throw  new RuntimeException();
+        }
+    }
+
+    public long insert(ContentValues contentValues, String tableName)
+    {
+        return sqLiteDatabase.insert(tableName, null, contentValues);
     }
 
     public void delete(String tableName, String condition) {
