@@ -3,12 +3,14 @@ package com.example.expensetracker.pojo;
 import com.example.expensetracker.R;
 
 public class User extends SettingsParent {
-    String name;
-    int logo;
+    private int id;
+    private String name;
+    private int drawableId;
 
-    public User(String name) {
+    public User(int id, String name) {
+        this.id = id;
         this.name = name;
-        this.logo = R.drawable.ic_launcher_background;
+        this.drawableId = R.drawable.ic_launcher_background;
     }
 
     @Override
@@ -25,7 +27,23 @@ public class User extends SettingsParent {
         this.name = name;
     }
 
-    public void setLogo(int logo) {
-        this.logo = logo;
+    public void setLogo(int drawableId) {
+        this.drawableId = drawableId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getDrawableId() {
+        return drawableId;
+    }
+
+    public void setDrawableId(int drawableId) {
+        this.drawableId = drawableId;
     }
 }

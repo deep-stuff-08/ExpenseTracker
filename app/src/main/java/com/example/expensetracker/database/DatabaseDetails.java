@@ -11,9 +11,15 @@ public class DatabaseDetails {
 
     public final  static String EXPENSE_ENTRIES = "expense_entries";
 
+    public final  static String EXPENSE_SHARED = "expense_shared";
+
     public final  static String CATEGORY_INCOME = "income_category";
 
     public final  static String SUBCATEGORY_INCOME = "income_subCategory";
 
     public final  static String INCOME_ENTRIES = "income_entries";
+
+    public final static String USERS = "users";
+
+    public final static  String TRANSFER = "transfer";
 }

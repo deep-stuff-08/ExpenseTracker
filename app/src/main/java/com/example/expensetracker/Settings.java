@@ -105,7 +105,7 @@ public class Settings {
                 new SubCategory(0,"Bonus", 0, R.drawable.ic_launcher_foreground)
         ))));
 
-        this.users.add(new User("Hrituja"));
-        this.users.add(new User("Deep"));
+        this.users.add(new User(1, "Deep"));
+        this.users.add(new User(0, "Hrituja"));
     }
 }

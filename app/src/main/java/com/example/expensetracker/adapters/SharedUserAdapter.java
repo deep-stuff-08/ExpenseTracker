@@ -31,8 +31,9 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
         nameList = new ArrayList<>();
         names.forEach(user -> nameList.add(user.getName()));
         sharedUserList = new ArrayList<>();
-        sharedUserList.add(new Entry.SharedUser("Me", 0));
-        sharedUserList.add(new Entry.SharedUser());
+        //TODO: Update to handle shared user
+		sharedUserList.add(null);
+        sharedUserList.add(null);
         this.updateListener = updateListener;
     }
 
@@ -78,12 +79,13 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
 
                 @Override
                 public void afterTextChanged(Editable s) {
-                    sharedUserList.get(holder.getAdapterPosition()).setName(holder.autoCompleteTextViewName.getText().toString());
-                    if (s.length() > 0 && holder.getAdapterPosition() == itemCount) {
-                        notifyItemInserted(itemCount + 1);
-                        itemCount += 1;
-                        sharedUserList.add(new Entry.SharedUser());
-                    }
+					//TODO: Update to use SharedUser
+//                    sharedUserList.get(holder.getAdapterPosition()).setName(holder.autoCompleteTextViewName.getText().toString());
+//                    if (s.length() > 0 && holder.getAdapterPosition() == itemCount) {
+//                        notifyItemInserted(itemCount + 1);
+//                        itemCount += 1;
+//                        sharedUserList.add(new Entry.SharedUser());
+//                    }
                 }
             });
             holder.autoCompleteTextViewName.setOnFocusChangeListener((v, hasFocus) -> {

@@ -193,7 +193,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         DBManager.getDBManagerInstance().insertIncomeSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
                         break;
                     case 5: //Users
-                        DBManager.getDBManagerInstance().insertUser(new User(name));
+                        DBManager.getDBManagerInstance().insertUser(new User(0, name));
                         break;
                 }
 

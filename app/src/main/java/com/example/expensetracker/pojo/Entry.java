@@ -5,33 +5,26 @@ import java.util.Date;
 
 public class Entry {
     public  static class SharedUser {
-        private String name;
+        private User user;
         private int value;
 
-        public SharedUser(String name, int value) {
-            this.name = name;
+        public SharedUser(User user, int value) {
+            this.user = user;
             this.value = value;
         }
-
-        public SharedUser() {
-            this.name = "";
-            this.value = 0;
-        }
-
-        public String getName() {
-            return name;
-        }
-
         public int getValue() {
             return value;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
         public void setValue(int value) {
             this.value = value;
+        }
+        public User getUser() {
+            return user;
+        }
+
+        public void setUser(User user) {
+            this.user = user;
         }
     }
     private String name;
@@ -41,9 +34,11 @@ public class Entry {
     private int paymentId;
     private Date date;
     private Date time;
+
+    private boolean isShared;
     private ArrayList<SharedUser> sharedUsersList;
 
-    public Entry(String name, int value, int categoryId, int subCategoryId, int paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
+    public Entry(String name, int value, int categoryId, int subCategoryId, int paymentId, Date date, Date time, boolean isShared, ArrayList<SharedUser> sharedUsersList) {
         this.name = name;
         this.value = value;
         this.categoryId = categoryId;
@@ -51,6 +46,7 @@ public class Entry {
         this.paymentId = paymentId;
         this.date = date;
         this.time = time;
+        this.isShared = isShared;
         this.sharedUsersList = sharedUsersList;
     }
 
@@ -116,5 +112,13 @@ public class Entry {
 
     public void setSharedUsersList(ArrayList<SharedUser> sharedUsersList) {
         this.sharedUsersList = sharedUsersList;
+    }
+
+    public boolean getIsShared() {
+        return isShared;
+    }
+
+    public void setIsShared(boolean isShared) {
+        this.isShared = isShared;
     }
 }
