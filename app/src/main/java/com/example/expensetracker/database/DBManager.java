@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.example.expensetracker.ExpenseSettings;
+import com.example.expensetracker.Settings;
 import com.example.expensetracker.R;
 import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.PaymentType;
@@ -45,7 +45,7 @@ public class DBManager{
         {
             dbManager.sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null);
             dbManager.onCreateSetup();
-            dbManager.insertExpenseSettings(ExpenseSettings.createWithDefaultParameters());
+            dbManager.insertSettings(Settings.createWithDefaultParameters());
         } else {
             dbManager.sqLiteDatabase = SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
         }
@@ -71,7 +71,7 @@ public class DBManager{
                         "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
         );
 
-        // TABLES AS PER DEBIT/CREDIT TYPE
+        // TABLES AS PER Expense/Income TYPE
         // create table - category
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS " + DatabaseDetails.CATEGORY_EXPENSE +
@@ -126,26 +126,19 @@ public class DBManager{
         Log.d("DATABASE_LOG", "onCreate: exit");
     }
 
-    public void insertExpenseSettings(ExpenseSettings expenseSettings)
+    public void insertSettings(Settings settings)
     {
-        for(PaymentType l : expenseSettings.getPaymentMethod()) {
+        for(PaymentType l : settings.getPaymentMethod()) {
             insertPaymentType(l);
         }
 
-        for(Category l : expenseSettings.getExpenseCategory()) {
-            // update subcategory
+        for(Category l : settings.getExpenseCategory()) {
+            // insert subcategory is called in the insertCategory
             insertExpenseCategory(l);
         }
-    }
 
-    public void insertIncomeSettings(ExpenseSettings expenseSettings)
-    {
-        for(PaymentType l : expenseSettings.getPaymentMethod()) {
-            insertPaymentType(l);
-        }
-
-        for(Category l : expenseSettings.getExpenseCategory()) {
-            // update subcategory
+        for(Category l : settings.getIncomeCategory()) {
+            // insert subcategory is called in the insertCategory
             insertIncomeCategory(l);
         }
     }
@@ -196,7 +189,7 @@ public class DBManager{
         Cursor cursor = getData("id", DatabaseDetails.CATEGORY_EXPENSE, "name = '" + cat.getName() + "' ");
         assert cursor != null;
         int catID = Integer.parseInt(cursor.getString(0));
-        for(SubCategory sCat: cat.getExpenseSubCategories())
+        for(SubCategory sCat: cat.getSubCategories())
         {
             sCat.setCategoryId(catID);
             insertExpenseSubCategory(sCat);
@@ -215,7 +208,7 @@ public class DBManager{
     public void deleteExpenseCategory(Category c)
     {
         int categoryId = c.getId();
-        for(SubCategory sCat: c.getExpenseSubCategories())
+        for(SubCategory sCat: c.getSubCategories())
         {
             sCat.setCategoryId(categoryId);
             deleteExpenseSubCategory(sCat);
@@ -270,7 +263,7 @@ public class DBManager{
         Cursor cursor = getData("id", DatabaseDetails.CATEGORY_INCOME, "name = '" + cat.getName() + "' ");
         assert cursor != null;
         int catID = Integer.parseInt(cursor.getString(0));
-        for(SubCategory sCat: cat.getExpenseSubCategories())
+        for(SubCategory sCat: cat.getSubCategories())
         {
             sCat.setCategoryId(catID);
             insertIncomeSubCategory(sCat);
@@ -289,7 +282,7 @@ public class DBManager{
     public void deleteIncomeCategory(Category c)
     {
         int categoryId = c.getId();
-        for(SubCategory sCat: c.getExpenseSubCategories())
+        for(SubCategory sCat: c.getSubCategories())
         {
             sCat.setCategoryId(categoryId);
             deleteExpenseSubCategory(sCat);

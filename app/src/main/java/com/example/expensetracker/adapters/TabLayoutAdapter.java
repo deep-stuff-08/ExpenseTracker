@@ -6,24 +6,31 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.expensetracker.fragments.AddExpenseFragment;
 import com.example.expensetracker.fragments.TransferFragment;
+import com.example.expensetracker.pojo.UnconfirmedEntry;
 
 public class TabLayoutAdapter extends FragmentStateAdapter {
-    public TabLayoutAdapter(@NonNull Fragment fragment) {
+    UnconfirmedEntry entry;
+    public TabLayoutAdapter(@NonNull Fragment fragment, UnconfirmedEntry entry) {
         super(fragment);
+        this.entry = entry;
     }
 
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        if(position == 0) {
-            return new AddExpenseFragment();
-        } else {
-            return new TransferFragment();
+        switch(position) {
+            case 0:
+                return new AddExpenseFragment(false, entry);
+            case 1:
+                return new AddExpenseFragment(true, entry);
+            case 2:
+                return new TransferFragment();
         }
+        return new Fragment();
     }
 
     @Override
     public int getItemCount() {
-        return 2;
+        return 3;
     }
 }

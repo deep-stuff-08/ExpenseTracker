@@ -71,7 +71,6 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
 
         private final Button delete;
         private final Button confirm;
-        private final Button transfer;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.unconfirmed_title);
@@ -79,7 +78,6 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
             value = itemView.findViewById(R.id.unconfirmed_value);
             delete = itemView.findViewById(R.id.unconfirmed_deleteBtn);
             confirm = itemView.findViewById(R.id.unconfirmed_confirmBtn);
-            transfer = itemView.findViewById(R.id.unconfirmed_transferBtn);
         }
     }
 }

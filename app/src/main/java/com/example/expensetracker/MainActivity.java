@@ -28,7 +28,7 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private boolean isSettingsVisible;
-    private ExpenseSettings expenseSettings;
+    private Settings settings;
     private ArrayList<UnconfirmedEntry> entries;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(findViewById(R.id.toolbar));
 
         DBManager.createDBManagerInstance(this);
-        expenseSettings = ExpenseSettings.createWithParametersFromDatabase();
+        settings = Settings.createWithParametersFromDatabase();
 
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
         return Navigation.findNavController(this,R.id.fragment_container_view).navigateUp();
     }
 
-    public ExpenseSettings getSettings() {
-        return expenseSettings;
+    public Settings getSettings() {
+        return settings;
     }
 
     public ArrayList<UnconfirmedEntry> getEntries() {

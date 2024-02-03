@@ -46,39 +46,8 @@
                 android:autofillHints="Cost"
                 tools:ignore="VisualLintTextFieldSize" />
 
-            <RadioGroup
-                android:id="@+id/expense_income"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/expense_value"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:orientation="horizontal">
-
-                <RadioButton
-                    android:id="@+id/expense_income_debit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:checked="true"
-                    android:text="Debit"
-                    android:textSize="24sp"
-                    tools:ignore="TouchTargetSizeCheck" />
-
-                <RadioButton
-                    android:id="@+id/expense_income_credit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Credit"
-                    android:textSize="24sp"
-                    tools:ignore="TouchTargetSizeCheck" />
-            </RadioGroup>
-
             <Spinner
-                android:layout_below="@id/expense_income"
+                android:layout_below="@id/expense_value"
                 android:layout_marginBottom="8dp"
                 android:id="@+id/expense_category"
                 android:layout_width="match_parent"

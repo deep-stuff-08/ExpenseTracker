@@ -9,22 +9,24 @@ import com.example.expensetracker.pojo.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ExpenseSettings {
+public class Settings {
     private final ArrayList<PaymentType> paymentMethod;
     private final ArrayList<Category> expenseCategory;
-
     private final ArrayList<Category> incomeCategory;
+    private final ArrayList<User> users;
 
-    private ExpenseSettings() {
+    private Settings() {
         paymentMethod = new ArrayList<>();
         expenseCategory = new ArrayList<>();
         incomeCategory = new ArrayList<>();
+        users = new ArrayList<>();
     }
 
-    private ExpenseSettings(ArrayList<PaymentType> paymentMethod, ArrayList<Category> expenseCategory, ArrayList<Category> incomeCategory) {
+    private Settings(ArrayList<PaymentType> paymentMethod, ArrayList<Category> expenseCategory, ArrayList<Category> incomeCategory, ArrayList<User> users) {
         this.paymentMethod = paymentMethod;
         this.expenseCategory = expenseCategory;
         this.incomeCategory = incomeCategory;
+        this.users = users;
     }
 
     public ArrayList<PaymentType> getPaymentMethod() {
@@ -33,48 +35,46 @@ public class ExpenseSettings {
     public ArrayList<Category> getExpenseCategory() {
         return expenseCategory;
     }
-
     public ArrayList<Category> getIncomeCategory() {
        return incomeCategory;
     }
+    public ArrayList<User> getUsers() {
+        return users;
+    }
 
     public ArrayList<SubCategory> getExpenseSubCategory(int index) {
-        return expenseCategory.get(index).getExpenseSubCategories();
+        return expenseCategory.get(index).getSubCategories();
     }
 
     public ArrayList<SubCategory> getIncomeSubCategory(int index) {
-        return incomeCategory.get(index).getExpenseSubCategories();
+        return incomeCategory.get(index).getSubCategories();
     }
 
-	public ArrayList<User> getUsers() {
-        return new ArrayList<>(Arrays.asList(
-                new User("Hrituja"),
-                new User("Darshan")
-        ));
-    }
-
-    public static ExpenseSettings createWithDefaultParameters() {
-        ExpenseSettings s = new ExpenseSettings();
+    public static Settings createWithDefaultParameters() {
+        Settings s = new Settings();
         s.initToDefault();
         return s;
     }
 
-    public static ExpenseSettings createWithParametersFromDatabase()
+    public static Settings createWithParametersFromDatabase()
     {
         DBManager db = DBManager.getDBManagerInstance();
-        return new ExpenseSettings(db.getPaymentData(), db.getExpenseCategoryData(), db.getIncomeCategoryData());
+        return new Settings(db.getPaymentData(), db.getExpenseCategoryData(), db.getIncomeCategoryData(), db.getUserData());
     }
 
-    public void updateExpenseSettings(ExpenseSettings newExpenseSettings)
+    public void updateExpenseSettings(Settings newSettings)
     {
         this.expenseCategory.clear();
-        this.expenseCategory.addAll(newExpenseSettings.getExpenseCategory());
+        this.expenseCategory.addAll(newSettings.getExpenseCategory());
 
         this.incomeCategory.clear();
-        this.incomeCategory.addAll(newExpenseSettings.getIncomeCategory());
+        this.incomeCategory.addAll(newSettings.getIncomeCategory());
 
         this.paymentMethod.clear();
-        this.paymentMethod.addAll(newExpenseSettings.getPaymentMethod());
+        this.paymentMethod.addAll(newSettings.getPaymentMethod());
+
+        this.users.clear();
+        this.users.addAll(newSettings.users);
     }
 
     public void initToDefault() {
@@ -99,5 +99,13 @@ public class ExpenseSettings {
                 new SubCategory(0,"Entry Fee", 0, R.drawable.ic_launcher_foreground),
                 new SubCategory(0,"Trip", 0, R.drawable.ic_launcher_foreground)
         ))));
+
+        this.incomeCategory.add(new Category(0,"Sony", R.color.categoryYellow, new ArrayList<>(Arrays.asList(
+                new SubCategory(0,"Salary", 0, R.drawable.ic_launcher_foreground),
+                new SubCategory(0,"Bonus", 0, R.drawable.ic_launcher_foreground)
+        ))));
+
+        this.users.add(new User("Hrituja"));
+        this.users.add(new User("Deep"));
     }
 }

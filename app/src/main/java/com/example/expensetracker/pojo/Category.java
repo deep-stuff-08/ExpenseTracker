@@ -42,7 +42,7 @@ public class Category extends SettingsParent {
         this.colorId = colorId;
     }
 
-    public ArrayList<SubCategory> getExpenseSubCategories() {
+    public ArrayList<SubCategory> getSubCategories() {
         return subCategories;
     }
 

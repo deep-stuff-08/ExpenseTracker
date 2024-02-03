@@ -33,7 +33,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.expensetracker.adapters.ComboBoxAdapter;
-import com.example.expensetracker.ExpenseSettings;
+import com.example.expensetracker.Settings;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.adapters.SharedUserAdapter;
@@ -55,6 +55,12 @@ import java.util.Set;
 public class AddExpenseFragment extends Fragment {
     private SimpleDateFormat sdfDate;
     private SimpleDateFormat sdfTime;
+    boolean isIncome;
+    UnconfirmedEntry unconfirmedEntry;
+    public AddExpenseFragment(boolean isIncome, UnconfirmedEntry unconfirmedEntry) {
+        this.isIncome = isIncome;
+        this.unconfirmedEntry = unconfirmedEntry;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,39 +88,40 @@ public class AddExpenseFragment extends Fragment {
         CheckBox checkBoxIsShared = view.findViewById(R.id.expense_shared);
         EditText pickerDate = view.findViewById(R.id.expense_date);
         EditText pickerTime = view.findViewById(R.id.expense_time);
-        RadioGroup radioCreditDebit = view.findViewById(R.id.expense_income);
         RelativeLayout layoutShared = view.findViewById(R.id.expense_shared_details);
         RecyclerView listSharedUsers = view.findViewById(R.id.expense_sharing_users);
         CheckBox checkBoxIsRepeat = view.findViewById(R.id.expense_repeat);
         Button buttonSubmit = view.findViewById(R.id.expense_submit);
 
-        ExpenseSettings settings = ((MainActivity)requireActivity()).getSettings();
+        Settings settings = ((MainActivity)requireActivity()).getSettings();
         Calendar currentTime = Calendar.getInstance();
 
-        int expBgId = settings.getExpenseCategory().get(0).getColorId();
-        int incBgId = settings.getIncomeCategory().get(0).getColorId();
-        ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), expBgId);
-        ComboBoxAdapter adt_ExpenseCategory = new ComboBoxAdapter(context, settings.getExpenseCategory(), expBgId);
-        ComboBoxAdapter adt_ExpenseSubCategory = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0), expBgId);
-        ComboBoxAdapter adt_IncomeCategory = new ComboBoxAdapter(context, settings.getExpenseCategory(), incBgId);
-        ComboBoxAdapter adt_IncomeSubCategory = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0), incBgId);
+        ComboBoxAdapter adt_Payment;
+        ComboBoxAdapter adt_Category;
+        ComboBoxAdapter adt_SubCategory;
+        if(isIncome) {
+            adt_Category = new ComboBoxAdapter(context, settings.getIncomeCategory(), settings.getIncomeCategory().get(0).getColorId());
+            adt_SubCategory =new ComboBoxAdapter(context, settings.getIncomeSubCategory(0),  settings.getIncomeCategory().get(0).getColorId());
+            adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getIncomeCategory().get(0).getColorId());
+        } else {
+            adt_Category = new ComboBoxAdapter(context, settings.getExpenseCategory(),  settings.getExpenseCategory().get(0).getColorId());
+            adt_SubCategory = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0),  settings.getExpenseCategory().get(0).getColorId());
+            adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getExpenseCategory().get(0).getColorId());
+        }
 
         //Setup Name
         ArrayAdapter<String> adt = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, new String[]{"Deep", "Fee"});
         textName.setAdapter(adt);
         textName.setThreshold(1);
 
-        //Setup Value
-        UnconfirmedEntry unconfirmedEntry = null;
-        Bundle arg = getArguments();
-        final int unconfirmedEntryId = arg == null ? -1 : arg.getInt("unconfirmedEntryId", -1);
-        if(unconfirmedEntryId >= 0) {
-            unconfirmedEntry = ((MainActivity) requireActivity()).getEntries().get(unconfirmedEntryId);
+        if(unconfirmedEntry != null) {
             TextView textView = view.findViewById(R.id.expense_msg_body);
             textView.setText(unconfirmedEntry.getBody());
             textView.setVisibility(View.VISIBLE);
             textValue.setText(String.valueOf(unconfirmedEntry.getValue()));
         }
+
+        //Setup Value
         final int[] totalValue = {0};
         final int[] actualValue = {0};
         textValue.addTextChangedListener(new TextWatcher() {
@@ -140,50 +147,11 @@ public class AddExpenseFragment extends Fragment {
         textSharingValue.setText(getString(R.string.value_div, totalValue[0], actualValue[0]));
         textSharingValue.setTextColor(getResources().getColor(R.color.categoryGreen, context.getTheme()));
 
-        //Setup Credit/Debit Radio Group
-        RadioButton expenseIncomeCredit = view.findViewById(R.id.expense_income_credit);
-        if(unconfirmedEntry != null) {
-            expenseIncomeCredit.setChecked(unconfirmedEntry.isCredited());
-            RadioButton expenseIncomeDebit = view.findViewById(R.id.expense_income_debit);
-            expenseIncomeDebit.setChecked(!unconfirmedEntry.isCredited());
-        }
-        radioCreditDebit.setOnCheckedChangeListener((group, checkedId) -> {
-            if(checkedId == R.id.expense_income_credit) {
-                checkBoxIsShared.setChecked(false);
-                layoutShared.setVisibility(View.GONE);
-                checkBoxIsShared.setEnabled(false);
-                spinnerCategory.setAdapter(adt_IncomeCategory);
-                spinnerSubCategory.setAdapter(adt_IncomeSubCategory);
-            } else if(checkedId == R.id.expense_income_debit) {
-                checkBoxIsShared.setEnabled(true);
-                spinnerCategory.setAdapter(adt_ExpenseCategory);
-                spinnerSubCategory.setAdapter(adt_ExpenseSubCategory);
-            }
-        });
-
         //Setup Category / Income Type
-        spinnerCategory.setAdapter(adt_ExpenseCategory);
-        spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view2, int position, long id) {
-                if(((RadioButton)view.findViewById(R.id.expense_income_credit)).isChecked()) {
-                    int bgId = settings.getExpenseCategory().get(position).getColorId();
-                    spinnerSubCategory.setAdapter(new ComboBoxAdapter(requireContext(), settings.getIncomeSubCategory(position), bgId));
-                    ((ComboBoxAdapter) spinnerPayment.getAdapter()).setBackgroundColorId(bgId);
-                    ((ComboBoxAdapter) spinnerPayment.getAdapter()).notifyDataSetChanged();
-                } else {
-                    int bgId = settings.getExpenseCategory().get(position).getColorId();
-                    spinnerSubCategory.setAdapter(new ComboBoxAdapter(requireContext(), settings.getExpenseSubCategory(position), bgId));
-                    ((ComboBoxAdapter) spinnerPayment.getAdapter()).setBackgroundColorId(bgId);
-                    ((ComboBoxAdapter) spinnerPayment.getAdapter()).notifyDataSetChanged();
-                }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+        spinnerCategory.setAdapter(adt_Category);
 
         //Setup SubCategory
-        spinnerSubCategory.setAdapter(adt_ExpenseSubCategory);
+        spinnerSubCategory.setAdapter(adt_SubCategory);
 
         //Setup Payment Type
         spinnerPayment.setAdapter(adt_Payment);
@@ -235,6 +203,9 @@ public class AddExpenseFragment extends Fragment {
         });
 
         //Setup IsShared Checkbox
+        if(isIncome) {
+            checkBoxIsShared.setVisibility(View.GONE);
+        }
         checkBoxIsShared.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if(isChecked) {
                 layoutShared.setVisibility(View.VISIBLE);
@@ -322,8 +293,8 @@ public class AddExpenseFragment extends Fragment {
             if(error) {
                 return;
             }
-            if(unconfirmedEntryId >= 0) {
-                ((MainActivity)requireActivity()).getEntries().remove(unconfirmedEntryId);
+            if(unconfirmedEntry != null) {
+                ((MainActivity)requireActivity()).getEntries().remove(unconfirmedEntry);
             }
             ArrayList<String> newUsers = new ArrayList<>();
             try {
@@ -331,7 +302,8 @@ public class AddExpenseFragment extends Fragment {
                 HashMap<String, Integer> userMap = new HashMap<>();
                 for(Entry.SharedUser sharedUser : sharedUserList) {
                     if(userMap.containsKey(sharedUser.getName())) {
-                        userMap.replace(sharedUser.getName(), userMap.getOrDefault(sharedUser.getName(), 0) + sharedUser.getValue());
+                        Integer a = userMap.get(sharedUser.getName());
+                        userMap.replace(sharedUser.getName(), a == null ? 0 : a + sharedUser.getValue());
                     } else if(!sharedUser.getName().isEmpty()){
                         userMap.put(sharedUser.getName(), sharedUser.getValue());
                     }
@@ -343,7 +315,8 @@ public class AddExpenseFragment extends Fragment {
                     if(!s.contains(name) && !"Me".equals(name)) {
                         newUsers.add(name);
                     }
-                    sharedUserList.add(new Entry.SharedUser(name, userMap.getOrDefault(name, 0)));
+                    Integer a = userMap.get(name);
+                    sharedUserList.add(new Entry.SharedUser(name, a == null ? 0 : a));
                 }
                 Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), sharedUserList);
             } catch (ParseException e) {

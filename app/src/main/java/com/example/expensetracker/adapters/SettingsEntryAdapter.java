@@ -15,7 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.expensetracker.ExpenseSettings;
+import com.example.expensetracker.Settings;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.SettingsUpdateListener;
@@ -56,7 +56,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
         final boolean isExpanded = position==mExpandedPosition;
         holder.hidden.setVisibility(isExpanded?View.VISIBLE:View.GONE);
         holder.hiddenButton.setVisibility(isExpanded?View.VISIBLE:View.GONE);
-        holder.hiddenCategory.setVisibility(isExpanded && (position == 3 || position == 4)?View.VISIBLE:View.GONE);
+        holder.hiddenCategory.setVisibility(isExpanded && (position == 2 || position == 4)?View.VISIBLE:View.GONE);
         holder.itemView.setActivated(isExpanded);
         holder.itemView.setOnClickListener(v -> {
             notifyItemChanged(mExpandedPosition);
@@ -91,14 +91,13 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
 
     private void updateNewExpenseSetting()
     {
-        ExpenseSettings settings = ((MainActivity)currentContext).getSettings();
-        ExpenseSettings newExpenseSettings = ExpenseSettings.createWithParametersFromDatabase();
-        settings.updateExpenseSettings(newExpenseSettings);
+        Settings settings = ((MainActivity)currentContext).getSettings();
+        Settings newSettings = Settings.createWithParametersFromDatabase();
+        settings.updateExpenseSettings(newSettings);
     }
 
     private void setupListeners(ViewHolder holder, int rootPosition) {
-       ExpenseSettings settings = ((MainActivity)currentContext).getSettings();
-       holder.hiddenCategory.setAdapter(new ComboBoxAdapter(currentContext, settings.getExpenseCategory(), 0));
+       Settings settings = ((MainActivity)currentContext).getSettings();
        SettingsUpdateListener nameListener = new SettingsUpdateListener() {
             @Override
             public void onSettingsUpdateListener(int position, String newName, int newLogo) {
@@ -137,8 +136,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         User u = settings.getUsers().get(position);
                         u.setName(newName);
                         u.setLogo(newLogo);
-                        //TODO
-                        //DBManager.getDBManagerInstance().updateUser(u);
+                        DBManager.getDBManagerInstance().updateUser(u);
                 }
 
                 updateNewExpenseSetting();
@@ -167,8 +165,7 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         DBManager.getDBManagerInstance().deleteIncomeSubCategory(settings.getIncomeCategory().get(holder.hiddenCategory.getSelectedItemPosition()).getSubCategories().get(position));
                         break;
                     case 5: //Users
-                        //TODO
-                        //DBManager.getDBManagerInstance().deleteUser(settings.getUsers().get(position));
+                        DBManager.getDBManagerInstance().deleteUser(settings.getUsers().get(position));
                 }
 
                 updateNewExpenseSetting();
@@ -184,24 +181,19 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         DBManager.getDBManagerInstance().insertPaymentType(new PaymentType(0, name, logo));
                         break;
                     case 1: //Expense Category
-                        //TODO
-                        //DBManager.getDBManagerInstance().insertExpenseCategory(new Category(0, name, logo, new ArrayList<>()));
+                        DBManager.getDBManagerInstance().insertExpenseCategory(new Category(0, name, logo, new ArrayList<>()));
                         break;
                     case 2: //Expense Sub-Category
-                        //TODO
-                        //DBManager.getDBManagerInstance().insertExpenseSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                        DBManager.getDBManagerInstance().insertExpenseSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
                         break;
                     case 3: //Income Category
-                        //TODO
-                        //DBManager.getDBManagerInstance().insertIncomeCategory(new Category(0, name, logo, new ArrayList<>()));
+                        DBManager.getDBManagerInstance().insertIncomeCategory(new Category(0, name, logo, new ArrayList<>()));
                         break;
                     case 4: //Expense Sub-Category
-                        //TODO
-                        //DBManager.getDBManagerInstance().insertIncomeSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                        DBManager.getDBManagerInstance().insertIncomeSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
                         break;
                     case 5: //Users
-                        //TODO
-                        //DBManager.getDBManagerInstance().insertUser(new User(name));
+                        DBManager.getDBManagerInstance().insertUser(new User(name));
                         break;
                 }
 
@@ -221,12 +213,14 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                 break;
             case 2: //Expense Sub-Category
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getExpenseSubCategory(0), nameListener);
+                holder.hiddenCategory.setAdapter(new ComboBoxAdapter(currentContext, settings.getExpenseCategory(), 0));
                 break;
-            case 3: //Expense Category
+            case 3: //Income Category
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getIncomeCategory(), nameListener);
                 break;
-            case 4: //Expense Sub-Category
+            case 4: //Income Sub-Category
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getIncomeSubCategory(0), nameListener);
+                holder.hiddenCategory.setAdapter(new ComboBoxAdapter(currentContext, settings.getIncomeCategory(), 0));
                 break;
             case 5: //Users
                 settingsModifyAdapter = new SettingsModifyAdapter(settings.getUsers(), nameListener);
@@ -242,8 +236,10 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
         holder.hiddenCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(rootPosition == 3 || rootPosition == 4) {
+                if(rootPosition == 2) {
                     holder.hidden.setAdapter(new SettingsModifyAdapter(settings.getExpenseSubCategory(position), nameListener));
+                } else if(rootPosition == 4) {
+                    holder.hidden.setAdapter(new SettingsModifyAdapter(settings.getIncomeSubCategory(position), nameListener));
                 }
             }
             @Override
