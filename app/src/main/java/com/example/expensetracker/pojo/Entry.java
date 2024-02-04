@@ -33,21 +33,16 @@ public class Entry {
     private int subCategoryId;
     private int paymentId;
     private Date date;
-    private Date time;
-
-    private boolean isShared;
     private ArrayList<SharedUser> sharedUsersList;
 
-    public Entry(String name, int value, int categoryId, int subCategoryId, int paymentId, Date date, Date time, boolean isShared, ArrayList<SharedUser> sharedUsersList) {
+    public Entry(String name, int value, int categoryId, int subCategoryId, int paymentId, Date date, Date time) {
         this.name = name;
         this.value = value;
         this.categoryId = categoryId;
         this.subCategoryId = subCategoryId;
         this.paymentId = paymentId;
-        this.date = date;
-        this.time = time;
-        this.isShared = isShared;
-        this.sharedUsersList = sharedUsersList;
+        this.date = new Date(date.getTime() + time.getTime());
+        this.sharedUsersList = new ArrayList<>();
     }
 
     public String getName() {
@@ -98,14 +93,6 @@ public class Entry {
         this.date = date;
     }
 
-    public Date getTime() {
-        return time;
-    }
-
-    public void setTime(Date time) {
-        this.time = time;
-    }
-
     public ArrayList<SharedUser> getSharedUsersList() {
         return sharedUsersList;
     }
@@ -115,10 +102,6 @@ public class Entry {
     }
 
     public boolean getIsShared() {
-        return isShared;
-    }
-
-    public void setIsShared(boolean isShared) {
-        this.isShared = isShared;
+        return sharedUsersList.isEmpty();
     }
 }

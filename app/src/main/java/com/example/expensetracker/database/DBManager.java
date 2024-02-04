@@ -26,10 +26,10 @@ public class DBManager{
 
     }
 
-    private static boolean isDatabaseCreated(Context context)
+    private static boolean isDatabaseCreated(Context conTEXT)
     {
         try {
-           SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY).close();
+           SQLiteDatabase.openDatabase(conTEXT.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY).close();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -69,31 +69,31 @@ public class DBManager{
         // create table - paymentMethod
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.PAYMENT_TYPE +
-                        "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
+                        "(id INTEGER PRIMARY KEY, name TEXT NOT NULL,drawable_id INTEGER DEFAULT 0)"
         );
 
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.USERS +
-                        "(id INTEGER PRIMARY KEY, name text NOT NULL,drawable_id INTEGER DEFAULT 0)"
+                        "(id INTEGER PRIMARY KEY, name TEXT NOT NULL,drawable_id INTEGER DEFAULT 0)"
         );
 
         // TABLES AS PER Expense/Income TYPE
         // create table - category
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS " + DatabaseDetails.CATEGORY_EXPENSE +
-                        "(id INTEGER PRIMARY KEY, name text NOT NULL, color_id INTEGER)"
+                        "(id INTEGER PRIMARY KEY, name TEXT NOT NULL, color_id INTEGER)"
         );
 
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS " + DatabaseDetails.CATEGORY_INCOME +
-                        "(id INTEGER PRIMARY KEY, name text NOT NULL, color_id INTEGER)"
+                        "(id INTEGER PRIMARY KEY, name TEXT NOT NULL, color_id INTEGER)"
         );
 
         // create table - subCategory
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.SUBCATEGORY_EXPENSE +
                         "(" +
-                            "id INTEGER PRIMARY KEY, name text NOT NULL, category_id INTEGER," +
+                            "id INTEGER PRIMARY KEY, name TEXT NOT NULL, category_id INTEGER," +
                             "FOREIGN KEY(category_id)" +
                             "REFERENCES category(id) " +
                         ")"
@@ -102,7 +102,7 @@ public class DBManager{
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.SUBCATEGORY_INCOME +
                         "(" +
-                        "id INTEGER PRIMARY KEY, name text NOT NULL, category_id INTEGER," +
+                        "id INTEGER PRIMARY KEY, name TEXT NOT NULL, category_id INTEGER," +
                         "FOREIGN KEY(category_id)" +
                         "REFERENCES category(id) " +
                         ")"
@@ -113,13 +113,12 @@ public class DBManager{
                 "create table IF NOT EXISTS " + DatabaseDetails.EXPENSE_ENTRIES +
                         "(" +
                             "id INTEGER PRIMARY KEY, " +
-                            "name text NOT NULL," +
+                            "name TEXT NOT NULL," +
                             "value REAL NOT NULL, " +
                             "category_id INTEGER NOT NULL," +
                             "subCategory_id INTEGER NOT NULL," +
                             "paymentMethod_id INTEGER, " +
-                            "date REAL, " +
-                            "time REAL, " +
+                            "date_time TEXT, " +
                             "isSharedExpense INTEGER" +
                         ")"
         );
@@ -138,13 +137,12 @@ public class DBManager{
                 "create table IF NOT EXISTS " + DatabaseDetails.INCOME_ENTRIES +
                         "(" +
                         "id INTEGER PRIMARY KEY, " +
-                        "name text NOT NULL," +
+                        "name TEXT NOT NULL," +
                         "value REAL NOT NULL, " +
                         "category_id INTEGER NOT NULL," +
                         "subCategory_id INTEGER NOT NULL," +
                         "paymentMethod_id INTEGER, " +
-                        "date REAL, " +
-                        "time REAL " +
+                        "date_time TEXT " +
                         ")"
         );
 
@@ -163,19 +161,10 @@ public class DBManager{
 
     public void insertSettings(Settings settings)
     {
-        for(PaymentType l : settings.getPaymentMethod()) {
-            insertPaymentType(l);
-        }
-
-        for(Category l : settings.getExpenseCategory()) {
-            // insert subcategory is called in the insertCategory
-            insertExpenseCategory(l);
-        }
-
-        for(Category l : settings.getIncomeCategory()) {
-            // insert subcategory is called in the insertCategory
-            insertIncomeCategory(l);
-        }
+        settings.getPaymentMethod().forEach(this::insertPaymentType);
+        settings.getExpenseCategory().forEach(this::insertExpenseCategory);
+        settings.getIncomeCategory().forEach(this::insertIncomeCategory);
+        settings.getUsers().forEach(this::insertUser);
     }
 
     public ArrayList<Category> getExpenseCategoryData() {
@@ -529,8 +518,7 @@ public class DBManager{
         contentValues.put("category_id", entry.getCategoryId());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-        contentValues.put("date", entry.getDate().toString());
-        contentValues.put("time", entry.getTime().toString());
+        contentValues.put("date_time", entry.getDate().toString());
         contentValues.put("isSharedExpense", entry.getIsShared());
 
         long id = this.insert(contentValues, DatabaseDetails.EXPENSE_ENTRIES);
@@ -553,8 +541,7 @@ public class DBManager{
         contentValues.put("category_id", entry.getCategoryId());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-        contentValues.put("date", entry.getDate().toString());
-        contentValues.put("time", entry.getTime().toString());
+        contentValues.put("date_time", entry.getDate().toString());
 
         long id = this.insert(contentValues, DatabaseDetails.INCOME_ENTRIES);
         if(id == -1)

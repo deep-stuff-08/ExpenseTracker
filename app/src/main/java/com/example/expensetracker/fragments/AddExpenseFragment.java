@@ -298,59 +298,50 @@ public class AddExpenseFragment extends Fragment {
             if(unconfirmedEntry != null) {
                 ((MainActivity)requireActivity()).getEntries().remove(unconfirmedEntry);
             }
-            ArrayList<String> newUsers = new ArrayList<>();
-            Entry entry;
+            Date date = new Date();
+            Date time = new Date();
             try {
-                ArrayList<Entry.SharedUser> sharedUserList =  ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList();
-                HashMap<String, Integer> userMap = new HashMap<>();
-                for(Entry.SharedUser sharedUser : sharedUserList) {
-                    if(userMap.containsKey(sharedUser.getUser().getName())) {
-                        Integer a = userMap.get(sharedUser.getUser().getName());
-                        userMap.replace(sharedUser.getUser().getName(), a == null ? 0 : a + sharedUser.getValue());
-                    } else if(!sharedUser.getUser().getName().isEmpty()){
-                        userMap.put(sharedUser.getUser().getName(), sharedUser.getValue());
-                    }
-                }
-                sharedUserList.clear();
-                Set<String> s = new HashSet<>();
-                settings.getUsers().forEach(user -> s.add(user.getName()));
-                for(String name : userMap.keySet()) {
-                    if(!s.contains(name) && !"Me".equals(name)) {
-                        newUsers.add(name);
-                    }
-                    Integer a = userMap.get(name);
-                }
-                entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), sdfDate.parse(pickerDate.getText().toString()), sdfTime.parse(pickerTime.getText().toString()), checkBoxIsShared.isChecked(), sharedUserList);
-
-			} catch (ParseException e) {
+                date = sdfDate.parse(pickerDate.getText().toString());
+                time = sdfTime.parse(pickerTime.getText().toString());
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
-			if(newUsers.size() > 0) {
-				StringBuilder userList = new StringBuilder();
-				for(int i = 0; i < newUsers.size(); i++) {
-					userList.append(i).append(") ").append(newUsers.get(i)).append("\n");
-				}
-				new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc.\n" + userList)
-						.setPositiveButton("Yes", (dialog, which) -> {
-							for(int i = 0; i < newUsers.size(); i++) {
-								DBManager.getDBManagerInstance().insertUser(new User(0, newUsers.get(i)));
-							}
-							onSuccessfulSubmit(entry, view, checkBoxIsRepeat);
-						})
-						.setCancelable(true)
-						.setNegativeButton("No", (dialog, which) -> {
-							onSuccessfulSubmit(entry, view, checkBoxIsRepeat);
-						}).show();
-			} else {
-				onSuccessfulSubmit(entry, view, checkBoxIsRepeat);
-			}
+            Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), date, time);
+            if(!isIncome && checkBoxIsShared.isChecked()) {
+                ArrayList<User> newUserList = new ArrayList<>();
+                ArrayList<Entry.SharedUser> sharedUserList =  ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList(newUserList);
+                entry.setSharedUsersList(sharedUserList);
+                if (newUserList.size() > 0) {
+                    StringBuilder userList = new StringBuilder();
+                    for (int i = 0; i < newUserList.size(); i++) {
+                        userList.append(i).append(") ").append(newUserList.get(i).getName()).append("\n");
+                    }
+                    new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc.\n" + userList)
+                            .setPositiveButton("Yes", (dialog, which) -> {
+                                newUserList.forEach(user -> DBManager.getDBManagerInstance().insertUser(user));
+                                onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
+                            })
+                            .setCancelable(true)
+                            .setNegativeButton("No", (dialog, which) -> {
+                                onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
+                            }).show();
+                } else {
+                    onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
+                }
+            } else {
+                onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), isIncome);
+            }
         });
     }
 
-    private void onSuccessfulSubmit(Entry entry, View view, CheckBox isRepeat) {
-        DBManager.getDBManagerInstance().insertExpenseEntries(entry);
+    private void onSuccessfulSubmit(Entry entry, View view, boolean isRepeat, boolean isIncome) {
+        if(isIncome) {
+            DBManager.getDBManagerInstance().insertIncomeEntries(entry);
+        } else {
+            DBManager.getDBManagerInstance().insertExpenseEntries(entry);
+        }
         Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
-        if (isRepeat.isChecked()) {
+        if (isRepeat) {
             Bundle bundle = new Bundle();
             bundle.putBoolean("isLogMultiOn", true);
             Navigation.findNavController(view).navigate(R.id.entryFragment, bundle, new NavOptions.Builder().setPopUpTo(R.id.entryFragment, true).build());
