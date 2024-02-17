@@ -7,17 +7,17 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class SubCategory extends SettingsParent {
-    int id;
+    private long id;
     String name;
     int drawableId;
-    int categoryId;
+    long categoryId;
 
     public SubCategory() {
         this.name = "";
         this.drawableId = 0;
     }
 
-    public SubCategory(int id, String name, int categoryId, int drawableId) {
+    public SubCategory(long id, String name, long categoryId, int drawableId) {
         this.id = id;
         this.name = name;
         this.categoryId = categoryId;
@@ -32,13 +32,13 @@ public class SubCategory extends SettingsParent {
         this.name = name;
     }
 
-    public void setCategoryId(int categoryId) { this.categoryId = categoryId;}
+    public void setCategoryId(long categoryId) { this.categoryId = categoryId;}
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public int getCategoryId() {
+    public long getCategoryId() {
         return categoryId;
     }
 

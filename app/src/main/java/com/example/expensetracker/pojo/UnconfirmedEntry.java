@@ -3,6 +3,8 @@ package com.example.expensetracker.pojo;
 import java.util.Date;
 
 public class UnconfirmedEntry {
+
+    private long id;
     private final String sender;
     private final String body;
     private final Date sentDate;
@@ -35,5 +37,13 @@ public class UnconfirmedEntry {
 
     public boolean isCredited() {
         return isCredited;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Category extends SettingsParent {
     private String name;
 
-    private  int id;
+    private  long id;
     private int colorId;
     final private ArrayList<SubCategory> subCategories;
 
@@ -22,7 +22,7 @@ public class Category extends SettingsParent {
         this.subCategories = new ArrayList<>();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

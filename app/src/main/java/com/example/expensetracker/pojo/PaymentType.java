@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class PaymentType extends SettingsParent {
-    int id;
+    private long id;
     private String name;
     private int drawableId;
 
@@ -26,7 +26,7 @@ public class PaymentType extends SettingsParent {
         return name;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 

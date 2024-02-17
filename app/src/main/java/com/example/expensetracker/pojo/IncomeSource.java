@@ -2,6 +2,8 @@ package com.example.expensetracker.pojo;
 
 public class IncomeSource extends SettingsParent {
 
+    private long id;
+
     String name;
 
     public IncomeSource(String name) {
