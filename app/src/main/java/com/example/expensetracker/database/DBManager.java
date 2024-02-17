@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.example.expensetracker.Settings;
@@ -15,6 +16,7 @@ import com.example.expensetracker.pojo.SubCategory;
 import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class DBManager{
     private static DBManager dbManager = null;
@@ -93,18 +95,16 @@ public class DBManager{
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.SUBCATEGORY_EXPENSE +
                         "(" +
-                            "id INTEGER PRIMARY KEY, name TEXT NOT NULL, category_id INTEGER," +
-                            "FOREIGN KEY(category_id)" +
-                            "REFERENCES category(id) " +
+                            "id INTEGER PRIMARY KEY, name text NOT NULL, category_id INTEGER," +
+                            "FOREIGN KEY(category_id) REFERENCES "+ DatabaseDetails.CATEGORY_EXPENSE +"(id)" +
                         ")"
         );
 
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.SUBCATEGORY_INCOME +
                         "(" +
-                        "id INTEGER PRIMARY KEY, name TEXT NOT NULL, category_id INTEGER," +
-                        "FOREIGN KEY(category_id)" +
-                        "REFERENCES category(id) " +
+                        "id INTEGER PRIMARY KEY, name text NOT NULL, category_id INTEGER," +
+                        "FOREIGN KEY(category_id) REFERENCES "+ DatabaseDetails.CATEGORY_INCOME +"(id) " +
                         ")"
         );
 
@@ -115,11 +115,12 @@ public class DBManager{
                             "id INTEGER PRIMARY KEY, " +
                             "name TEXT NOT NULL," +
                             "value REAL NOT NULL, " +
-                            "category_id INTEGER NOT NULL," +
-                            "subCategory_id INTEGER NOT NULL," +
-                            "paymentMethod_id INTEGER, " +
+                            "subcategory_id INTEGER NOT NULL," +
+                            "paymentmethod_id INTEGER, " +
                             "date_time TEXT, " +
-                            "isSharedExpense INTEGER" +
+                            "isShared_expense INTEGER, " +
+                            "FOREIGN KEY(subcategory_id) REFERENCES "+ DatabaseDetails.SUBCATEGORY_EXPENSE +"(id)," +
+                            "FOREIGN KEY(paymentmethod_id) REFERENCES "+ DatabaseDetails.PAYMENT_TYPE +"(id)" +
                         ")"
         );
 
@@ -127,9 +128,11 @@ public class DBManager{
                 "create table IF NOT EXISTS  " + DatabaseDetails.EXPENSE_SHARED +
                         "( " +
                         "id INTEGER PRIMARY KEY, " +
-                        "Expense_entries_id INTEGER NOT NULL, " +
+                        "expenseentries_id INTEGER NOT NULL, " +
                         "user_id INTEGER, " +
-                        "value INTEGER" +
+                        "value INTEGER, " +
+                        "FOREIGN KEY(expenseentries_id) REFERENCES "+ DatabaseDetails.EXPENSE_ENTRIES +"(id)," +
+                        "FOREIGN KEY(user_id) REFERENCES "+ DatabaseDetails.USERS +"(id)" +
                         ")"
         );
 
@@ -139,10 +142,11 @@ public class DBManager{
                         "id INTEGER PRIMARY KEY, " +
                         "name TEXT NOT NULL," +
                         "value REAL NOT NULL, " +
-                        "category_id INTEGER NOT NULL," +
-                        "subCategory_id INTEGER NOT NULL," +
-                        "paymentMethod_id INTEGER, " +
+                        "subcategory_id INTEGER NOT NULL," +
+                        "paymentmethod_id INTEGER, " +
                         "date_time TEXT " +
+                        "FOREIGN KEY(subcategory_id) REFERENCES "+ DatabaseDetails.SUBCATEGORY_INCOME +"(id)," +
+                        "FOREIGN KEY(paymentmethod_id) REFERENCES "+ DatabaseDetails.PAYMENT_TYPE +"(id)" +
                         ")"
         );
 
@@ -152,7 +156,9 @@ public class DBManager{
                         "id INTEGER PRIMARY KEY, " +
                         "sender_id INTEGER NOT NULL, " +
                         "receiver_id INTEGER NOT NULL, " +
-                        "value INTEGER NOT NULL " +
+                        "value INTEGER NOT NULL, " +
+                        "FOREIGN KEY(sender_id) REFERENCES "+  DatabaseDetails.USERS +"(id), " +
+                        "FOREIGN KEY(receiver_id) REFERENCES "+  DatabaseDetails.USERS +"(id)" +
                         ")"
         );
     }
@@ -225,7 +231,7 @@ public class DBManager{
 
     public void deleteExpenseCategory(Category c)
     {
-        int categoryId = c.getId();
+        long categoryId = c.getId();
         for(SubCategory sCat: c.getSubCategories())
         {
             sCat.setCategoryId(categoryId);
@@ -295,7 +301,7 @@ public class DBManager{
 
     public void deleteIncomeCategory(Category c)
     {
-        int categoryId = c.getId();
+        long categoryId = c.getId();
         for(SubCategory sCat: c.getSubCategories())
         {
             sCat.setCategoryId(categoryId);
@@ -508,23 +514,51 @@ public class DBManager{
         this.insert(contentValues, DatabaseDetails.EXPENSE_SHARED);
     }
 
+     public ArrayList<Entry.SharedUser> getSharedUserEntries(long expenseID)
+     {
+         ArrayList<Entry.SharedUser> data = new ArrayList<>();
+         String query = "select id, user_id, "
+                        + DatabaseDetails.USERS+ ".name user_name,  " + " value from "
+                        + DatabaseDetails.EXPENSE_SHARED
+                        + " JOIN  " + DatabaseDetails.USERS
+                        + " ON " + DatabaseDetails.EXPENSE_SHARED + ".user_id = " + DatabaseDetails.USERS + ".id "
+                        + " where expense_entries_id = " + expenseID;
+         try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
+                 null)) {
+             if (null != cursor)
+                 cursor.moveToFirst();
+             do {
+                 assert cursor != null;
+                 long id = cursor.getLong(0);
+                 long user_id = cursor.getLong(1);
+                 String name = cursor.getString(2);
+                 int value = cursor.getInt(3);
+                 Entry.SharedUser obj = new Entry.SharedUser(new User(user_id,name), id, value);
+                 data.add(obj);
+             } while (cursor.moveToNext());
+         }
+         catch (Exception e)
+         {
+             e.printStackTrace();
+         }
+         return data;
+     }
+
     public void insertExpenseEntries(Entry entry)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", entry.getName());
         contentValues.put("value", entry.getValue());
-        contentValues.put("category_id", entry.getCategoryId());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-        contentValues.put("date_time", entry.getDate().toString());
-        contentValues.put("isSharedExpense", entry.getIsShared());
+		contentValues.put("date_time", entry.getDate().toString());
+        contentValues.put("isShared_expense", entry.isShared());
 
         long id = this.insert(contentValues, DatabaseDetails.EXPENSE_ENTRIES);
         if(id == -1)
         {
             throw  new RuntimeException();
         }
-
         entry.getSharedUsersList().forEach(sharedUser ->
         {
             insertSharedUserEntries(sharedUser, id);
@@ -546,6 +580,32 @@ public class DBManager{
         {
             throw  new RuntimeException();
         }
+    }
+
+    public ArrayList<Entry> getIncomeEntries() {
+        ArrayList<Entry> data = new ArrayList<>();
+        String query = "select id, name, value, category_id, subCategory_id, paymentMethod_id, date,time from "+ DatabaseDetails.INCOME_ENTRIES;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
+                null)) {
+            if (null != cursor)
+                cursor.moveToFirst();
+            do {
+                assert cursor != null;
+                long id = cursor.getLong(0);
+                String name = cursor.getString(1);
+                int value = cursor.getInt(2);
+                long category_id = cursor.getLong(3);
+                long subCategory_id = cursor.getLong(4);
+                long paymentMethod_id = cursor.getLong(5);
+                Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, new Date(),new Date());
+                data.add(entry);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return data;
     }
 
     public void insertTransferEntries(int sender_user_id, int receiver_user_id, int value)

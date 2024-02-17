@@ -5,15 +5,6 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavOptions;
-import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
@@ -26,16 +17,22 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.example.expensetracker.adapters.ComboBoxAdapter;
-import com.example.expensetracker.Settings;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavOptions;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
+import com.example.expensetracker.Settings;
+import com.example.expensetracker.adapters.ComboBoxAdapter;
 import com.example.expensetracker.adapters.SharedUserAdapter;
 import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.Entry;
@@ -48,11 +45,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Set;
 
 public class AddExpenseFragment extends Fragment {
     private SimpleDateFormat sdfDate;
@@ -322,9 +316,7 @@ public class AddExpenseFragment extends Fragment {
                                 onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
                             })
                             .setCancelable(true)
-                            .setNegativeButton("No", (dialog, which) -> {
-                                onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
-                            }).show();
+                            .setNegativeButton("No", (dialog, which) -> onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false)).show();
                 } else {
                     onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
                 }
