@@ -11,18 +11,14 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.adapters.TransferUserAdapter;
-import com.example.expensetracker.pojo.User;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Objects;
 
 public class TransferFragment extends Fragment {
     public TransferFragment() {
@@ -57,7 +53,11 @@ public class TransferFragment extends Fragment {
         spinnerTo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                ((TransferUserAdapter)spinnerFrom.getAdapter()).setEnableUsers(id == 0);
+                TransferUserAdapter t = ((TransferUserAdapter)spinnerFrom.getAdapter());
+                if(position != 0) {
+                    String item = (String) spinnerTo.getSelectedItem();
+                    t.setSelectedItem(item);
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -67,7 +67,11 @@ public class TransferFragment extends Fragment {
         spinnerFrom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                ((TransferUserAdapter)spinnerTo.getAdapter()).setEnableUsers(id == 0);
+                TransferUserAdapter t = ((TransferUserAdapter) spinnerTo.getAdapter());
+                if(position != 0) {
+                    String item = (String) spinnerFrom.getSelectedItem();
+                    t.setSelectedItem(item);
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -76,13 +80,39 @@ public class TransferFragment extends Fragment {
         });
 
         btnSwap.setOnClickListener(v -> {
-            boolean from = ((TransferUserAdapter)spinnerFrom.getAdapter()).getEnableUsers();
-            ((TransferUserAdapter)spinnerFrom.getAdapter()).setEnableUsers(((TransferUserAdapter)spinnerTo.getAdapter()).getEnableUsers());
-            ((TransferUserAdapter)spinnerTo.getAdapter()).setEnableUsers(from);
+            TransferUserAdapter from = (TransferUserAdapter) spinnerFrom.getAdapter();
+            TransferUserAdapter to = (TransferUserAdapter) spinnerTo.getAdapter();
 
-            int froms = spinnerFrom.getSelectedItemPosition();
-            spinnerFrom.setSelection(spinnerTo.getSelectedItemPosition());
-            spinnerTo.setSelection(froms);
+            TransferUserAdapter.State fromState = from.getState();
+            TransferUserAdapter.State toState = to.getState();
+
+            from.resetState();
+            to.resetState();
+
+            int selected = from.getItemPosition((String)spinnerFrom.getSelectedItem());
+            int selected2 = to.getItemPosition((String)spinnerTo.getSelectedItem());
+            spinnerFrom.setSelection(selected2);
+            spinnerTo.setSelection(selected);
+
+            from.setState(toState);
+            to.setState(fromState);
+        });
+
+        btnSubmit.setOnClickListener(v -> {
+            String from = (String)spinnerFrom.getSelectedItem();
+            String to = (String)spinnerTo.getSelectedItem();
+            String value = txtValue.getText().toString();
+
+            if(Objects.equals(from, "Select an Option")) {
+                ((TextView)spinnerFrom.getSelectedView().findViewById(R.id.spinner_category_text)).setError("From Not Set");
+            }
+            if(Objects.equals(to, "Select an Option")) {
+                ((TextView)spinnerTo.getSelectedView().findViewById(R.id.spinner_category_text)).setError("From Not Set");
+            }
+
+            if(value.isEmpty()) {
+                txtValue.setError("Value Empty");
+            }
         });
 
         return view;

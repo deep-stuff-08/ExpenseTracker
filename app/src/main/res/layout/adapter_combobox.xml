@@ -20,12 +20,11 @@
 
     <TextView
         android:id="@+id/spinner_category_text"
-        android:textSize="28sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@id/spinner_category_image"
         android:layout_centerInParent="true"
-        />
+        android:layout_toEndOf="@id/spinner_category_image"
+        android:textSize="28sp" />
 
 </RelativeLayout>

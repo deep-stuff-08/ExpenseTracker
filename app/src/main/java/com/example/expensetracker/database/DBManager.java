@@ -155,8 +155,6 @@ public class DBManager{
                         "value INTEGER NOT NULL " +
                         ")"
         );
-
-        Log.d("DATABASE_LOG", "onCreate: exit");
     }
 
     public void insertSettings(Settings settings)
