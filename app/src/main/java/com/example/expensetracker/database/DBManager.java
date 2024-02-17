@@ -144,7 +144,7 @@ public class DBManager{
                         "value REAL NOT NULL, " +
                         "subcategory_id INTEGER NOT NULL," +
                         "paymentmethod_id INTEGER, " +
-                        "date_time TEXT " +
+                        "date_time TEXT, " +
                         "FOREIGN KEY(subcategory_id) REFERENCES "+ DatabaseDetails.SUBCATEGORY_INCOME +"(id)," +
                         "FOREIGN KEY(paymentmethod_id) REFERENCES "+ DatabaseDetails.PAYMENT_TYPE +"(id)" +
                         ")"
@@ -551,7 +551,7 @@ public class DBManager{
         contentValues.put("value", entry.getValue());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-		contentValues.put("date_time", entry.getDate().toString());
+		contentValues.put("date_time", entry.getDateAndTime().toString());
         contentValues.put("isShared_expense", entry.isShared());
 
         long id = this.insert(contentValues, DatabaseDetails.EXPENSE_ENTRIES);
@@ -573,7 +573,7 @@ public class DBManager{
         contentValues.put("category_id", entry.getCategoryId());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-        contentValues.put("date_time", entry.getDate().toString());
+        contentValues.put("date_time", entry.getDateAndTime().toString());
 
         long id = this.insert(contentValues, DatabaseDetails.INCOME_ENTRIES);
         if(id == -1)
