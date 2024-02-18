@@ -54,15 +54,15 @@ public class Entry {
         this.sharedUsersList = sharedUsersList;
     }
     public Entry(String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
-        new Entry(-1, name, value, categoryId, subCategoryId, paymentId, date, time, sharedUsersList);
+        this(-1, name, value, categoryId, subCategoryId, paymentId, date, time, sharedUsersList);
     }
 
     public Entry(long id, String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
-        new Entry(id, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
+        this(id, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
     }
 
     public Entry(String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
-        new Entry(-1, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
+        this(-1, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
     }
 
     public String getName() {

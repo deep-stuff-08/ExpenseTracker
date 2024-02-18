@@ -3,6 +3,8 @@ package com.example.expensetracker.fragments;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavOptions;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +18,9 @@ import android.widget.TextView;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.adapters.TransferUserAdapter;
+import com.example.expensetracker.database.DBManager;
+import com.example.expensetracker.pojo.User;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -103,16 +108,46 @@ public class TransferFragment extends Fragment {
             String to = (String)spinnerTo.getSelectedItem();
             String value = txtValue.getText().toString();
 
+            boolean error = false;
+
             if(Objects.equals(from, "Select an Option")) {
                 ((TextView)spinnerFrom.getSelectedView().findViewById(R.id.spinner_category_text)).setError("From Not Set");
+                error = true;
             }
             if(Objects.equals(to, "Select an Option")) {
-                ((TextView)spinnerTo.getSelectedView().findViewById(R.id.spinner_category_text)).setError("From Not Set");
+                ((TextView)spinnerTo.getSelectedView().findViewById(R.id.spinner_category_text)).setError("To Not Set");
+                error = true;
             }
 
             if(value.isEmpty()) {
                 txtValue.setError("Value Empty");
+                error = true;
             }
+
+            long fromUserId = -1;
+            long toUserId = -1;
+            for(User u : ((MainActivity)requireActivity()).getSettings().getUsers()) {
+                if(fromUserId == -1 && Objects.equals(u.getName(), from)) {
+                    fromUserId = u.getId();
+                }
+                if(toUserId == -1 && Objects.equals(u.getName(), to)) {
+                    toUserId = u.getId();
+                }
+            }
+
+            if(toUserId != -1 && fromUserId != -1) {
+                ((TextView)spinnerFrom.getSelectedView().findViewById(R.id.spinner_category_text)).setError("From Not Set");
+                ((TextView)spinnerTo.getSelectedView().findViewById(R.id.spinner_category_text)).setError("To Not Set");
+                error = true;
+            }
+
+            if(error) {
+                return;
+            }
+            DBManager.getDBManagerInstance().insertTransferEntries(fromUserId, toUserId, Integer.parseInt(value));
+
+            Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
+            requireActivity().getOnBackPressedDispatcher().onBackPressed();
         });
 
         return view;

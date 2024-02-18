@@ -570,7 +570,6 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", entry.getName());
         contentValues.put("value", entry.getValue());
-        contentValues.put("category_id", entry.getCategoryId());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
         contentValues.put("date_time", entry.getDateAndTime().toString());
@@ -608,7 +607,7 @@ public class DBManager{
         return data;
     }
 
-    public void insertTransferEntries(int sender_user_id, int receiver_user_id, int value)
+    public void insertTransferEntries(long sender_user_id, long receiver_user_id, int value)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("sender_id", sender_user_id);
@@ -622,17 +621,17 @@ public class DBManager{
         }
     }
 
-    public long insert(ContentValues contentValues, String tableName)
+    private long insert(ContentValues contentValues, String tableName)
     {
         return sqLiteDatabase.insert(tableName, null, contentValues);
     }
 
-    public void delete(String tableName, String condition) {
+    private void delete(String tableName, String condition) {
         sqLiteDatabase.delete(tableName, condition, null);
         Log.d("DATABASE_LOG", "delete: exiting" );
     }
 
-    public int update(String tableName, ContentValues cv, String condition) {
+    private int update(String tableName, ContentValues cv, String condition) {
         int ret =  sqLiteDatabase.update(tableName, cv, condition, null);
         Log.d("DATABASE_LOG", "update: exiting");
         return ret;
