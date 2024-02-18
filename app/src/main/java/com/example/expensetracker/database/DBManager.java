@@ -583,9 +583,8 @@ public class DBManager{
 
     public ArrayList<Entry> getIncomeEntries() {
         ArrayList<Entry> data = new ArrayList<>();
-        String query = "select id, name, value, category_id, subCategory_id, paymentMethod_id, date,time from "+ DatabaseDetails.INCOME_ENTRIES;
-        try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
-                null)) {
+        String query = "select id, name, value, subCategory_id, paymentMethod_id, date_time from "+ DatabaseDetails.INCOME_ENTRIES;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
             if (null != cursor)
                 cursor.moveToFirst();
             do {
@@ -593,10 +592,9 @@ public class DBManager{
                 long id = cursor.getLong(0);
                 String name = cursor.getString(1);
                 int value = cursor.getInt(2);
-                long category_id = cursor.getLong(3);
-                long subCategory_id = cursor.getLong(4);
-                long paymentMethod_id = cursor.getLong(5);
-                Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, new Date(),new Date());
+                long subCategory_id = cursor.getLong(3);
+                long paymentMethod_id = cursor.getLong(4);
+                Entry entry = new Entry(id, name, value, 1, subCategory_id, paymentMethod_id, new Date(),new Date());
                 data.add(entry);
             } while (cursor.moveToNext());
         }

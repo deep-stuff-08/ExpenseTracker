@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.adapters.ExpEntryAdapter;
+import com.example.expensetracker.database.DBManager;
 
 public class HomeFragment extends Fragment {
     @Override
@@ -28,7 +29,7 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         RecyclerView recycler = view.findViewById(R.id.recycleView);
-        recycler.setAdapter(new ExpEntryAdapter());
+        recycler.setAdapter(new ExpEntryAdapter((MainActivity) getActivity(), DBManager.getDBManagerInstance().getIncomeEntries()));
 
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         recycler.setVerticalScrollbarPosition(0);
