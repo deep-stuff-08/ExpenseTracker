@@ -29,7 +29,7 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         RecyclerView recycler = view.findViewById(R.id.recycleView);
-        recycler.setAdapter(new ExpEntryAdapter((MainActivity) getActivity(), DBManager.getDBManagerInstance().getIncomeEntries()));
+        recycler.setAdapter(new ExpEntryAdapter((MainActivity) getActivity(), DBManager.getDBManagerInstance().getExpenseEntries()));
 
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         recycler.setVerticalScrollbarPosition(0);
