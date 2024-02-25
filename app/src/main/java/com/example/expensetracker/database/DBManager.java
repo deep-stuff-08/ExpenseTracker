@@ -508,7 +508,7 @@ public class DBManager{
     public void insertSharedUserEntries(Entry.SharedUser sharedUser, long expenseEntriesId)
     {
         ContentValues contentValues = new ContentValues();
-        contentValues.put("expense_entries_id", expenseEntriesId);
+        contentValues.put("expenseentries_id", expenseEntriesId);
         contentValues.put("user_id", sharedUser.getUser().getId());
         contentValues.put("value", sharedUser.getValue());
         this.insert(contentValues, DatabaseDetails.EXPENSE_SHARED);
@@ -529,7 +529,11 @@ public class DBManager{
         {
             throw  new RuntimeException();
         }
-        entry.getSharedUsersList().forEach(sharedUser ->
+        ArrayList<Entry.SharedUser> sharedUsersList = new ArrayList<>();
+        Entry.SharedUser su = new Entry.SharedUser(new User(1, "Hrituja"), 50);
+        sharedUsersList.add(su);
+        //entry.getSharedUsersList().forEach(sharedUser ->
+        sharedUsersList.forEach(sharedUser ->
         {
             insertSharedUserEntries(sharedUser, id);
         });
