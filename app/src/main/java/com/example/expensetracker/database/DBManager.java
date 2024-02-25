@@ -128,10 +128,10 @@ public class DBManager{
                 "create table IF NOT EXISTS  " + DatabaseDetails.EXPENSE_SHARED +
                         "( " +
                         "id INTEGER PRIMARY KEY, " +
-                        "expenseentries_id INTEGER NOT NULL, " +
+                        "expense_entries_id INTEGER NOT NULL, " +
                         "user_id INTEGER, " +
                         "value INTEGER, " +
-                        "FOREIGN KEY(expenseentries_id) REFERENCES "+ DatabaseDetails.EXPENSE_ENTRIES +"(id)," +
+                        "FOREIGN KEY(expense_entries_id) REFERENCES "+ DatabaseDetails.EXPENSE_ENTRIES +"(id)," +
                         "FOREIGN KEY(user_id) REFERENCES "+ DatabaseDetails.USERS +"(id)" +
                         ")"
         );
@@ -508,7 +508,7 @@ public class DBManager{
     public void insertSharedUserEntries(Entry.SharedUser sharedUser, long expenseEntriesId)
     {
         ContentValues contentValues = new ContentValues();
-        contentValues.put("expenseentries_id", expenseEntriesId);
+        contentValues.put("expense_entries_id", expenseEntriesId);
         contentValues.put("user_id", sharedUser.getUser().getId());
         contentValues.put("value", sharedUser.getValue());
         this.insert(contentValues, DatabaseDetails.EXPENSE_SHARED);
@@ -529,11 +529,7 @@ public class DBManager{
         {
             throw  new RuntimeException();
         }
-        ArrayList<Entry.SharedUser> sharedUsersList = new ArrayList<>();
-        Entry.SharedUser su = new Entry.SharedUser(new User(1, "Hrituja"), 50);
-        sharedUsersList.add(su);
-        //entry.getSharedUsersList().forEach(sharedUser ->
-        sharedUsersList.forEach(sharedUser ->
+        entry.getSharedUsersList().forEach(sharedUser ->
         {
             insertSharedUserEntries(sharedUser, id);
         });
@@ -563,7 +559,7 @@ public class DBManager{
                 + DatabaseDetails.EXPENSE_SHARED
                 + " JOIN  " + DatabaseDetails.USERS
                 + " ON " + DatabaseDetails.EXPENSE_SHARED + ".user_id = " + DatabaseDetails.USERS + ".id "
-                + " where expenseentries_id = " + expenseID;
+                + " where expense_entries_id = " + expenseID;
         try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
                 null)) {
             if (null == cursor || 0 == cursor.getCount() )
