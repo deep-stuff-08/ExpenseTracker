@@ -71,12 +71,12 @@ public class DBManager{
         // create table - paymentMethod
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.PAYMENT_TYPE +
-                        "(id INTEGER PRIMARY KEY, name TEXT NOT NULL,drawable_id INTEGER DEFAULT 0)"
+                        "(id INTEGER PRIMARY KEY, name TEXT NOT NULL,color_id INTEGER DEFAULT 0)"
         );
 
         sqLiteDatabase.execSQL(
                 "create table IF NOT EXISTS  " + DatabaseDetails.USERS +
-                        "(id INTEGER PRIMARY KEY, name TEXT NOT NULL,drawable_id INTEGER DEFAULT 0)"
+                        "(id INTEGER PRIMARY KEY, name TEXT NOT NULL,color_id INTEGER DEFAULT 0)"
         );
 
         // TABLES AS PER Expense/Income TYPE
@@ -115,12 +115,12 @@ public class DBManager{
                             "id INTEGER PRIMARY KEY, " +
                             "name TEXT NOT NULL," +
                             "value REAL NOT NULL, " +
-                            "subcategory_id INTEGER NOT NULL," +
-                            "paymentmethod_id INTEGER, " +
+                            "subCategory_id INTEGER NOT NULL," +
+                            "paymentMethod_id INTEGER, " +
                             "date_time TEXT, " +
-                            "isShared_expense INTEGER, " +
-                            "FOREIGN KEY(subcategory_id) REFERENCES "+ DatabaseDetails.SUBCATEGORY_EXPENSE +"(id)," +
-                            "FOREIGN KEY(paymentmethod_id) REFERENCES "+ DatabaseDetails.PAYMENT_TYPE +"(id)" +
+                            "isShared INTEGER, " +
+                            "FOREIGN KEY(subCategory_id) REFERENCES "+ DatabaseDetails.SUBCATEGORY_EXPENSE +"(id)," +
+                            "FOREIGN KEY(paymentMethod_id) REFERENCES "+ DatabaseDetails.PAYMENT_TYPE +"(id)" +
                         ")"
         );
 
@@ -128,10 +128,10 @@ public class DBManager{
                 "create table IF NOT EXISTS  " + DatabaseDetails.EXPENSE_SHARED +
                         "( " +
                         "id INTEGER PRIMARY KEY, " +
-                        "expenseentries_id INTEGER NOT NULL, " +
+                        "expenseEntries_id INTEGER NOT NULL, " +
                         "user_id INTEGER, " +
                         "value INTEGER, " +
-                        "FOREIGN KEY(expenseentries_id) REFERENCES "+ DatabaseDetails.EXPENSE_ENTRIES +"(id)," +
+                        "FOREIGN KEY(expenseEntries_id) REFERENCES "+ DatabaseDetails.EXPENSE_ENTRIES +"(id)," +
                         "FOREIGN KEY(user_id) REFERENCES "+ DatabaseDetails.USERS +"(id)" +
                         ")"
         );
@@ -142,11 +142,11 @@ public class DBManager{
                         "id INTEGER PRIMARY KEY, " +
                         "name TEXT NOT NULL," +
                         "value REAL NOT NULL, " +
-                        "subcategory_id INTEGER NOT NULL," +
-                        "paymentmethod_id INTEGER, " +
+                        "subCategory_id INTEGER NOT NULL," +
+                        "paymentMethod_id INTEGER, " +
                         "date_time TEXT, " +
-                        "FOREIGN KEY(subcategory_id) REFERENCES "+ DatabaseDetails.SUBCATEGORY_INCOME +"(id)," +
-                        "FOREIGN KEY(paymentmethod_id) REFERENCES "+ DatabaseDetails.PAYMENT_TYPE +"(id)" +
+                        "FOREIGN KEY(subCategory_id) REFERENCES "+ DatabaseDetails.SUBCATEGORY_INCOME +"(id)," +
+                        "FOREIGN KEY(paymentMethod_id) REFERENCES "+ DatabaseDetails.PAYMENT_TYPE +"(id)" +
                         ")"
         );
 
@@ -440,7 +440,7 @@ public class DBManager{
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
-        contentValues.put("drawable_id", p.getDrawableId());
+        contentValues.put("color_id", p.getDrawableId());
         this.insert(contentValues, DatabaseDetails.PAYMENT_TYPE);
     }
 
@@ -449,7 +449,7 @@ public class DBManager{
         String condition = "id = " + p.getId();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
-        contentValues.put("drawable_id", p.getDrawableId());
+        contentValues.put("color_id", p.getDrawableId());
         this.update(DatabaseDetails.PAYMENT_TYPE, contentValues, condition);
     }
 
@@ -486,7 +486,7 @@ public class DBManager{
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", u.getName());
-        contentValues.put("drawable_id", u.getDrawableId());
+        contentValues.put("color_id", u.getDrawableId());
         this.insert(contentValues, DatabaseDetails.USERS);
     }
 
@@ -495,7 +495,7 @@ public class DBManager{
         String condition = "id = " + u.getId();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", u.getName());
-        contentValues.put("drawable_id", u.getDrawableId());
+        contentValues.put("color_id", u.getDrawableId());
         this.update(DatabaseDetails.USERS, contentValues, condition);
     }
 
@@ -508,41 +508,11 @@ public class DBManager{
     public void insertSharedUserEntries(Entry.SharedUser sharedUser, long expenseEntriesId)
     {
         ContentValues contentValues = new ContentValues();
-        contentValues.put("expense_entries_id", expenseEntriesId);
+        contentValues.put("expenseEntries_id", expenseEntriesId);
         contentValues.put("user_id", sharedUser.getUser().getId());
         contentValues.put("value", sharedUser.getValue());
         this.insert(contentValues, DatabaseDetails.EXPENSE_SHARED);
     }
-
-     public ArrayList<Entry.SharedUser> getSharedUserEntries(long expenseID)
-     {
-         ArrayList<Entry.SharedUser> data = new ArrayList<>();
-         String query = "select id, user_id, "
-                        + DatabaseDetails.USERS+ ".name user_name,  " + " value from "
-                        + DatabaseDetails.EXPENSE_SHARED
-                        + " JOIN  " + DatabaseDetails.USERS
-                        + " ON " + DatabaseDetails.EXPENSE_SHARED + ".user_id = " + DatabaseDetails.USERS + ".id "
-                        + " where expense_entries_id = " + expenseID;
-         try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
-                 null)) {
-             if (null != cursor)
-                 cursor.moveToFirst();
-             do {
-                 assert cursor != null;
-                 long id = cursor.getLong(0);
-                 long user_id = cursor.getLong(1);
-                 String name = cursor.getString(2);
-                 int value = cursor.getInt(3);
-                 Entry.SharedUser obj = new Entry.SharedUser(new User(user_id,name), id, value);
-                 data.add(obj);
-             } while (cursor.moveToNext());
-         }
-         catch (Exception e)
-         {
-             e.printStackTrace();
-         }
-         return data;
-     }
 
     public void insertExpenseEntries(Entry entry)
     {
@@ -552,7 +522,7 @@ public class DBManager{
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
 		contentValues.put("date_time", entry.getDateAndTime().toString());
-        contentValues.put("isShared_expense", entry.isShared());
+        contentValues.put("isShared", entry.isShared());
 
         long id = this.insert(contentValues, DatabaseDetails.EXPENSE_ENTRIES);
         if(id == -1)
@@ -581,20 +551,74 @@ public class DBManager{
         }
     }
 
-    public ArrayList<Entry> getIncomeEntries() {
+    public ArrayList<Entry.SharedUser> getSharedUserEntries(long expenseID)
+    {
+        ArrayList<Entry.SharedUser> data = new ArrayList<>();
+        String query = "select " + DatabaseDetails.EXPENSE_SHARED + ".id, user_id, "
+                + DatabaseDetails.USERS+ ".name user_name,  " + " value from "
+                + DatabaseDetails.EXPENSE_SHARED
+                + " JOIN  " + DatabaseDetails.USERS
+                + " ON " + DatabaseDetails.EXPENSE_SHARED + ".user_id = " + DatabaseDetails.USERS + ".id "
+                + " where expenseEntries_id = " + expenseID;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
+                null)) {
+            if (null == cursor || 0 == cursor.getCount() )
+                return data;
+
+            cursor.moveToFirst();
+            do {
+                assert cursor != null;
+                long shared_id = cursor.getLong(0);
+                long user_id = cursor.getLong(1);
+                String user_name = cursor.getString(2);
+                int shared_value = cursor.getInt(3);
+                Entry.SharedUser obj = new Entry.SharedUser(new User(user_id,user_name), shared_id, shared_value);
+                data.add(obj);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    public ArrayList<Entry> getExpenseEntries() {
         ArrayList<Entry> data = new ArrayList<>();
-        String query = "select id, name, value, subCategory_id, paymentMethod_id, date_time from "+ DatabaseDetails.INCOME_ENTRIES;
+        String query = "select "+ DatabaseDetails.EXPENSE_ENTRIES +".id, " + DatabaseDetails.EXPENSE_ENTRIES +".name, "
+                +DatabaseDetails.EXPENSE_ENTRIES+".value, "
+                +DatabaseDetails.SUBCATEGORY_EXPENSE + ".category_id as category_id, " + DatabaseDetails.CATEGORY_EXPENSE + ".name as category_name, "
+                +DatabaseDetails.EXPENSE_ENTRIES +".subCategory_id as subCategory_id," + DatabaseDetails.SUBCATEGORY_EXPENSE + ".name as subCategory_name, "
+                +DatabaseDetails.EXPENSE_ENTRIES+".paymentMethod_id as paymentMethod_id," + DatabaseDetails.PAYMENT_TYPE+".name as payment_name, "
+                +"date_time FROM "+ DatabaseDetails.EXPENSE_ENTRIES
+                +" JOIN  " + DatabaseDetails.SUBCATEGORY_EXPENSE
+                +" ON " + DatabaseDetails.EXPENSE_ENTRIES + ".subCategory_id = " + DatabaseDetails.SUBCATEGORY_EXPENSE + ".id"
+                +" JOIN " + DatabaseDetails.PAYMENT_TYPE
+                +" ON " + DatabaseDetails.EXPENSE_ENTRIES + ".paymentMethod_id = " + DatabaseDetails.PAYMENT_TYPE + ".id"
+                +" JOIN " + DatabaseDetails.CATEGORY_EXPENSE
+                +" ON " + DatabaseDetails.SUBCATEGORY_EXPENSE + ".category_id = " + DatabaseDetails.CATEGORY_EXPENSE + ".id"
+                ;
+
         try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
-            if (null != cursor)
-                cursor.moveToFirst();
+            if (null == cursor || 0 == cursor.getCount() )
+                return data;
+            cursor.moveToFirst();
             do {
                 assert cursor != null;
                 long id = cursor.getLong(0);
                 String name = cursor.getString(1);
                 int value = cursor.getInt(2);
-                long subCategory_id = cursor.getLong(3);
-                long paymentMethod_id = cursor.getLong(4);
-                Entry entry = new Entry(id, name, value, 1, subCategory_id, paymentMethod_id, new Date(),new Date());
+                long category_id = cursor.getLong(3);
+                String category_name = cursor.getString(4);
+                long subCategory_id = cursor.getLong(5);
+                String subCategory_name = cursor.getString(6);
+                long paymentMethod_id = cursor.getLong(7);
+                String paymentMethod_name = cursor.getString(8);
+
+                ArrayList<Entry.SharedUser> sharedUsersList = getSharedUserEntries(id);
+                Entry entry = new Entry(id, name, value, category_id, category_name,
+                        subCategory_id, subCategory_name, paymentMethod_id, paymentMethod_name,
+                        new Date(), new Date(), sharedUsersList);
                 data.add(entry);
             } while (cursor.moveToNext());
         }
@@ -603,6 +627,49 @@ public class DBManager{
             e.printStackTrace();
         }
         return data;
+    }
+    public ArrayList<Entry> getIncomeEntries() {
+        ArrayList<Entry> data = new ArrayList<>();
+        String query = "select "+ DatabaseDetails.INCOME_ENTRIES +".id, " + DatabaseDetails.INCOME_ENTRIES +".name, "
+                +DatabaseDetails.INCOME_ENTRIES+".value, "
+                +DatabaseDetails.SUBCATEGORY_INCOME + ".category_id as category_id, " + DatabaseDetails.CATEGORY_INCOME + ".name as category_name, "
+                +DatabaseDetails.INCOME_ENTRIES +".subCategory_id as subCategory_id," + DatabaseDetails.SUBCATEGORY_INCOME + ".name as subCategory_name, "
+                +DatabaseDetails.INCOME_ENTRIES+".paymentMethod_id as paymentMethod_id," + DatabaseDetails.PAYMENT_TYPE+".name as payment_name, "
+                +"date_time FROM "+ DatabaseDetails.INCOME_ENTRIES
+                +" JOIN  " + DatabaseDetails.SUBCATEGORY_INCOME
+                +" ON " + DatabaseDetails.INCOME_ENTRIES + ".subCategory_id = " + DatabaseDetails.SUBCATEGORY_INCOME + ".id"
+                +" JOIN " + DatabaseDetails.PAYMENT_TYPE
+                +" ON " + DatabaseDetails.INCOME_ENTRIES + ".paymentMethod_id = " + DatabaseDetails.PAYMENT_TYPE + ".id"
+                +" JOIN " + DatabaseDetails.CATEGORY_INCOME
+                +" ON " + DatabaseDetails.SUBCATEGORY_INCOME + ".category_id = " + DatabaseDetails.CATEGORY_INCOME + ".id"
+                ;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
+            if (null == cursor || 0 == cursor.getCount() )
+                return data;
+            cursor.moveToFirst();
+            do {
+                    assert cursor != null;
+                    long id = cursor.getLong(0);
+                    String name = cursor.getString(1);
+                    int value = cursor.getInt(2);
+                    long category_id = cursor.getLong(3);
+                    String category_name = cursor.getString(4);
+                    long subCategory_id = cursor.getLong(5);
+                    String subCategory_name = cursor.getString(6);
+                    long paymentMethod_id = cursor.getLong(7);
+                    String paymentMethod_name = cursor.getString(8);
+                    Entry entry = new Entry(id, name, value, category_id, category_name,
+                            subCategory_id, subCategory_name, paymentMethod_id, paymentMethod_name,
+                            new Date(), new Date());
+                    data.add(entry);
+            } while (cursor.moveToNext());
+            return data;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return  data;
+        }
     }
 
     public void insertTransferEntries(long sender_user_id, long receiver_user_id, int value)

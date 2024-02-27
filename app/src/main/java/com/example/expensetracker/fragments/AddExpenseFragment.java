@@ -300,7 +300,8 @@ public class AddExpenseFragment extends Fragment {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition(), spinnerSubCategory.getSelectedItemPosition(), spinnerPayment.getSelectedItemPosition(), date, time);
+            ArrayList<Entry.SharedUser> sharedUsersList = new ArrayList<>();
+            Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition() + 1, spinnerSubCategory.getSelectedItemPosition() + 1, spinnerPayment.getSelectedItemPosition() +1, date, time, sharedUsersList);
             if(!isIncome && checkBoxIsShared.isChecked()) {
                 ArrayList<User> newUserList = new ArrayList<>();
                 ArrayList<Entry.SharedUser> sharedUserList =  ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList(newUserList);

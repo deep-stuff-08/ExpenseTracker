@@ -37,32 +37,43 @@ public class Entry {
     private String name;
     private int value;
     private long categoryId;
+
+    private String categoryName;
     private long subCategoryId;
+    private String subCategoryName;
     private long paymentId;
+    private String paymentName;
     private Date dateAndTime;
     private long id;
     private ArrayList<SharedUser> sharedUsersList;
 
-	public Entry(long id, String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
+	public Entry(long id, String name, int value, long categoryId, String categoryName, long subCategoryId, String subCategoryName, long paymentId, String paymentName,  Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
         this.id = id;
         this.name = name;
         this.value = value;
         this.categoryId = categoryId;
+        this.categoryName = categoryName;
         this.subCategoryId = subCategoryId;
+        this.subCategoryName = subCategoryName;
         this.paymentId = paymentId;
+        this.paymentName = paymentName;
         this.dateAndTime = new Date(date.getTime() + time.getTime());
         this.sharedUsersList = sharedUsersList;
     }
     public Entry(String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
-        this(-1, name, value, categoryId, subCategoryId, paymentId, date, time, sharedUsersList);
+        this(-1, name, value, categoryId, null, subCategoryId, null, paymentId, null, date, time, sharedUsersList);
     }
 
     public Entry(long id, String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
-        this(id, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
+        this(id, name, value, categoryId, null, subCategoryId, null, paymentId, null, date, time, new ArrayList<>());
+    }
+
+    public Entry(long id, String name, int value, long categoryId, String categoryName, long subCategoryId, String subCategoryName, long paymentId, String paymentName, Date date, Date time) {
+        this(id, name, value, categoryId, categoryName, subCategoryId, subCategoryName, paymentId, paymentName, date, time, new ArrayList<>());
     }
 
     public Entry(String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
-        this(-1, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
+        this(-1, name, value, categoryId,null, subCategoryId, null, paymentId,null, date, time, new ArrayList<>());
     }
 
     public String getName() {
