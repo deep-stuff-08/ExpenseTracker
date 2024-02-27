@@ -6,4 +6,7 @@
     <color name="categoryBlue">#FF1010CC</color>
     <color name="categoryYellow">#FFCCCC10</color>
     <color name="categoryOrange">#FFCC5510</color>
+
+    <color name="profitGreen">#FF00A200</color>
+    <color name="lossRed">#FFC20000</color>
 </resources>

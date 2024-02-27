@@ -1,5 +1,6 @@
 package com.example.expensetracker.adapters;
 
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,15 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.name.setText(entries.get(position).getName());
         holder.payment.setText(String.format(Locale.getDefault(), "%d", entries.get(position).getPaymentId()));
+        String sign = "";
+        if (entries.get(position).getValue() < 0) {
+            sign = "-";
+            holder.value.setTextColor(activity.getColor(R.color.lossRed));
+        } else {
+            sign = "+";
+            holder.value.setTextColor(activity.getColor(R.color.profitGreen));
+        }
+        holder.value.setText(sign + String.format(Locale.getDefault(), "%d", entries.get(position).getValue()));
     }
     @Override
     public int getItemCount() {
@@ -43,10 +53,12 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView name;
         public final TextView payment;
+        public final TextView value;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.expense_name);
             payment = itemView.findViewById(R.id.payment_type);
+            value = itemView.findViewById(R.id.expense_payment_value);
         }
     }
 }
