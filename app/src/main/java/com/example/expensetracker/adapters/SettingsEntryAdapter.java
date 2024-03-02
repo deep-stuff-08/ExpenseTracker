@@ -178,22 +178,22 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
             public void onSettingsAddListener(String name, int logo) {
                 switch (rootPosition) {
                     case 0: // Payment Type
-                        DBManager.getDBManagerInstance().insertPaymentType(new PaymentType(0, name, logo));
+                        DBManager.getDBManagerInstance().insertPaymentType(new PaymentType(name, logo));
                         break;
                     case 1: //Expense Category
-                        DBManager.getDBManagerInstance().insertExpenseCategory(new Category(0, name, logo, new ArrayList<>()));
+                        DBManager.getDBManagerInstance().insertExpenseCategory(new Category(name, logo));
                         break;
                     case 2: //Expense Sub-Category
-                        DBManager.getDBManagerInstance().insertExpenseSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                        DBManager.getDBManagerInstance().insertExpenseSubCategory(new SubCategory(name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
                         break;
                     case 3: //Income Category
-                        DBManager.getDBManagerInstance().insertIncomeCategory(new Category(0, name, logo, new ArrayList<>()));
+                        DBManager.getDBManagerInstance().insertIncomeCategory(new Category(name, logo));
                         break;
                     case 4: //Expense Sub-Category
-                        DBManager.getDBManagerInstance().insertIncomeSubCategory(new SubCategory(0, name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                        DBManager.getDBManagerInstance().insertIncomeSubCategory(new SubCategory(name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
                         break;
                     case 5: //Users
-                        DBManager.getDBManagerInstance().insertUser(new User(0, name));
+                        DBManager.getDBManagerInstance().insertUser(new User(name));
                         break;
                 }
 

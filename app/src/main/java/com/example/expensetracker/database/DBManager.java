@@ -567,7 +567,6 @@ public class DBManager{
 
             cursor.moveToFirst();
             do {
-                assert cursor != null;
                 long shared_id = cursor.getLong(0);
                 long user_id = cursor.getLong(1);
                 String user_name = cursor.getString(2);

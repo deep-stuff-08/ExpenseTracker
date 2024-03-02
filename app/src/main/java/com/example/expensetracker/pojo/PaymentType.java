@@ -17,7 +17,9 @@ public class PaymentType extends SettingsParent {
         this.name = name;
         this.drawableId = drawableId;
     }
-
+    public PaymentType(String name, int drawableId) {
+        this(-1, name, drawableId);
+    }
     public PaymentType(String name) {
         this(-1, name, R.drawable.ic_launcher_background);
     }

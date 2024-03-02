@@ -21,6 +21,10 @@ public class SubCategory extends SettingsParent {
         this.drawableId = drawableId;
     }
 
+    public SubCategory(String name, int categoryId, int drawableId) {
+        this(-1, name, categoryId, drawableId);
+    }
+
     public SubCategory(String name, int categoryId) {
         this(-1, name, categoryId, R.drawable.ic_launcher_background);
     }

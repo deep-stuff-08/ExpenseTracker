@@ -16,7 +16,9 @@ public class Category extends SettingsParent {
         this.colorId = colorId;
         this.subCategories = subCategories;
     }
-
+    public Category(String name, int colorId) {
+        this(-1, name, colorId, new ArrayList<>());
+    }
     public Category(String name) {
         this(-1, name, R.color.categoryGreen, new ArrayList<>());
     }

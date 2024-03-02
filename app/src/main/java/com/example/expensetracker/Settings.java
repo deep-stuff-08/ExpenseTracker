@@ -79,33 +79,38 @@ public class Settings {
 
     public void initToDefault() {
         //Payment Method
-        this.paymentMethod.add(new PaymentType(0, "UPI", R.drawable.ic_launcher_foreground));
-        this.paymentMethod.add(new PaymentType(0, "Cash", R.drawable.ic_launcher_foreground));
-        this.paymentMethod.add(new PaymentType(0, "Credit Card", R.drawable.ic_launcher_foreground));
+        this.paymentMethod.clear();
+        this.paymentMethod.add(new PaymentType("UPI", R.drawable.ic_launcher_foreground));
+        this.paymentMethod.add(new PaymentType("Cash", R.drawable.ic_launcher_foreground));
+        this.paymentMethod.add(new PaymentType("Credit Card", R.drawable.ic_launcher_foreground));
 
-        this.expenseCategory.add(new Category(0, "Food", R.color.categoryOrange, new ArrayList<>(Arrays.asList(
-                new SubCategory(0,"Restaurant", 0, R.drawable.ic_launcher_foreground),
-                new SubCategory(0,"Grocery", 0, R.drawable.ic_launcher_foreground)
-        ))));
-        this.expenseCategory.add(new Category(0,"Housing", R.color.categoryYellow, new ArrayList<>(Arrays.asList(
-                new SubCategory(0,"Rent", 0, R.drawable.ic_launcher_foreground),
-                new SubCategory(0,"Electricity", 0, R.drawable.ic_launcher_foreground)
-        ))));
-        this.expenseCategory.add(new Category(0,"Travel", R.color.categoryBlue, new ArrayList<>(Arrays.asList(
-                new SubCategory(0,"Public", 0, R.drawable.ic_launcher_foreground),
-                new SubCategory(0,"Long Distance", 0, R.drawable.ic_launcher_foreground)
-        ))));
-        this.expenseCategory.add(new Category(0,"Entertainment", R.color.categoryGreen, new ArrayList<>(Arrays.asList(
-                new SubCategory(0,"Entry Fee", 0, R.drawable.ic_launcher_foreground),
-                new SubCategory(0,"Trip", 0, R.drawable.ic_launcher_foreground)
-        ))));
+        //ExpenseCategory
+        this.expenseCategory.clear();
+        this.expenseCategory.add(new Category("Food", R.color.categoryOrange));
+        this.expenseCategory.get(0).getSubCategories().add(new SubCategory("Restaurant", R.drawable.ic_launcher_foreground));
+        this.expenseCategory.get(0).getSubCategories().add(new SubCategory("Grocery", R.drawable.ic_launcher_foreground));
 
-        this.incomeCategory.add(new Category(0,"Sony", R.color.categoryYellow, new ArrayList<>(Arrays.asList(
-                new SubCategory(0,"Salary", 0, R.drawable.ic_launcher_foreground),
-                new SubCategory(0,"Bonus", 0, R.drawable.ic_launcher_foreground)
-        ))));
+        this.expenseCategory.add(new Category("Housing", R.color.categoryYellow));
+        this.expenseCategory.get(1).getSubCategories().add(new SubCategory("Rent", R.drawable.ic_launcher_foreground));
+        this.expenseCategory.get(1).getSubCategories().add(new SubCategory("Electricity", R.drawable.ic_launcher_foreground));
 
-        this.users.add(new User(1, "Deep"));
-        this.users.add(new User(0, "Hrituja"));
+        this.expenseCategory.add(new Category("Travel", R.color.categoryBlue));
+        this.expenseCategory.get(2).getSubCategories().add(new SubCategory("Public", R.drawable.ic_launcher_foreground));
+        this.expenseCategory.get(2).getSubCategories().add(new SubCategory("Long Distance", R.drawable.ic_launcher_foreground));
+
+        this.expenseCategory.add(new Category("Entertainment", R.color.categoryGreen));
+        this.expenseCategory.get(3).getSubCategories().add(new SubCategory("Entry Fee", R.drawable.ic_launcher_foreground));
+        this.expenseCategory.get(3).getSubCategories().add(new SubCategory("Trip", R.drawable.ic_launcher_foreground));
+
+        //Income Category
+        this.incomeCategory.clear();
+        this.incomeCategory.add(new Category("Sony", R.color.categoryYellow));
+        this.incomeCategory.get(0).getSubCategories().add(new SubCategory("Salary", R.drawable.ic_launcher_foreground));
+        this.incomeCategory.get(0).getSubCategories().add(new SubCategory("Bonus", R.drawable.ic_launcher_foreground));
+
+        //User
+        this.users.clear();
+        this.users.add(new User("Deep"));
+        this.users.add(new User("Hrituja"));
     }
 }
