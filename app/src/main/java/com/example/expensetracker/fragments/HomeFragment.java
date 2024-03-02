@@ -51,7 +51,7 @@ public class HomeFragment extends Fragment {
         filter = new SearchFilters();
 
         RecyclerView recycler = view.findViewById(R.id.recycleView);
-        recycler.setAdapter(new ExpEntryAdapter(activity, DBManager.getDBManagerInstance().getIncomeEntries()));
+        recycler.setAdapter(new ExpEntryAdapter(activity, DBManager.getDBManagerInstance().getExpenseEntries()));
 
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         recycler.setVerticalScrollbarPosition(0);

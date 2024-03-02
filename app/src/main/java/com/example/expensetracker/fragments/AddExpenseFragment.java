@@ -300,25 +300,44 @@ public class AddExpenseFragment extends Fragment {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            ArrayList<Entry.SharedUser> sharedUsersList = new ArrayList<>();
-            Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition() + 1, spinnerSubCategory.getSelectedItemPosition() + 1, spinnerPayment.getSelectedItemPosition() +1, date, time, sharedUsersList);
+            Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), spinnerCategory.getSelectedItemPosition() + 1, spinnerSubCategory.getSelectedItemPosition() + 1, spinnerPayment.getSelectedItemPosition() +1, date, time);
             if(!isIncome && checkBoxIsShared.isChecked()) {
-                ArrayList<User> newUserList = new ArrayList<>();
-                ArrayList<Entry.SharedUser> sharedUserList =  ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList(newUserList);
-                entry.setSharedUsersList(sharedUserList);
+                ArrayList<Entry.SharedUser> newUserList = new ArrayList<>();
+                ArrayList<Entry.SharedUser> sharedUserList = new ArrayList<>();
+                int miscIndex = ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList(sharedUserList, newUserList);
                 if (newUserList.size() > 0) {
                     StringBuilder userList = new StringBuilder();
                     for (int i = 0; i < newUserList.size(); i++) {
-                        userList.append(i).append(") ").append(newUserList.get(i).getName()).append("\n");
+                        userList.append(i + 1).append(") ").append(newUserList.get(i).getUser().getName()).append("\n");
                     }
                     new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc.\n" + userList)
                             .setPositiveButton("Yes", (dialog, which) -> {
-                                newUserList.forEach(user -> DBManager.getDBManagerInstance().insertUser(user));
+                                sharedUserList.addAll(newUserList);
+                                entry.setSharedUsersList(sharedUserList);
                                 onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
                             })
                             .setCancelable(true)
-                            .setNegativeButton("No", (dialog, which) -> onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false)).show();
+                            .setNegativeButton("No", (dialog, which) -> {
+                                int sum = 0;
+                                for(Entry.SharedUser users : newUserList) {
+                                    sum += users.getValue();
+                                }
+                                if(miscIndex == -1) {
+                                    User miscUser = new User("Misc");
+                                    for(User u : settings.getUsers()) {
+                                        if(u.getName().equals("Misc")){
+                                            miscUser = u;
+                                        }
+                                    }
+                                    sharedUserList.add(new Entry.SharedUser(miscUser, sum));
+                                } else {
+                                    sharedUserList.get(miscIndex).setValue(sharedUserList.get(miscIndex).getValue() + sum);
+                                }
+                                entry.setSharedUsersList(sharedUserList);
+                                onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
+                            }).show();
                 } else {
+                    entry.setSharedUsersList(sharedUserList);
                     onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
                 }
             } else {

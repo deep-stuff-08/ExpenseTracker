@@ -13,6 +13,12 @@ public class User extends SettingsParent {
         this.drawableId = R.drawable.ic_launcher_background;
     }
 
+    public User(String name) {
+        this.id = -1;
+        this.name = name;
+        this.drawableId = R.drawable.ic_launcher_background;
+    }
+
     @Override
     public SettingsType getType() {
         return SettingsType.USER;

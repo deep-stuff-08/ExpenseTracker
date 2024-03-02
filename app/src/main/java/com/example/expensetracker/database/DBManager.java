@@ -521,13 +521,13 @@ public class DBManager{
         contentValues.put("value", entry.getValue());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-		contentValues.put("date_time", entry.getDateAndTime().toString());
+        contentValues.put("date_time", entry.getDateAndTime().toString());
         contentValues.put("isShared", entry.isShared());
 
         long id = this.insert(contentValues, DatabaseDetails.EXPENSE_ENTRIES);
         if(id == -1)
         {
-            throw  new RuntimeException();
+            throw new RuntimeException();
         }
         entry.getSharedUsersList().forEach(sharedUser ->
         {
@@ -607,7 +607,7 @@ public class DBManager{
                 assert cursor != null;
                 long id = cursor.getLong(0);
                 String name = cursor.getString(1);
-                int value = cursor.getInt(2);
+                int value = -cursor.getInt(2);
                 long category_id = cursor.getLong(3);
                 String category_name = cursor.getString(4);
                 long subCategory_id = cursor.getLong(5);

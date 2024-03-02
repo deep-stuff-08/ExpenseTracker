@@ -12,6 +12,7 @@ public class Entry {
         public SharedUser(User user, int value) {
             this.user = user;
             this.value = value;
+            this.id = -1;
         }
 
         public SharedUser(User user, long id, int value) {
@@ -37,7 +38,6 @@ public class Entry {
     private String name;
     private int value;
     private long categoryId;
-
     private String categoryName;
     private long subCategoryId;
     private String subCategoryName;
@@ -113,10 +113,6 @@ public class Entry {
     }
 
     public void setPaymentId(long paymentId) {
-        this.paymentId = paymentId;
-    }
-
-    public void setPaymentId(int paymentId) {
         this.paymentId = paymentId;
     }
 

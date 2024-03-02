@@ -3,6 +3,8 @@ package com.example.expensetracker.pojo;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
+import com.example.expensetracker.R;
+
 import java.io.IOException;
 import java.util.Objects;
 
@@ -12,16 +14,15 @@ public class SubCategory extends SettingsParent {
     int drawableId;
     long categoryId;
 
-    public SubCategory() {
-        this.name = "";
-        this.drawableId = 0;
-    }
-
     public SubCategory(long id, String name, long categoryId, int drawableId) {
         this.id = id;
         this.name = name;
         this.categoryId = categoryId;
         this.drawableId = drawableId;
+    }
+
+    public SubCategory(String name, int categoryId) {
+        this(-1, name, categoryId, R.drawable.ic_launcher_background);
     }
 
     public String getName() {

@@ -3,6 +3,7 @@ package com.example.expensetracker.adapters;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,16 +34,21 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
     ValueUpdateListener updateListener;
     int itemCount = 1;
     public SharedUserAdapter(ArrayList<User> names, ValueUpdateListener updateListener) {
+        nameList = names;
         sharedUserList = new ArrayList<>();
-        sharedUserList.add(null);
-        sharedUserList.add(null);
+        SharedUser meUser = new SharedUser();
+        meUser.name = "Me";
+        sharedUserList.add(meUser);
+        sharedUserList.add(new SharedUser());
         this.updateListener = updateListener;
     }
 
     private int getValueTotal() {
         int total = 0;
         for(SharedUser i : sharedUserList) {
-            total += i.value;
+            if(i != null) {
+                total += i.value;
+            }
         }
         return total;
     }
@@ -54,34 +60,39 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
     }
 
     @NonNull
-    public ArrayList<Entry.SharedUser> getSharedUserList(ArrayList<User> newUsers) {
+    public int getSharedUserList(ArrayList<Entry.SharedUser> sharedUsersList, ArrayList<Entry.SharedUser> newUsers) {
         newUsers.clear();
         HashMap<String, User> map = new HashMap<>();
         for(User u : nameList) {
             map.put(u.getName(), u);
         }
-        HashMap<String, Integer> omap = new HashMap<>();
+        HashMap<String, Integer> userMap = new HashMap<>();
         for(SharedUser su : sharedUserList) {
-            if(omap.containsKey(su.name)) {
-                Integer a = omap.get(su.name);
-                omap.replace(su.name, (a != null ? a : 0) + su.value);
-            } else {
-                omap.put(su.name, su.value);
+            if(su.name != null && !su.name.equals("Me")) {
+                if (userMap.containsKey(su.name)) {
+                    Integer a = userMap.get(su.name);
+                    userMap.replace(su.name, (a != null ? a : 0) + su.value);
+                } else {
+                    userMap.put(su.name, su.value);
+                }
             }
         }
-        ArrayList<Entry.SharedUser> finalList = new ArrayList<>();
-        for(String n : omap.keySet()) {
-            Integer a = omap.get(n);
-            int sum = a == null ? 0 : a;
-            if(map.containsKey(n)) {
-                finalList.add(new Entry.SharedUser(map.get(n), sum));
-            } else {
-                User u = new User(0, n);
-                newUsers.add(u);
-                finalList.add(new Entry.SharedUser(u, sum));
+        int miscIndex = -1;
+        for(String n : userMap.keySet()) {
+            Integer a = userMap.get(n);
+            if(a != null) {
+                int sum = a;
+                if (map.containsKey(n)) {
+                    if(n.equals("Misc")) {
+                        miscIndex = sharedUsersList.size();
+                    }
+                    sharedUsersList.add(new Entry.SharedUser(map.get(n), sum));
+                } else {
+                    newUsers.add(new Entry.SharedUser(new User(n), sum));
+                }
             }
         }
-        return finalList;
+        return miscIndex;
     }
 
     @Override
