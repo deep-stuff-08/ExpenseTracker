@@ -491,12 +491,12 @@ public class DBManager{
         return data;
     }
 
-    public void insertUser(User u)
+    public long insertUser(User u)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", u.getName());
         contentValues.put("color_id", u.getDrawableId());
-        this.insert(contentValues, DatabaseDetails.USERS);
+        return this.insert(contentValues, DatabaseDetails.USERS);
     }
 
     public void updateUser(User u)

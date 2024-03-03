@@ -313,6 +313,11 @@ public class AddExpenseFragment extends Fragment {
                     }
                     new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc.\n" + userList)
                             .setPositiveButton("Yes", (dialog, which) -> {
+                                newUserList.forEach(sharedUser -> {
+                                    long newId = DBManager.getDBManagerInstance().insertUser(sharedUser.getUser());
+                                    sharedUser.getUser().setId(newId);
+                                });
+                                settings.setUsers(DBManager.getDBManagerInstance().getUserData());
                                 sharedUserList.addAll(newUserList);
                                 entry.setSharedUsersList(sharedUserList);
                                 onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
