@@ -1,18 +1,16 @@
 package com.example.expensetracker.fragments;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
-import com.example.expensetracker.adapters.ExpEntryAdapter;
 import com.example.expensetracker.adapters.UnconfirmedEntriesAdapter;
 
 public class UnconfirmedEntriesFragment extends Fragment {

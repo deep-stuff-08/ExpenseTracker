@@ -1,19 +1,16 @@
 package com.example.expensetracker.fragments;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.os.Bundle;
-import androidx.core.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -67,9 +64,7 @@ public class HomeFragment extends Fragment {
             dialog.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, typeArray), (dialog1, which) -> {
                 filter.setType(which);
                 textFilterType.setText(typeArray[which]);
-            }).setNegativeButton("Cancel", (dialog1, which) -> {
-                dialog1.dismiss();
-            }).show();
+            }).setNegativeButton("Cancel", (dialog1, which) -> dialog1.dismiss()).show();
         });
 
         String[] timeArray = {
@@ -140,21 +135,17 @@ public class HomeFragment extends Fragment {
                 } else {
                     filter.setDate(timeDateArray[which], new Date());
                 }
-            }).setNegativeButton("Cancel", (dialog1, which) -> {
-                dialog1.dismiss();
-            }).show();
+            }).setNegativeButton("Cancel", (dialog1, which) -> dialog1.dismiss()).show();
         });
 
         TextView textFilterPayment = view.findViewById(R.id.filter_payment);
-        textFilterPayment.setText("All");
+        textFilterPayment.setText(R.string.string_all);
         boolean[] paymentData = {false, false, false};
         textFilterPayment.setOnClickListener(v -> {
             AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext());
             ArrayList<String> items = new ArrayList<>();
             activity.getSettings().getPaymentMethod().forEach(paymentType -> items.add(paymentType.getName()));
-            dialog.setMultiChoiceItems(items.toArray(new String[]{}), paymentData, (dialog1, which, isChecked) -> {
-                paymentData[which] = isChecked;
-            }).setPositiveButton("Ok", (dialog1, which) -> {
+            dialog.setMultiChoiceItems(items.toArray(new String[]{}), paymentData, (dialog1, which, isChecked) -> paymentData[which] = isChecked).setPositiveButton("Ok", (dialog1, which) -> {
                 StringBuilder custom = new StringBuilder();
                 boolean areAllSelected = true;
                 boolean areNoneSelected = false;
@@ -168,19 +159,17 @@ public class HomeFragment extends Fragment {
                     }
                 }
                 if(areAllSelected || areNoneSelected){
-                    textFilterPayment.setText("All");
+                    textFilterPayment.setText(R.string.string_all);
                     list.clear();
                 } else {
                     textFilterPayment.setText(custom.toString());
                 }
                 filter.setPaymentType(list);
-            }).setNegativeButton("Cancel", (dialog1, which) -> {
-                dialog1.dismiss();
-            }).show();
+            }).setNegativeButton("Cancel", (dialog1, which) -> dialog1.dismiss()).show();
         });
 
         TextView textFilterCategory = view.findViewById(R.id.filter_category);
-        textFilterCategory.setText("All");
+        textFilterCategory.setText(R.string.string_all);
         boolean[] categoryData = {false, false, false};
         textFilterCategory.setOnClickListener(v -> {
             AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext());
@@ -193,9 +182,7 @@ public class HomeFragment extends Fragment {
             } else if (textFilterType.getText().equals("Income")) {
                 activity.getSettings().getIncomeCategory().forEach(paymentType -> items.add(paymentType.getName()));
             }
-            dialog.setMultiChoiceItems(items.toArray(new String[]{}), categoryData, (dialog1, which, isChecked) -> {
-                categoryData[which] = isChecked;
-            }).setPositiveButton("Ok", (dialog1, which) -> {
+            dialog.setMultiChoiceItems(items.toArray(new String[]{}), categoryData, (dialog1, which, isChecked) -> categoryData[which] = isChecked).setPositiveButton("Ok", (dialog1, which) -> {
                 StringBuilder custom = new StringBuilder();
                 ArrayList<Long> list = new ArrayList<>();
                 boolean areAllSelected = true;
@@ -210,14 +197,12 @@ public class HomeFragment extends Fragment {
                 }
                 if(areAllSelected || areNoneSelected){
                     list.clear();
-                    textFilterCategory.setText("All");
+                    textFilterCategory.setText(R.string.string_all);
                 } else {
                     textFilterCategory.setText(custom.toString());
                 }
                 filter.setCategory(list);
-            }).setNegativeButton("Cancel", (dialog1, which) -> {
-                dialog1.dismiss();
-            }).show();
+            }).setNegativeButton("Cancel", (dialog1, which) -> dialog1.dismiss()).show();
         });
 
         return view;

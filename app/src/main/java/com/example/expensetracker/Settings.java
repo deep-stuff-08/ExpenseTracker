@@ -7,7 +7,6 @@ import com.example.expensetracker.pojo.SubCategory;
 import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Settings {
     private final ArrayList<PaymentType> paymentMethod;

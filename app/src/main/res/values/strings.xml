@@ -23,4 +23,5 @@
     <string name="expense_share_user_me">Me</string>
     <string name="settle_swap">Swap</string>
     <string name="incomeorexpensetab">IncomeOrExpense</string>
+    <string name="string_all">All</string>
 </resources>

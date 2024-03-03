@@ -5,21 +5,14 @@ import java.util.Date;
 
 public class Entry {
     public  static class SharedUser {
-        private long id;
-        private User user;
+        private final User user;
         private int value;
 
         public SharedUser(User user, int value) {
             this.user = user;
             this.value = value;
-            this.id = -1;
         }
 
-        public SharedUser(User user, long id, int value) {
-            this.user = user;
-            this.id = id;
-            this.value = value;
-        }
         public int getValue() {
             return value;
         }
@@ -30,50 +23,31 @@ public class Entry {
         public User getUser() {
             return user;
         }
-
-        public void setUser(User user) {
-            this.user = user;
-        }
     }
     private String name;
     private int value;
-    private long categoryId;
-    private String categoryName;
-    private long subCategoryId;
-    private String subCategoryName;
-    private long paymentId;
-    private String paymentName;
-    private Date dateAndTime;
+    final private long categoryId;
+    final private long subCategoryId;
+    final private long paymentId;
+    final private Date dateAndTime;
     private long id;
     private ArrayList<SharedUser> sharedUsersList;
 
-	public Entry(long id, String name, int value, long categoryId, String categoryName, long subCategoryId, String subCategoryName, long paymentId, String paymentName,  Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
+	public Entry(long id, String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
         this.id = id;
         this.name = name;
         this.value = value;
         this.categoryId = categoryId;
-        this.categoryName = categoryName;
         this.subCategoryId = subCategoryId;
-        this.subCategoryName = subCategoryName;
         this.paymentId = paymentId;
-        this.paymentName = paymentName;
         this.dateAndTime = new Date(date.getTime() + time.getTime());
         this.sharedUsersList = sharedUsersList;
     }
-    public Entry(String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
-        this(-1, name, value, categoryId, null, subCategoryId, null, paymentId, null, date, time, sharedUsersList);
-    }
-
     public Entry(long id, String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
-        this(id, name, value, categoryId, null, subCategoryId, null, paymentId, null, date, time, new ArrayList<>());
+        this(id, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
     }
-
-    public Entry(long id, String name, int value, long categoryId, String categoryName, long subCategoryId, String subCategoryName, long paymentId, String paymentName, Date date, Date time) {
-        this(id, name, value, categoryId, categoryName, subCategoryId, subCategoryName, paymentId, paymentName, date, time, new ArrayList<>());
-    }
-
     public Entry(String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
-        this(-1, name, value, categoryId,null, subCategoryId, null, paymentId,null, date, time, new ArrayList<>());
+        this(-1, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
     }
 
     public String getName() {
@@ -92,36 +66,16 @@ public class Entry {
         this.value = value;
     }
 
-    public long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(long categoryId) {
-        this.categoryId = categoryId;
-    }
-
     public long getSubCategoryId() {
         return subCategoryId;
-    }
-
-    public void setSubCategoryId(long subCategoryId) {
-        this.subCategoryId = subCategoryId;
     }
 
     public long getPaymentId() {
         return paymentId;
     }
 
-    public void setPaymentId(long paymentId) {
-        this.paymentId = paymentId;
-    }
-
     public Date getDateAndTime() {
         return dateAndTime;
-    }
-
-    public void setDateAndTime(Date date, Date time) {
-        this.dateAndTime = new Date(date.getTime() + time.getTime());
     }
 
     public ArrayList<SharedUser> getSharedUsersList() {

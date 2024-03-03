@@ -1,15 +1,9 @@
 package com.example.expensetracker.pojo;
 
-import android.util.JsonReader;
-import android.util.JsonWriter;
-
 import com.example.expensetracker.R;
 
-import java.io.IOException;
-import java.util.Objects;
-
 public class SubCategory extends SettingsParent {
-    private long id;
+    private final long id;
     String name;
     int drawableId;
     long categoryId;
