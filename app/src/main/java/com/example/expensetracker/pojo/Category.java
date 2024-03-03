@@ -10,7 +10,7 @@ public class Category extends SettingsParent {
     private int colorId;
     private ArrayList<SubCategory> subCategories;
 
-    public Category(int id, String name, int colorId, ArrayList<SubCategory> subCategories) {
+    public Category(long id, String name, int colorId, ArrayList<SubCategory> subCategories) {
         this.id = id;
         this.name = name;
         this.colorId = colorId;

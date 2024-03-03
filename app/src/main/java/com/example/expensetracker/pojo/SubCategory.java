@@ -12,21 +12,19 @@ public class SubCategory extends SettingsParent {
     private long id;
     String name;
     int drawableId;
-    long categoryId;
 
-    public SubCategory(long id, String name, long categoryId, int drawableId) {
+    public SubCategory(long id, String name, int drawableId) {
         this.id = id;
         this.name = name;
-        this.categoryId = categoryId;
         this.drawableId = drawableId;
     }
 
-    public SubCategory(String name, int categoryId, int drawableId) {
-        this(-1, name, categoryId, drawableId);
+    public SubCategory(String name, int drawableId) {
+        this(-1, name, drawableId);
     }
 
-    public SubCategory(String name, int categoryId) {
-        this(-1, name, categoryId, R.drawable.ic_launcher_background);
+    public SubCategory(String name) {
+        this(-1, name, R.drawable.ic_launcher_background);
     }
 
     public String getName() {
@@ -37,14 +35,8 @@ public class SubCategory extends SettingsParent {
         this.name = name;
     }
 
-    public void setCategoryId(long categoryId) { this.categoryId = categoryId;}
-
     public long getId() {
         return id;
-    }
-
-    public long getCategoryId() {
-        return categoryId;
     }
 
     public int getDrawableId() {

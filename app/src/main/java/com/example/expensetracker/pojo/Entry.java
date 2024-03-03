@@ -37,44 +37,36 @@ public class Entry {
     }
     private String name;
     private int value;
-    private long categoryId;
-    private String categoryName;
-    private long subCategoryId;
-    private String subCategoryName;
-    private long paymentId;
-    private String paymentName;
+    private Category category;
+    private PaymentType paymentType;
     private Date dateAndTime;
     private long id;
     private ArrayList<SharedUser> sharedUsersList;
 
-	public Entry(long id, String name, int value, long categoryId, String categoryName, long subCategoryId, String subCategoryName, long paymentId, String paymentName,  Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
+	public Entry(long id, String name, int value, Category category, PaymentType paymentType, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
         this.id = id;
         this.name = name;
         this.value = value;
-        this.categoryId = categoryId;
-        this.categoryName = categoryName;
-        this.subCategoryId = subCategoryId;
-        this.subCategoryName = subCategoryName;
-        this.paymentId = paymentId;
-        this.paymentName = paymentName;
+        this.category = category;
+        this.paymentType = paymentType;
         this.dateAndTime = new Date(date.getTime() + time.getTime());
         this.sharedUsersList = sharedUsersList;
     }
-    public Entry(String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
-        this(-1, name, value, categoryId, null, subCategoryId, null, paymentId, null, date, time, sharedUsersList);
+    public Entry(String name, int value, Category category, PaymentType paymentType, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
+        this(-1, name, value, category, paymentType, date, time, sharedUsersList);
     }
 
-    public Entry(long id, String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
-        this(id, name, value, categoryId, null, subCategoryId, null, paymentId, null, date, time, new ArrayList<>());
+    public Entry(long id, String name, int value, Category category, PaymentType paymentType, Date date, Date time) {
+        this(id, name, value, category, paymentType, date, time, new ArrayList<>());
     }
 
-    public Entry(long id, String name, int value, long categoryId, String categoryName, long subCategoryId, String subCategoryName, long paymentId, String paymentName, Date date, Date time) {
-        this(id, name, value, categoryId, categoryName, subCategoryId, subCategoryName, paymentId, paymentName, date, time, new ArrayList<>());
+    public Entry(String name, int value, Category category, PaymentType paymentType, Date date, Date time) {
+        this(-1, name, value, category, paymentType, date, time, new ArrayList<>());
     }
 
-    public Entry(String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
-        this(-1, name, value, categoryId,null, subCategoryId, null, paymentId,null, date, time, new ArrayList<>());
-    }
+//    public Entry(String name, int value, long categoryID, long SubCategoryId, long paymentId, Date date, Date time) {
+//        this(-1, name, value, category, paymentType, date, time, new ArrayList<>());
+//    }
 
     public String getName() {
         return name;
@@ -90,30 +82,6 @@ public class Entry {
 
     public void setValue(int value) {
         this.value = value;
-    }
-
-    public long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(long categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public long getSubCategoryId() {
-        return subCategoryId;
-    }
-
-    public void setSubCategoryId(long subCategoryId) {
-        this.subCategoryId = subCategoryId;
-    }
-
-    public long getPaymentId() {
-        return paymentId;
-    }
-
-    public void setPaymentId(long paymentId) {
-        this.paymentId = paymentId;
     }
 
     public Date getDateAndTime() {
@@ -143,4 +111,13 @@ public class Entry {
     public void setId(long id) {
         this.id = id;
     }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
 }

@@ -12,7 +12,7 @@ public class PaymentType extends SettingsParent {
     private long id;
     private String name;
     private int drawableId;
-    public PaymentType(int id, String name, int drawableId) {
+    public PaymentType(long id, String name, int drawableId) {
         this.id = id;
         this.name = name;
         this.drawableId = drawableId;

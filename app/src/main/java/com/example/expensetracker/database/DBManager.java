@@ -179,21 +179,11 @@ public class DBManager{
             {
                 throw new RuntimeException("cursor is null");
             }
-
-            ArrayList<SubCategory> subCategories = this.getExpenseSubCategoryData();
             cursor.moveToFirst();
             do {
-                ArrayList<SubCategory> subCategoriesByCategory = new ArrayList<>();
-                int id = cursor.getInt(0);
-                String name = cursor.getString(1);
-
-                for (SubCategory subCat: subCategories) {
-                    if(subCat.getCategoryId() == id)
-                    {
-                        subCategoriesByCategory.add(new SubCategory(subCat.getId(), subCat.getName(), subCat.getCategoryId(), subCat.getDrawableId()));
-                    }
-                }
-                data.add(new Category(id, name, R.color.categoryYellow,subCategoriesByCategory));
+                long categoryId = cursor.getLong(0);
+                String categoryName = cursor.getString(1);
+                data.add(new Category(categoryId, categoryName, R.color.categoryYellow, this.getExpenseSubCategoryData(categoryId)));
             } while(cursor.moveToNext());
         }
         catch (Exception e)
@@ -209,14 +199,13 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", cat.getName());
         contentValues.put("color_id", cat.getColorId());
-        long catID = this.insert(contentValues, DatabaseDetails.CATEGORY_EXPENSE);
-        if(catID == -1) {
+        long categoryId = this.insert(contentValues, DatabaseDetails.CATEGORY_EXPENSE);
+        if(categoryId == -1) {
             throw new RuntimeException("Failed to insert data into database");
         }
         for(SubCategory sCat: cat.getSubCategories())
         {
-            sCat.setCategoryId((int)catID);
-            insertExpenseSubCategory(sCat);
+            insertExpenseSubCategory(sCat, categoryId);
         }
     }
 
@@ -234,7 +223,6 @@ public class DBManager{
         long categoryId = c.getId();
         for(SubCategory sCat: c.getSubCategories())
         {
-            sCat.setCategoryId(categoryId);
             deleteExpenseSubCategory(sCat);
         }
         String condition = "id = '" + c.getId() +"'";
@@ -252,18 +240,11 @@ public class DBManager{
 
             ArrayList<SubCategory> subCategories = this.getIncomeSubCategoryData();
             cursor.moveToFirst();
-            do {
-                ArrayList<SubCategory> subCategoriesByCategory = new ArrayList<>();
-                int id = cursor.getInt(0);
-                String name = cursor.getString(1);
 
-                for (SubCategory subCat: subCategories) {
-                    if(subCat.getCategoryId() == id)
-                    {
-                        subCategoriesByCategory.add(new SubCategory(subCat.getId(), subCat.getName(), subCat.getCategoryId(), subCat.getDrawableId()));
-                    }
-                }
-                data.add(new Category(id, name, R.color.categoryYellow,subCategoriesByCategory));
+            do {
+                long categoryId = cursor.getLong(0);
+                String categoryName = cursor.getString(1);
+                data.add(new Category(categoryId, categoryName, R.color.categoryYellow, this.getExpenseSubCategoryData(categoryId)));
             } while(cursor.moveToNext());
         }
         catch (Exception e)
@@ -285,8 +266,7 @@ public class DBManager{
         }
         for(SubCategory sCat: cat.getSubCategories())
         {
-            sCat.setCategoryId((int)catID);
-            insertIncomeSubCategory(sCat);
+            insertIncomeSubCategory(sCat, catID);
         }
     }
 
@@ -304,16 +284,19 @@ public class DBManager{
         long categoryId = c.getId();
         for(SubCategory sCat: c.getSubCategories())
         {
-            sCat.setCategoryId(categoryId);
             deleteExpenseSubCategory(sCat);
         }
         String condition = "id = '" + c.getId() +"'";
         this.delete(DatabaseDetails.CATEGORY_INCOME, condition);
     }
 
-    public ArrayList<SubCategory> getExpenseSubCategoryData() {
+    public ArrayList<SubCategory> getExpenseSubCategoryData(long categoryId) {
         ArrayList<SubCategory>  data = new ArrayList<>();
         String query = "select id, name, category_id from "+ DatabaseDetails.SUBCATEGORY_EXPENSE;
+        if(categoryId > 0)
+        {
+            query += " where category_id = " + categoryId;
+        }
         try(Cursor cursor =  sqLiteDatabase.rawQuery( query,
                 null )) {
             if (null != cursor)
@@ -323,8 +306,7 @@ public class DBManager{
                 assert cursor != null;
                 String id = cursor.getString(0);
                 String name = cursor.getString(1);
-                String categoryId = cursor.getString(2);
-                SubCategory obj = new SubCategory(Integer.parseInt(id), name, Integer.parseInt(categoryId), 0);
+                SubCategory obj = new SubCategory(Integer.parseInt(id), name, 0);
                 data.add(obj);
             } while (cursor.moveToNext());
         }
@@ -335,11 +317,11 @@ public class DBManager{
         return data;
     }
 
-    public void insertExpenseSubCategory(SubCategory scat)
+    public void insertExpenseSubCategory(SubCategory scat, long categoryId)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", scat.getName());
-        contentValues.put("category_id", scat.getCategoryId());
+        contentValues.put("category_id", categoryId);
         long ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_EXPENSE);
         if(ret == -1)
         {
@@ -352,7 +334,6 @@ public class DBManager{
         String condition = "id = " + s.getId();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", s.getName());
-        contentValues.put("category_id", s.getCategoryId());
         this.update(DatabaseDetails.SUBCATEGORY_EXPENSE, contentValues ,condition);
     }
 
@@ -375,7 +356,7 @@ public class DBManager{
                 String id = cursor.getString(0);
                 String name = cursor.getString(1);
                 String categoryId = cursor.getString(2);
-                SubCategory obj = new SubCategory(Integer.parseInt(id), name, Integer.parseInt(categoryId), 0);
+                SubCategory obj = new SubCategory(Integer.parseInt(id), name, 0);
                 data.add(obj);
             } while (cursor.moveToNext());
         }
@@ -386,11 +367,11 @@ public class DBManager{
         return data;
     }
 
-    public void insertIncomeSubCategory(SubCategory scat)
+    public void insertIncomeSubCategory(SubCategory scat, long categoryId)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", scat.getName());
-        contentValues.put("category_id", scat.getCategoryId());
+        contentValues.put("category_id", categoryId);
         long ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_INCOME);
         if(ret == -1)
         {
@@ -403,7 +384,6 @@ public class DBManager{
         String condition = "id = " + s.getId();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", s.getName());
-        contentValues.put("category_id", s.getCategoryId());
         this.update(DatabaseDetails.SUBCATEGORY_INCOME, contentValues ,condition);
     }
 
@@ -614,9 +594,12 @@ public class DBManager{
                 long paymentMethod_id = cursor.getLong(7);
                 String paymentMethod_name = cursor.getString(8);
 
+                ArrayList<SubCategory> subCategories = new ArrayList<>();
+                subCategories.add(new SubCategory(subCategory_id, subCategory_name, 0));
                 ArrayList<Entry.SharedUser> sharedUsersList = getSharedUserEntries(id);
-                Entry entry = new Entry(id, name, value, category_id, category_name,
-                        subCategory_id, subCategory_name, paymentMethod_id, paymentMethod_name,
+                Entry entry = new Entry(id, name, value,
+                        new Category(category_id, category_name, 0, subCategories),
+                        new PaymentType(paymentMethod_id, paymentMethod_name, 0),
                         new Date(), new Date(), sharedUsersList);
                 data.add(entry);
             } while (cursor.moveToNext());
@@ -657,8 +640,11 @@ public class DBManager{
                     String subCategory_name = cursor.getString(6);
                     long paymentMethod_id = cursor.getLong(7);
                     String paymentMethod_name = cursor.getString(8);
-                    Entry entry = new Entry(id, name, value, category_id, category_name,
-                            subCategory_id, subCategory_name, paymentMethod_id, paymentMethod_name,
+
+                ArrayList<SubCategory> subCategories = new ArrayList<>();
+                subCategories.add(new SubCategory(subCategory_id, subCategory_name, 0));
+                    Entry entry = new Entry(id, name, value, new Category(category_id, category_name, 0, subCategories),
+                            new PaymentType(paymentMethod_id, paymentMethod_name, 0),
                             new Date(), new Date());
                     data.add(entry);
             } while (cursor.moveToNext());

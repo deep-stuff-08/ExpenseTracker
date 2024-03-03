@@ -184,13 +184,14 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
                         DBManager.getDBManagerInstance().insertExpenseCategory(new Category(name, logo));
                         break;
                     case 2: //Expense Sub-Category
-                        DBManager.getDBManagerInstance().insertExpenseSubCategory(new SubCategory(name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                        DBManager.getDBManagerInstance().insertExpenseSubCategory(new SubCategory(name,  logo), 1);
                         break;
                     case 3: //Income Category
                         DBManager.getDBManagerInstance().insertIncomeCategory(new Category(name, logo));
                         break;
-                    case 4: //Expense Sub-Category
-                        DBManager.getDBManagerInstance().insertIncomeSubCategory(new SubCategory(name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                    case 4: //Income Sub-Category
+                        // how to take category id here?
+                        DBManager.getDBManagerInstance().insertIncomeSubCategory(new SubCategory(name, logo), 1);
                         break;
                     case 5: //Users
                         DBManager.getDBManagerInstance().insertUser(new User(name));
