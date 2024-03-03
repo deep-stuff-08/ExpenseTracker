@@ -90,7 +90,7 @@ public class Entry {
     }
 
     public boolean isShared() {
-        return sharedUsersList.isEmpty();
+        return !sharedUsersList.isEmpty();
     }
 
     public long getId() {

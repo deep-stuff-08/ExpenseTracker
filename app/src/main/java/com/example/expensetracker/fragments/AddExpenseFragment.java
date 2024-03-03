@@ -305,6 +305,7 @@ public class AddExpenseFragment extends Fragment {
                 ArrayList<Entry.SharedUser> newUserList = new ArrayList<>();
                 ArrayList<Entry.SharedUser> sharedUserList = new ArrayList<>();
                 int miscIndex = ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList(sharedUserList, newUserList);
+                entry.setValue(((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getMeTotal());
                 if (newUserList.size() > 0) {
                     StringBuilder userList = new StringBuilder();
                     for (int i = 0; i < newUserList.size(); i++) {
