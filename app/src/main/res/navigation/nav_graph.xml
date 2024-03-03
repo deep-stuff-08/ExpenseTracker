@@ -39,11 +39,11 @@
     <fragment
         android:id="@+id/entryFragment"
         android:name="com.example.expensetracker.fragments.EntryFragment"
-        android:label="EntryFragment"
+        android:label="Add New Entry"
         tools:layout="@layout/fragment_entry"/>
     <fragment
         android:id="@+id/userSplitFragment"
         android:name="com.example.expensetracker.fragments.UserSplitFragment"
-        android:label="UserSplitFragment"
+        android:label="User Splits"
         tools:layout="@layout/fragment_user_split" />
 </navigation>

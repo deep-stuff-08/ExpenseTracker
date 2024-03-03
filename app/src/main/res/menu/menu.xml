@@ -11,7 +11,7 @@
         app:showAsAction="never"/>
 
     <item android:id="@+id/menu_users_split"
-        android:title="User Splits"
+        android:title="@string/user_splits"
         app:showAsAction="never"/>
 
 </menu>

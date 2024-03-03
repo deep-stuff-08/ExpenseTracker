@@ -21,12 +21,14 @@ import com.example.expensetracker.R;
 import com.example.expensetracker.SearchFilters;
 import com.example.expensetracker.adapters.ExpEntryAdapter;
 import com.example.expensetracker.database.DBManager;
+import com.example.expensetracker.pojo.PaymentType;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class HomeFragment extends Fragment {
@@ -170,7 +172,6 @@ public class HomeFragment extends Fragment {
 
         TextView textFilterCategory = view.findViewById(R.id.filter_category);
         textFilterCategory.setText(R.string.string_all);
-        boolean[] categoryData = {false, false, false};
         textFilterCategory.setOnClickListener(v -> {
             AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext());
             ArrayList<String> items = new ArrayList<>();
@@ -182,6 +183,7 @@ public class HomeFragment extends Fragment {
             } else if (textFilterType.getText().equals("Income")) {
                 activity.getSettings().getIncomeCategory().forEach(paymentType -> items.add(paymentType.getName()));
             }
+            boolean[] categoryData = new boolean[items.size()];
             dialog.setMultiChoiceItems(items.toArray(new String[]{}), categoryData, (dialog1, which, isChecked) -> categoryData[which] = isChecked).setPositiveButton("Ok", (dialog1, which) -> {
                 StringBuilder custom = new StringBuilder();
                 ArrayList<Long> list = new ArrayList<>();
@@ -192,7 +194,12 @@ public class HomeFragment extends Fragment {
                     areNoneSelected = areNoneSelected || categoryData[i];
                     if(categoryData[i]) {
                         custom.append(items.get(i)).append(" ");
-                        list.add(activity.getSettings().getExpenseCategory().get(i).getId());
+                        int expenseLen = activity.getSettings().getExpenseCategory().size();
+                        if(i >= expenseLen) {
+                            list.add(activity.getSettings().getIncomeCategory().get(i - expenseLen).getId());
+                        } else {
+                            list.add(activity.getSettings().getExpenseCategory().get(i).getId());
+                        }
                     }
                 }
                 if(areAllSelected || areNoneSelected){

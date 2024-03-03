@@ -24,4 +24,5 @@
     <string name="settle_swap">Swap</string>
     <string name="incomeorexpensetab">IncomeOrExpense</string>
     <string name="string_all">All</string>
+    <string name="user_splits">User Splits</string>
 </resources>

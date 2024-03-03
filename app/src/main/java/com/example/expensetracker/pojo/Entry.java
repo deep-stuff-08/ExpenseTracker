@@ -69,6 +69,9 @@ public class Entry {
     public long getSubCategoryId() {
         return subCategoryId;
     }
+    public long getCategoryId() {
+        return categoryId;
+    }
 
     public long getPaymentId() {
         return paymentId;
