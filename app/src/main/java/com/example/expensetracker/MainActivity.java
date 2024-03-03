@@ -27,7 +27,7 @@ import java.util.Objects;
 */
 
 public class MainActivity extends AppCompatActivity {
-    private boolean isSettingsVisible;
+    private int currentNav;
     private Settings settings;
     private ArrayList<UnconfirmedEntry> entries;
     @Override
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, mNavigationController);
 
         mNavigationController.addOnDestinationChangedListener((navController, navDestination, bundle) -> {
-            isSettingsVisible = navDestination.getId() == R.id.homeFragment;
+            currentNav = navDestination.getId();
             invalidateOptionsMenu();
         });
 
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         };
         getOnBackPressedDispatcher().addCallback(callback);
 
-        isSettingsVisible = true;
+        currentNav = R.id.homeFragment;
     }
 
     @Override
@@ -79,7 +79,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.menu_action_settings).setVisible(isSettingsVisible);
+        menu.findItem(R.id.menu_action_settings).setVisible(currentNav != R.id.settingsFragment);
+        menu.findItem(R.id.menu_unconfirmed_entries).setVisible(currentNav != R.id.unconfirmedEntryFragment);
+        menu.findItem(R.id.menu_users_split).setVisible(currentNav != R.id.userSplitFragment);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -87,15 +89,27 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if(R.id.menu_action_settings == item.getItemId()) {
             invalidateMenu();
-            Navigation.findNavController(this, R.id.fragment_container_view).navigate(R.id.action_homeFragment_to_settingsFragment);
+            NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
+            if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
+                navController.navigateUp();
+            }
+            navController.navigate(R.id.action_homeFragment_to_settingsFragment);
             return true;
         } else if (R.id.menu_unconfirmed_entries == item.getItemId()) {
             invalidateMenu();
             NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
-            if(Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
+            if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
                 navController.navigateUp();
             }
             navController.navigate(R.id.action_homeFragment_to_unconfirmedEntryFragment);
+            return true;
+        } else if (R.id.menu_users_split == item.getItemId()) {
+            invalidateMenu();
+            NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
+            if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
+                navController.navigateUp();
+            }
+            navController.navigate(R.id.action_homeFragment_to_userSplitFragment);
             return true;
         } else {
             return super.onOptionsItemSelected(item);

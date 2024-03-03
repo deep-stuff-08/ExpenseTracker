@@ -10,4 +10,8 @@
         android:title="@string/action_settings"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/menu_users_split"
+        android:title="User Splits"
+        app:showAsAction="never"/>
+
 </menu>
