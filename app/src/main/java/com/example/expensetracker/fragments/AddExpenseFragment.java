@@ -105,8 +105,15 @@ public class AddExpenseFragment extends Fragment {
             adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getExpenseCategory().get(0).getColorId());
         }
 
+        ArrayList<String> entryNames;
+        if(isIncome) {
+            entryNames = DBManager.getDBManagerInstance().getIncomeEntryNames();
+        } else {
+            entryNames = DBManager.getDBManagerInstance().getExpenseEntryNames();
+        }
+
         //Setup Name
-        ArrayAdapter<String> adt = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, new String[]{"Deep", "Fee"});
+        ArrayAdapter<String> adt = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, entryNames);
         textName.setAdapter(adt);
         textName.setThreshold(1);
 

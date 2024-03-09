@@ -5,8 +5,10 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -29,7 +31,8 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
     private int currentNav;
     private Settings settings;
-    private ArrayList<UnconfirmedEntry> entries;
+    private ArrayList<UnconfirmedEntry> unconfirmedEntries;
+    private long pressedTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +43,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+        unconfirmedEntries = new ArrayList<>();
+
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
         } else {
             SmsReader reader = new SmsReader();
@@ -51,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             c.set(Calendar.HOUR_OF_DAY, 9);
             c.set(Calendar.MINUTE, 40);
             c.set(Calendar.SECOND, 30);
-            entries = reader.readMessagesSentAfter(this, c.getTime());
+            unconfirmedEntries = reader.readMessagesSentAfter(this, c.getTime());
         }
         NavController mNavigationController = Navigation.findNavController(this,R.id.fragment_container_view);
         NavigationUI.setupActionBarWithNavController(this, mNavigationController);
@@ -64,11 +69,22 @@ public class MainActivity extends AppCompatActivity {
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                if (pressedTime + 2000 > System.currentTimeMillis()) {
+                    finish();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Press back again to exit", Toast.LENGTH_SHORT).show();
+                }
+                pressedTime = System.currentTimeMillis();
             }
         };
         getOnBackPressedDispatcher().addCallback(callback);
 
         currentNav = R.id.homeFragment;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -126,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public ArrayList<UnconfirmedEntry> getEntries() {
-        return entries;
+        return unconfirmedEntries;
     }
 
     public void terminateApplicationWithError(int errorCode) {

@@ -42,6 +42,7 @@ public class SmsReader {
             if(amountMatcher.find()) {
                 String amt = amountMatcher.group()
                         .replaceFirst("(?i)(RS|INR)(.?+)", "")
+                        .replaceAll(",", "")
                         .trim();
                 value = Math.round(Float.parseFloat(amt));
                 if(Pattern.compile("(?i)(debited|spent)").matcher(body).find()) {

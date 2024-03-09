@@ -27,10 +27,10 @@ public class DBManager{
 
     }
 
-    private static boolean isDatabaseCreated(Context conTEXT)
+    private static boolean isDatabaseCreated(Context context)
     {
         try {
-           SQLiteDatabase.openDatabase(conTEXT.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY).close();
+           SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY).close();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -678,6 +678,33 @@ public class DBManager{
         {
             throw  new RuntimeException();
         }
+    }
+
+    private ArrayList<String> getEntryNames(String tblName) {
+        ArrayList<String> data = new ArrayList<>();
+        String query = "select "+ tblName +".name from " + tblName;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
+            if (null == cursor || 0 == cursor.getCount() )
+                return data;
+            cursor.moveToFirst();
+            do {
+                data.add(cursor.getString(0));
+            } while (cursor.moveToNext());
+            return data;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return  data;
+        }
+    }
+
+    public ArrayList<String> getIncomeEntryNames() {
+        return getEntryNames(DatabaseDetails.INCOME_ENTRIES);
+    }
+
+    public ArrayList<String> getExpenseEntryNames() {
+        return getEntryNames(DatabaseDetails.EXPENSE_ENTRIES);
     }
 
     private long insert(ContentValues contentValues, String tableName)
