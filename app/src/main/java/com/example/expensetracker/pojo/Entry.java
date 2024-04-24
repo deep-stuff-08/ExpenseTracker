@@ -32,6 +32,7 @@ public class Entry {
     final private Date dateAndTime;
     private long id;
     private ArrayList<SharedUser> sharedUsersList;
+    private User payer;
 
 	public Entry(long id, String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
         this.id = id;
@@ -85,7 +86,12 @@ public class Entry {
         return sharedUsersList;
     }
 
-    public void setSharedUsersList(ArrayList<SharedUser> sharedUsersList) {
+    public User getPayer() {
+        return payer;
+    }
+
+    public void setSharedUsersList(User payer, ArrayList<SharedUser> sharedUsersList) {
+        this.payer = payer;
         this.sharedUsersList = sharedUsersList;
     }
 

@@ -23,6 +23,7 @@ public class EntryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        ((MainActivity)requireActivity()).getDeleteButton().setVisibility(View.GONE);
         return inflater.inflate(R.layout.fragment_entry, container, false);
     }
 

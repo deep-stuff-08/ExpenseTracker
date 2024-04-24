@@ -16,8 +16,15 @@
         app:menu="@menu/menu"
         android:background="?attr/colorAccent"
         app:popupTheme="@style/Theme.ExpenseTracker.PopupMenuStyle"
-        app:title="@string/app_name"
-        />
+        app:title="@string/app_name">
+        <ImageView
+            android:id="@+id/delete_entry_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:visibility="gone"
+            android:src="@android:drawable/ic_menu_delete"/>
+    </androidx.appcompat.widget.Toolbar>
 
     <fragment
         android:layout_below="@id/toolbar"

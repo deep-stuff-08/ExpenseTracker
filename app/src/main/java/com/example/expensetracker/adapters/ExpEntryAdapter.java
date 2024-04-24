@@ -5,10 +5,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.selection.ItemDetailsLookup;
+import androidx.recyclerview.selection.ItemKeyProvider;
+import androidx.recyclerview.selection.SelectionTracker;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expensetracker.MainActivity;
@@ -33,8 +39,9 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
     HashMap<Long, SubCategory> expenseSubCategoryHashMap;
     HashMap<Long, Category> incomeCategoryHashMap;
     HashMap<Long, SubCategory> incomeSubCategoryHashMap;
-
+    SelectionTracker<Long> selectionTracker;
     public ExpEntryAdapter(MainActivity activity, ArrayList<Entry> entries) {
+        setHasStableIds(true);
         this.activity = activity;
         this.entries = entries;
         paymentTypeHashMap = new HashMap<>();
@@ -52,6 +59,15 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
             c.getSubCategories().forEach(subCategory -> incomeSubCategoryHashMap.put(subCategory.getId(), subCategory));
         }
     }
+    @Override
+    public long getItemId(int position) {
+        if(position < entries.size()) {
+            return entries.get(position).getId();
+        } else {
+            return position;
+        }
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -73,11 +89,19 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
             holder.value.setText(String.format(Locale.getDefault(), "%s%d", sign, entries.get(position).getValue()));
             holder.image.setImageResource(Objects.requireNonNull(expenseSubCategoryHashMap.get(entries.get(position).getSubCategoryId())).getDrawableId());
             holder.image.setBackgroundColor(Objects.requireNonNull(expenseCategoryHashMap.get(entries.get(position).getCategoryId())).getColorId());
+            holder.id = entries.get(position).getId();
+            boolean isSelected = selectionTracker.isSelected(entries.get(position).getId());
+            holder.itemView.setActivated(isSelected);
+            holder.checkBox.setChecked(isSelected);
         }
     }
     @Override
     public int getItemCount() {
-        return entries.size() + 2;
+        return entries.size();
+    }
+
+    public void setSelectionTracker(SelectionTracker<Long> selectionTracker) {
+        this.selectionTracker = selectionTracker;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -85,12 +109,32 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
         public final TextView payment;
         public final TextView value;
         public final ImageView image;
+        public final CheckBox checkBox;
+        public Long id;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.expense_name);
             payment = itemView.findViewById(R.id.payment_type);
             value = itemView.findViewById(R.id.expense_payment_value);
             image = itemView.findViewById(R.id.imageview);
+            checkBox = itemView.findViewById(R.id.expense_is_selected);
+            checkBox.setClickable(false);
+            id = 0L;
+        }
+
+        ItemDetailsLookup.ItemDetails<Long> getItemDetails() {
+            return new ItemDetailsLookup.ItemDetails<Long>() {
+                @Override
+                public int getPosition() {
+                    return getAdapterPosition();
+                }
+
+                @Nullable
+                @Override
+                public Long getSelectionKey() {
+                    return id;
+                }
+            };
         }
     }
 }

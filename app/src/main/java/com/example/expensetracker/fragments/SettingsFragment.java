@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.adapters.SettingsEntryAdapter;
 import com.example.expensetracker.R;
 
@@ -22,6 +23,7 @@ public class SettingsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((MainActivity)requireActivity()).getDeleteButton().setVisibility(View.GONE);
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
         RecyclerView recycler = view.findViewById(R.id.settings_recycle_view);

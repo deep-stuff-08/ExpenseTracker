@@ -1,6 +1,5 @@
 package com.example.expensetracker.fragments;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,9 +9,13 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.selection.SelectionPredicates;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StorageStrategy;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,40 +23,81 @@ import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.SearchFilters;
 import com.example.expensetracker.adapters.ExpEntryAdapter;
+import com.example.expensetracker.adapters.ExpItemDetailsLookup;
+import com.example.expensetracker.adapters.ExpItemKeyProvider;
 import com.example.expensetracker.database.DBManager;
-import com.example.expensetracker.pojo.PaymentType;
+import com.example.expensetracker.pojo.Entry;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
     SearchFilters filter;
-
+    RecyclerView recycler;
+    SelectionTracker<Long> selectionTracker;
+    ArrayList<Entry> entries;
+    SelectionTracker.SelectionObserver<Long> observer;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    void refreshEntries() {
+        entries = DBManager.getDBManagerInstance().getEntries(filter);
+        ExpEntryAdapter adapter = new ExpEntryAdapter((MainActivity)requireActivity(), entries);
+        recycler.setAdapter(adapter);
+        selectionTracker = new SelectionTracker.Builder<>("HomeSelector", recycler, new ExpItemKeyProvider(entries), new ExpItemDetailsLookup(recycler), StorageStrategy.createLongStorage())
+                        .withSelectionPredicate(SelectionPredicates.createSelectAnything())
+                        .build();
+        adapter.setSelectionTracker(selectionTracker);
+        selectionTracker.addObserver(observer);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-
         MainActivity activity = (MainActivity)requireActivity();
 
         filter = new SearchFilters();
 
-        RecyclerView recycler = view.findViewById(R.id.recycleView);
-        recycler.setAdapter(new ExpEntryAdapter(activity, DBManager.getDBManagerInstance().getExpenseEntries()));
+        recycler = view.findViewById(R.id.recycleView);
+        entries = DBManager.getDBManagerInstance().getExpenseEntries();
+        ExpEntryAdapter adapter = new ExpEntryAdapter(activity, entries);
+        recycler.setAdapter(adapter);
 
         recycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         recycler.setVerticalScrollbarPosition(0);
+
+        selectionTracker =
+                new SelectionTracker.Builder<>("HomeSelector", recycler, new ExpItemKeyProvider(entries), new ExpItemDetailsLookup(recycler), StorageStrategy.createLongStorage())
+                .withSelectionPredicate(SelectionPredicates.createSelectAnything())
+                .build();
+
+        adapter.setSelectionTracker(selectionTracker);
+        observer = new SelectionTracker.SelectionObserver<Long>() {
+            @Override
+            public void onItemStateChanged(@NonNull Long key, boolean selected) {
+                super.onItemStateChanged(key, selected);
+                if(selectionTracker.hasSelection()) {
+                    activity.getDeleteButton().setVisibility(View.VISIBLE);
+                    for(int i = 0; i < Math.min(recycler.getChildCount(),entries.size()); i++) {
+                        recycler.getChildAt(i).findViewById(R.id.expense_is_selected).setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    activity.getDeleteButton().setVisibility(View.GONE);
+                    for(int i = 0; i < Math.min(recycler.getChildCount(),entries.size()); i++) {
+                        recycler.getChildAt(i).findViewById(R.id.expense_is_selected).setVisibility(View.GONE);
+                    }
+                }
+            }
+        };
+        selectionTracker.addObserver(observer);
 
         String[] typeArray = {
           "All", "Expense", "Income"
@@ -65,6 +109,7 @@ public class HomeFragment extends Fragment {
             AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext());
             dialog.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, typeArray), (dialog1, which) -> {
                 filter.setType(which);
+                refreshEntries();
                 textFilterType.setText(typeArray[which]);
             }).setNegativeButton("Cancel", (dialog1, which) -> dialog1.dismiss()).show();
         });
@@ -137,6 +182,7 @@ public class HomeFragment extends Fragment {
                 } else {
                     filter.setDate(timeDateArray[which], new Date());
                 }
+                refreshEntries();
             }).setNegativeButton("Cancel", (dialog1, which) -> dialog1.dismiss()).show();
         });
 
@@ -167,6 +213,7 @@ public class HomeFragment extends Fragment {
                     textFilterPayment.setText(custom.toString());
                 }
                 filter.setPaymentType(list);
+                refreshEntries();
             }).setNegativeButton("Cancel", (dialog1, which) -> dialog1.dismiss()).show();
         });
 
@@ -209,6 +256,7 @@ public class HomeFragment extends Fragment {
                     textFilterCategory.setText(custom.toString());
                 }
                 filter.setCategory(list);
+                refreshEntries();
             }).setNegativeButton("Cancel", (dialog1, which) -> dialog1.dismiss()).show();
         });
 
@@ -227,5 +275,18 @@ public class HomeFragment extends Fragment {
         if(((MainActivity)requireActivity()).getEntries().size() > 0) {
             requireView().findViewById(R.id.unconfirmed_parent).setVisibility(View.VISIBLE);
         }
+        ((MainActivity)requireActivity()).getDeleteButton().setOnClickListener(v -> {
+            new AlertDialog.Builder(requireContext()).setMessage("Are you sure you want to delete " + selectionTracker.getSelection().size() + " entries?")
+                    .setCancelable(true)
+                    .setPositiveButton("Yes, I'm Sure", (dialog, which) -> {
+                        selectionTracker.getSelection().forEach(aLong ->{
+                            DBManager.getDBManagerInstance().deleteExpenseEntries(aLong);
+                        });
+                        selectionTracker.clearSelection();
+                        refreshEntries();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        });
     }
 }

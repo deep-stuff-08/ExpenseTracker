@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class SmsReader {
 
     public ArrayList<UnconfirmedEntry> readMessagesSentAfter(Context context, Date dateAfter) {
-        Cursor cursor = context.getContentResolver().query(Telephony.Sms.CONTENT_URI, new String[]{Telephony.Sms.BODY, Telephony.Sms.DATE, Telephony.Sms.ADDRESS, Telephony.Sms.DATE}, Telephony.Sms.DATE+">="+dateAfter.getTime(), null, null);
+        Cursor cursor = context.getContentResolver().query(Telephony.Sms.CONTENT_URI, new String[]{Telephony.Sms.BODY, Telephony.Sms.DATE, Telephony.Sms.ADDRESS}, Telephony.Sms.DATE+">="+dateAfter.getTime(), null, null);
         assert cursor != null;
         cursor.moveToFirst();
         ArrayList<UnconfirmedEntry> entries = new ArrayList<>();

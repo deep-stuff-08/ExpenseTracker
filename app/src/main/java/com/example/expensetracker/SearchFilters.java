@@ -1,5 +1,9 @@
 package com.example.expensetracker;
 
+import android.widget.Filter;
+
+import com.example.expensetracker.database.DBManager;
+
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -9,6 +13,26 @@ public class SearchFilters {
     Date dateBefore;
     ArrayList<Long> paymentType;
     ArrayList<Long> category;
+
+    public int getType() {
+        return type;
+    }
+
+    public Date getDateAfter() {
+        return dateAfter;
+    }
+
+    public Date getDateBefore() {
+        return dateBefore;
+    }
+
+    public ArrayList<Long> getPaymentType() {
+        return paymentType;
+    }
+
+    public ArrayList<Long> getCategory() {
+        return category;
+    }
 
     public SearchFilters() {
         type = 0;

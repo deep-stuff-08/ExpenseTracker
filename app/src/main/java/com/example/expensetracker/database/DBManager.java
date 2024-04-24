@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.expensetracker.R;
+import com.example.expensetracker.SearchFilters;
 import com.example.expensetracker.Settings;
 import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.Entry;
@@ -16,6 +17,7 @@ import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 public class DBManager{
     private static DBManager dbManager = null;
@@ -491,6 +493,27 @@ public class DBManager{
         return data;
     }
 
+    public int getUserShare(long userId) {
+        String query = "select value from "
+                + DatabaseDetails.EXPENSE_SHARED
+                + " where user_id = " + userId;
+        int value = 0;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
+            if (null == cursor || 0 == cursor.getCount() )
+                return 0;
+
+            cursor.moveToFirst();
+            do {
+                value += cursor.getInt(0);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return value;
+    }
+
     public long insertUser(User u)
     {
         ContentValues contentValues = new ContentValues();
@@ -516,12 +539,12 @@ public class DBManager{
         this.delete(DatabaseDetails.USERS, condition);
     }
 
-    public void insertSharedUserEntries(Entry.SharedUser sharedUser, long expenseEntriesId)
+    public void insertSharedUserEntries(User user, int value, long expenseEntriesId)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("expenseEntries_id", expenseEntriesId);
-        contentValues.put("user_id", sharedUser.getUser().getId());
-        contentValues.put("value", sharedUser.getValue());
+        contentValues.put("user_id", user.getId());
+        contentValues.put("value", value);
         this.insert(contentValues, DatabaseDetails.EXPENSE_SHARED);
     }
 
@@ -540,7 +563,20 @@ public class DBManager{
         {
             throw new RuntimeException();
         }
-        entry.getSharedUsersList().forEach(sharedUser -> insertSharedUserEntries(sharedUser, id));
+        if(entry.isShared() && entry.getPayer().getId() == -1) {
+            entry.getSharedUsersList().forEach(sharedUser -> insertSharedUserEntries(sharedUser.getUser(), sharedUser.getValue(), id));
+        } else {
+            entry.getSharedUsersList().forEach(sharedUser -> {
+                if(sharedUser.getUser().getId() == entry.getPayer().getId() && Objects.equals(sharedUser.getUser().getName(), entry.getPayer().getName())) {
+                    insertSharedUserEntries(sharedUser.getUser(), -entry.getValue(), id);
+                }
+            });
+        }
+    }
+
+    public void deleteExpenseEntries(long entry) {
+        String condition = "id = '" + entry +"'";
+        this.delete(DatabaseDetails.EXPENSE_ENTRIES, condition);
     }
 
     public void insertIncomeEntries(Entry entry)
@@ -587,6 +623,15 @@ public class DBManager{
             e.printStackTrace();
         }
         return data;
+    }
+
+    public ArrayList<Entry> getEntries(SearchFilters filters) {
+        if(filters.getType() == 0) {
+            return getExpenseEntries();
+        } else if(filters.getType() == 1) {
+            return getIncomeEntries();
+        }
+        return new ArrayList<>();
     }
 
     public ArrayList<Entry> getExpenseEntries() {
