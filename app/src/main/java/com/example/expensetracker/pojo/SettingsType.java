@@ -5,7 +5,4 @@ public enum SettingsType {
     CATEGORY,
     SUBCATEGORY,
     USER,
-    INCOME,
-    TYPE,
-    EXPENSE_ENTRY
 }

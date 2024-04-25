@@ -1,11 +1,6 @@
 package com.example.expensetracker.fragments;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavOptions;
-import androidx.navigation.Navigation;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +9,8 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
 
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
@@ -36,6 +33,7 @@ public class TransferFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ((MainActivity)requireActivity()).getDeleteButton().setVisibility(View.GONE);
         View view = inflater.inflate(R.layout.fragment_transfer, container, false);
 
         Spinner spinnerTo = view.findViewById(R.id.spinner_to);

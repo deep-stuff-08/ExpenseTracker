@@ -1,16 +1,20 @@
 package com.example.expensetracker;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
@@ -18,8 +22,10 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -27,9 +33,14 @@ import java.util.Objects;
 */
 
 public class MainActivity extends AppCompatActivity {
-    private boolean isSettingsVisible;
+    private int currentNav;
     private Settings settings;
-    private ArrayList<UnconfirmedEntry> entries;
+    private ArrayList<UnconfirmedEntry> unconfirmedEntries;
+    private long pressedTime;
+
+    public ImageView getDeleteButton() {
+        return findViewById(R.id.delete_entry_button);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,38 +48,74 @@ public class MainActivity extends AppCompatActivity {
         DBManager.createDBManagerInstance(this);
         settings = Settings.createWithParametersFromDatabase();
 
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        long lastTime = sharedPref.getLong("LastTime", 0);
+        SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
+
+        sharedPrefEditor.putLong("LastTime", new Date().getTime());
+        sharedPrefEditor.apply();
+        boolean isFirstOpen = !sharedPref.getBoolean("NotFirstOpen", false);
+
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
+        unconfirmedEntries = new ArrayList<>();
+
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+            if(isFirstOpen) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder
+                        .setMessage("The App has a feature that can allow it go through your SMS and create entries, saving you the hassle of doing so manually. To enable this feature the App requires SMS read permission.")
+                        .setCancelable(false)
+                        .setPositiveButton("Ok, Got it", (dialog, which) ->
+                        {
+                            sharedPrefEditor.putBoolean("NotFirstOpen", true);
+                            sharedPrefEditor.apply();
+                            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_SMS}, 1);
+                        })
+                        .show();
+            }
         } else {
             SmsReader reader = new SmsReader();
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.YEAR, 2023);
-            c.set(Calendar.MONTH, 11);
-            c.set(Calendar.DAY_OF_MONTH, 27);
-            c.set(Calendar.HOUR_OF_DAY, 9);
-            c.set(Calendar.MINUTE, 40);
-            c.set(Calendar.SECOND, 30);
-            entries = reader.readMessagesSentAfter(this, c.getTime());
+            Date lastDate = lastTime != 0 ? new Date(lastTime) : new Date();
+            unconfirmedEntries = reader.readMessagesSentAfter(this, lastDate);
         }
+
         NavController mNavigationController = Navigation.findNavController(this,R.id.fragment_container_view);
         NavigationUI.setupActionBarWithNavController(this, mNavigationController);
 
         mNavigationController.addOnDestinationChangedListener((navController, navDestination, bundle) -> {
-            isSettingsVisible = navDestination.getId() == R.id.homeFragment;
+            currentNav = navDestination.getId();
             invalidateOptionsMenu();
         });
 
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                if (pressedTime + 2000 > System.currentTimeMillis()) {
+                    finish();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Press back again to exit", Toast.LENGTH_SHORT).show();
+                }
+                pressedTime = System.currentTimeMillis();
             }
         };
         getOnBackPressedDispatcher().addCallback(callback);
 
-        isSettingsVisible = true;
+        currentNav = R.id.homeFragment;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == 1 && permissions[0].equals(android.Manifest.permission.READ_SMS) && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder
+                    .setMessage("You have denied to use the SMS Read Feature of the App. If you would like to turn it on in the future, go to settings and give SMS Permission to the App. On restarting the app SMS reading should be enabled.")
+                    .setCancelable(true)
+                    .setPositiveButton("Ok, Got it!", null)
+                    .show();
+        }
     }
 
     @Override
@@ -79,7 +126,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.menu_action_settings).setVisible(isSettingsVisible);
+        menu.findItem(R.id.menu_action_settings).setVisible(currentNav != R.id.settingsFragment);
+        menu.findItem(R.id.menu_unconfirmed_entries).setVisible(currentNav != R.id.unconfirmedEntryFragment);
+        menu.findItem(R.id.menu_users_split).setVisible(currentNav != R.id.userSplitFragment);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -87,15 +136,27 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if(R.id.menu_action_settings == item.getItemId()) {
             invalidateMenu();
-            Navigation.findNavController(this, R.id.fragment_container_view).navigate(R.id.action_homeFragment_to_settingsFragment);
+            NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
+            if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
+                navController.navigateUp();
+            }
+            navController.navigate(R.id.action_homeFragment_to_settingsFragment);
             return true;
         } else if (R.id.menu_unconfirmed_entries == item.getItemId()) {
             invalidateMenu();
             NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
-            if(Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
+            if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
                 navController.navigateUp();
             }
             navController.navigate(R.id.action_homeFragment_to_unconfirmedEntryFragment);
+            return true;
+        } else if (R.id.menu_users_split == item.getItemId()) {
+            invalidateMenu();
+            NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
+            if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
+                navController.navigateUp();
+            }
+            navController.navigate(R.id.action_homeFragment_to_userSplitFragment);
             return true;
         } else {
             return super.onOptionsItemSelected(item);
@@ -112,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public ArrayList<UnconfirmedEntry> getEntries() {
-        return entries;
+        return unconfirmedEntries;
     }
 
     public void terminateApplicationWithError(int errorCode) {

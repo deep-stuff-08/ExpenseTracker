@@ -116,10 +116,10 @@
                 tools:ignore="VisualLintButtonSize" />
 
             <RelativeLayout
-                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/expense_shared"
+                android:visibility="gone"
                 android:id="@+id/expense_shared_details">
 
                 <TextView
@@ -147,12 +147,21 @@
                     android:layout_alignParentTop="true"
                     android:id="@+id/expense_sharing_type"/>
 
+                <Spinner
+                    android:id="@+id/expense_shared_payer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:layout_marginStart="-7dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_below="@id/expense_sharing_value"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/expense_sharing_users"
-                    android:layout_below="@id/expense_sharing_value" />
+                    android:layout_below="@id/expense_shared_payer" />
         </RelativeLayout>
 
             <CheckBox

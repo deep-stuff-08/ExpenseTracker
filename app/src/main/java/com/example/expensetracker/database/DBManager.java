@@ -4,11 +4,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.ContactsContract;
 import android.util.Log;
 
-import com.example.expensetracker.Settings;
 import com.example.expensetracker.R;
+import com.example.expensetracker.SearchFilters;
+import com.example.expensetracker.Settings;
 import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.Entry;
 import com.example.expensetracker.pojo.PaymentType;
@@ -17,6 +17,7 @@ import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 public class DBManager{
     private static DBManager dbManager = null;
@@ -28,10 +29,10 @@ public class DBManager{
 
     }
 
-    private static boolean isDatabaseCreated(Context conTEXT)
+    private static boolean isDatabaseCreated(Context context)
     {
         try {
-           SQLiteDatabase.openDatabase(conTEXT.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY).close();
+           SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY).close();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -215,7 +216,9 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", c.getName());
         contentValues.put("color_id", c.getColorId());
-        this.update(DatabaseDetails.CATEGORY_EXPENSE, contentValues, condition);
+        if(this.update(DatabaseDetails.CATEGORY_EXPENSE, contentValues, condition) < 1) {
+            throw new RuntimeException("No Rows Updated");
+        }
     }
 
     public void deleteExpenseCategory(Category c)
@@ -276,7 +279,9 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", c.getName());
         contentValues.put("color_id", c.getColorId());
-        this.update(DatabaseDetails.CATEGORY_INCOME, contentValues, condition);
+        if(this.update(DatabaseDetails.CATEGORY_INCOME, contentValues, condition) < 1) {
+            throw new RuntimeException("No Entry Updated");
+        }
     }
 
     public void deleteIncomeCategory(Category c)
@@ -334,7 +339,10 @@ public class DBManager{
         String condition = "id = " + s.getId();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", s.getName());
-        this.update(DatabaseDetails.SUBCATEGORY_EXPENSE, contentValues ,condition);
+        contentValues.put("category_id", s.getCategoryId());
+        if(this.update(DatabaseDetails.SUBCATEGORY_EXPENSE, contentValues ,condition) < 1) {
+            throw new RuntimeException("No Rows Updated");
+        }
     }
 
     public void deleteExpenseSubCategory(SubCategory s)
@@ -384,7 +392,10 @@ public class DBManager{
         String condition = "id = " + s.getId();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", s.getName());
-        this.update(DatabaseDetails.SUBCATEGORY_INCOME, contentValues ,condition);
+        contentValues.put("category_id", s.getCategoryId());
+        if(this.update(DatabaseDetails.SUBCATEGORY_INCOME, contentValues ,condition) < 1) {
+            throw new RuntimeException("No Rows Updated");
+        }
     }
 
     public void deleteIncomeSubCategory(SubCategory s)
@@ -430,7 +441,9 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", p.getName());
         contentValues.put("color_id", p.getDrawableId());
-        this.update(DatabaseDetails.PAYMENT_TYPE, contentValues, condition);
+        if(this.update(DatabaseDetails.PAYMENT_TYPE, contentValues, condition) < 1) {
+            throw new RuntimeException("No Rows Updated");
+        }
     }
 
     public void deletePaymentType(PaymentType p)
@@ -462,12 +475,33 @@ public class DBManager{
         return data;
     }
 
-    public void insertUser(User u)
+    public int getUserShare(long userId) {
+        String query = "select value from "
+                + DatabaseDetails.EXPENSE_SHARED
+                + " where user_id = " + userId;
+        int value = 0;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
+            if (null == cursor || 0 == cursor.getCount() )
+                return 0;
+
+            cursor.moveToFirst();
+            do {
+                value += cursor.getInt(0);
+            } while (cursor.moveToNext());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return value;
+    }
+
+    public long insertUser(User u)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", u.getName());
         contentValues.put("color_id", u.getDrawableId());
-        this.insert(contentValues, DatabaseDetails.USERS);
+        return this.insert(contentValues, DatabaseDetails.USERS);
     }
 
     public void updateUser(User u)
@@ -476,7 +510,9 @@ public class DBManager{
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", u.getName());
         contentValues.put("color_id", u.getDrawableId());
-        this.update(DatabaseDetails.USERS, contentValues, condition);
+        if(this.update(DatabaseDetails.USERS, contentValues, condition) < 1) {
+            throw new RuntimeException("No Rows Updated");
+        }
     }
 
     public void deleteUser(User u)
@@ -485,12 +521,12 @@ public class DBManager{
         this.delete(DatabaseDetails.USERS, condition);
     }
 
-    public void insertSharedUserEntries(Entry.SharedUser sharedUser, long expenseEntriesId)
+    public void insertSharedUserEntries(User user, int value, long expenseEntriesId)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("expenseEntries_id", expenseEntriesId);
-        contentValues.put("user_id", sharedUser.getUser().getId());
-        contentValues.put("value", sharedUser.getValue());
+        contentValues.put("user_id", user.getId());
+        contentValues.put("value", value);
         this.insert(contentValues, DatabaseDetails.EXPENSE_SHARED);
     }
 
@@ -509,10 +545,20 @@ public class DBManager{
         {
             throw new RuntimeException();
         }
-        entry.getSharedUsersList().forEach(sharedUser ->
-        {
-            insertSharedUserEntries(sharedUser, id);
-        });
+        if(entry.isShared() && entry.getPayer().getId() == -1) {
+            entry.getSharedUsersList().forEach(sharedUser -> insertSharedUserEntries(sharedUser.getUser(), sharedUser.getValue(), id));
+        } else {
+            entry.getSharedUsersList().forEach(sharedUser -> {
+                if(sharedUser.getUser().getId() == entry.getPayer().getId() && Objects.equals(sharedUser.getUser().getName(), entry.getPayer().getName())) {
+                    insertSharedUserEntries(sharedUser.getUser(), -entry.getValue(), id);
+                }
+            });
+        }
+    }
+
+    public void deleteExpenseEntries(long entry) {
+        String condition = "id = '" + entry +"'";
+        this.delete(DatabaseDetails.EXPENSE_ENTRIES, condition);
     }
 
     public void insertIncomeEntries(Entry entry)
@@ -547,11 +593,10 @@ public class DBManager{
 
             cursor.moveToFirst();
             do {
-                long shared_id = cursor.getLong(0);
                 long user_id = cursor.getLong(1);
                 String user_name = cursor.getString(2);
                 int shared_value = cursor.getInt(3);
-                Entry.SharedUser obj = new Entry.SharedUser(new User(user_id,user_name), shared_id, shared_value);
+                Entry.SharedUser obj = new Entry.SharedUser(new User(user_id,user_name), shared_value);
                 data.add(obj);
             } while (cursor.moveToNext());
         }
@@ -560,6 +605,15 @@ public class DBManager{
             e.printStackTrace();
         }
         return data;
+    }
+
+    public ArrayList<Entry> getEntries(SearchFilters filters) {
+        if(filters.getType() == 0) {
+            return getExpenseEntries();
+        } else if(filters.getType() == 1) {
+            return getIncomeEntries();
+        }
+        return new ArrayList<>();
     }
 
     public ArrayList<Entry> getExpenseEntries() {
@@ -583,24 +637,17 @@ public class DBManager{
                 return data;
             cursor.moveToFirst();
             do {
-                assert cursor != null;
                 long id = cursor.getLong(0);
                 String name = cursor.getString(1);
                 int value = -cursor.getInt(2);
                 long category_id = cursor.getLong(3);
-                String category_name = cursor.getString(4);
                 long subCategory_id = cursor.getLong(5);
-                String subCategory_name = cursor.getString(6);
                 long paymentMethod_id = cursor.getLong(7);
-                String paymentMethod_name = cursor.getString(8);
 
                 ArrayList<SubCategory> subCategories = new ArrayList<>();
                 subCategories.add(new SubCategory(subCategory_id, subCategory_name, 0));
                 ArrayList<Entry.SharedUser> sharedUsersList = getSharedUserEntries(id);
-                Entry entry = new Entry(id, name, value,
-                        new Category(category_id, category_name, 0, subCategories),
-                        new PaymentType(paymentMethod_id, paymentMethod_name, 0),
-                        new Date(), new Date(), sharedUsersList);
+                Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, new Date(), new Date(), sharedUsersList);
                 data.add(entry);
             } while (cursor.moveToNext());
         }
@@ -630,22 +677,13 @@ public class DBManager{
                 return data;
             cursor.moveToFirst();
             do {
-                    assert cursor != null;
                     long id = cursor.getLong(0);
                     String name = cursor.getString(1);
                     int value = cursor.getInt(2);
                     long category_id = cursor.getLong(3);
-                    String category_name = cursor.getString(4);
                     long subCategory_id = cursor.getLong(5);
-                    String subCategory_name = cursor.getString(6);
                     long paymentMethod_id = cursor.getLong(7);
-                    String paymentMethod_name = cursor.getString(8);
-
-                ArrayList<SubCategory> subCategories = new ArrayList<>();
-                subCategories.add(new SubCategory(subCategory_id, subCategory_name, 0));
-                    Entry entry = new Entry(id, name, value, new Category(category_id, category_name, 0, subCategories),
-                            new PaymentType(paymentMethod_id, paymentMethod_name, 0),
-                            new Date(), new Date());
+                    Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, new Date(), new Date());
                     data.add(entry);
             } while (cursor.moveToNext());
             return data;
@@ -671,6 +709,33 @@ public class DBManager{
         }
     }
 
+    private ArrayList<String> getEntryNames(String tblName) {
+        ArrayList<String> data = new ArrayList<>();
+        String query = "select "+ tblName +".name from " + tblName;
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
+            if (null == cursor || 0 == cursor.getCount() )
+                return data;
+            cursor.moveToFirst();
+            do {
+                data.add(cursor.getString(0));
+            } while (cursor.moveToNext());
+            return data;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return  data;
+        }
+    }
+
+    public ArrayList<String> getIncomeEntryNames() {
+        return getEntryNames(DatabaseDetails.INCOME_ENTRIES);
+    }
+
+    public ArrayList<String> getExpenseEntryNames() {
+        return getEntryNames(DatabaseDetails.EXPENSE_ENTRIES);
+    }
+
     private long insert(ContentValues contentValues, String tableName)
     {
         return sqLiteDatabase.insert(tableName, null, contentValues);
@@ -687,7 +752,7 @@ public class DBManager{
         return ret;
     }
 
-    public Cursor getData(String columnName, String tableName, String condition) {
+    /*public Cursor getData(String columnName, String tableName, String condition) {
         try {
             columnName =  (null == columnName) ? "*" :columnName;
             String query = "select " + columnName +" from " + tableName;
@@ -703,5 +768,5 @@ public class DBManager{
         catch(Exception e) {
             return null;
         }
-    }
+    }*/
 }

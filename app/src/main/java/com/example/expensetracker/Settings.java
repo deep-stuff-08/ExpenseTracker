@@ -7,7 +7,6 @@ import com.example.expensetracker.pojo.SubCategory;
 import com.example.expensetracker.pojo.User;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Settings {
     private final ArrayList<PaymentType> paymentMethod;
@@ -42,6 +41,26 @@ public class Settings {
         return users;
     }
 
+    public void setPaymentMethod(ArrayList<PaymentType> paymentMethodArray) {
+        paymentMethod.clear();
+        paymentMethod.addAll(paymentMethodArray);
+    }
+
+    public void setExpenseCategory(ArrayList<Category> expenseCategoryArray) {
+        expenseCategory.clear();
+        expenseCategory.addAll(expenseCategoryArray);
+    }
+
+    public void setIncomeCategory(ArrayList<Category> expenseCategoryArray) {
+        incomeCategory.clear();
+        incomeCategory.addAll(expenseCategoryArray);
+    }
+
+    public void setUsers(ArrayList<User> userArray) {
+        users.clear();
+        users.addAll(userArray);
+    }
+
     public ArrayList<SubCategory> getExpenseSubCategory(int index) {
         return expenseCategory.get(index).getSubCategories();
     }
@@ -60,21 +79,6 @@ public class Settings {
     {
         DBManager db = DBManager.getDBManagerInstance();
         return new Settings(db.getPaymentData(), db.getExpenseCategoryData(), db.getIncomeCategoryData(), db.getUserData());
-    }
-
-    public void updateExpenseSettings(Settings newSettings)
-    {
-        this.expenseCategory.clear();
-        this.expenseCategory.addAll(newSettings.getExpenseCategory());
-
-        this.incomeCategory.clear();
-        this.incomeCategory.addAll(newSettings.getIncomeCategory());
-
-        this.paymentMethod.clear();
-        this.paymentMethod.addAll(newSettings.getPaymentMethod());
-
-        this.users.clear();
-        this.users.addAll(newSettings.users);
     }
 
     public void initToDefault() {

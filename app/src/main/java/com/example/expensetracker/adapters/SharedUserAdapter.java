@@ -80,7 +80,7 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
         int miscIndex = -1;
         for(String n : userMap.keySet()) {
             Integer a = userMap.get(n);
-            if(a != null) {
+            if(a != null && a != 0) {
                 int sum = a;
                 if (map.containsKey(n)) {
                     if(n.equals("Misc")) {
@@ -93,6 +93,10 @@ public class SharedUserAdapter extends RecyclerView.Adapter<SharedUserAdapter.Vi
             }
         }
         return miscIndex;
+    }
+
+    public int getMeTotal() {
+        return sharedUserList.get(0).value;
     }
 
     @Override

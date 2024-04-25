@@ -88,9 +88,11 @@ public class AddExpenseFragment extends Fragment {
         RecyclerView listSharedUsers = view.findViewById(R.id.expense_sharing_users);
         CheckBox checkBoxIsRepeat = view.findViewById(R.id.expense_repeat);
         Button buttonSubmit = view.findViewById(R.id.expense_submit);
+        Spinner sharedExpensePayer = view.findViewById(R.id.expense_shared_payer);
 
         Settings settings = ((MainActivity)requireActivity()).getSettings();
         Calendar currentTime = Calendar.getInstance();
+        ((MainActivity)requireActivity()).getDeleteButton().setVisibility(View.GONE);
 
         ComboBoxAdapter adt_Payment;
         ComboBoxAdapter adt_Category;
@@ -105,8 +107,15 @@ public class AddExpenseFragment extends Fragment {
             adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getExpenseCategory().get(0).getColorId());
         }
 
+        ArrayList<String> entryNames;
+        if(isIncome) {
+            entryNames = DBManager.getDBManagerInstance().getIncomeEntryNames();
+        } else {
+            entryNames = DBManager.getDBManagerInstance().getExpenseEntryNames();
+        }
+
         //Setup Name
-        ArrayAdapter<String> adt = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, new String[]{"Deep", "Fee"});
+        ArrayAdapter<String> adt = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, entryNames);
         textName.setAdapter(adt);
         textName.setThreshold(1);
 
@@ -247,6 +256,40 @@ public class AddExpenseFragment extends Fragment {
 
             }
         });
+        sharedExpensePayer.setAdapter(new ArrayAdapter<User>(requireContext(), android.R.layout.simple_spinner_item, settings.getUsers()) {
+            @Nullable
+            @Override
+            public User getItem(int position) {
+                if(position == 0) {
+                    return new User(-1, "Me");
+                }
+                return super.getItem(position - 1);
+            }
+
+            @Override
+            public int getCount() {
+                return super.getCount() + 1;
+            }
+
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View v = super.getView(position, convertView, parent);
+                TextView tv = ((TextView) v);
+                tv.setText(Objects.requireNonNull(this.getItem(position)).getName());
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View v = super.getDropDownView(position, convertView, parent);
+                TextView tv = ((TextView) v);
+                tv.setText(Objects.requireNonNull(this.getItem(position)).getName());
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+                return v;
+            }
+        });
 
         //Setup Shared User List
         listSharedUsers.setAdapter(new SharedUserAdapter(settings.getUsers(), newTotal -> {
@@ -307,6 +350,8 @@ public class AddExpenseFragment extends Fragment {
                 ArrayList<Entry.SharedUser> newUserList = new ArrayList<>();
                 ArrayList<Entry.SharedUser> sharedUserList = new ArrayList<>();
                 int miscIndex = ((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getSharedUserList(sharedUserList, newUserList);
+                entry.setValue(((SharedUserAdapter)Objects.requireNonNull(listSharedUsers.getAdapter())).getMeTotal());
+                User payer = (User)sharedExpensePayer.getSelectedItem();
                 if (newUserList.size() > 0) {
                     StringBuilder userList = new StringBuilder();
                     for (int i = 0; i < newUserList.size(); i++) {
@@ -314,8 +359,13 @@ public class AddExpenseFragment extends Fragment {
                     }
                     new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc.\n" + userList)
                             .setPositiveButton("Yes", (dialog, which) -> {
+                                newUserList.forEach(sharedUser -> {
+                                    long newId = DBManager.getDBManagerInstance().insertUser(sharedUser.getUser());
+                                    sharedUser.getUser().setId(newId);
+                                });
+                                settings.setUsers(DBManager.getDBManagerInstance().getUserData());
                                 sharedUserList.addAll(newUserList);
-                                entry.setSharedUsersList(sharedUserList);
+                                entry.setSharedUsersList(payer, sharedUserList);
                                 onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
                             })
                             .setCancelable(true)
@@ -335,11 +385,12 @@ public class AddExpenseFragment extends Fragment {
                                 } else {
                                     sharedUserList.get(miscIndex).setValue(sharedUserList.get(miscIndex).getValue() + sum);
                                 }
-                                entry.setSharedUsersList(sharedUserList);
+                                sharedExpensePayer.getSelectedItem();
+                                entry.setSharedUsersList(payer, sharedUserList);
                                 onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
                             }).show();
                 } else {
-                    entry.setSharedUsersList(sharedUserList);
+                    entry.setSharedUsersList(payer, sharedUserList);
                     onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
                 }
             } else {

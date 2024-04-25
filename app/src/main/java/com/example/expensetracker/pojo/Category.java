@@ -1,14 +1,12 @@
 package com.example.expensetracker.pojo;
 
-import com.example.expensetracker.R;
-
 import java.util.ArrayList;
 
 public class Category extends SettingsParent {
     private String name;
-    private  long id;
+    private final long id;
     private int colorId;
-    private ArrayList<SubCategory> subCategories;
+    private final ArrayList<SubCategory> subCategories;
 
     public Category(long id, String name, int colorId, ArrayList<SubCategory> subCategories) {
         this.id = id;
@@ -18,9 +16,6 @@ public class Category extends SettingsParent {
     }
     public Category(String name, int colorId) {
         this(-1, name, colorId, new ArrayList<>());
-    }
-    public Category(String name) {
-        this(-1, name, R.color.categoryGreen, new ArrayList<>());
     }
 
     public long getId() {

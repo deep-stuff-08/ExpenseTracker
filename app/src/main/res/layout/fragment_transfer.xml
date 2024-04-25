@@ -7,9 +7,9 @@
     <Spinner
         android:id="@+id/spinner_from"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="48dp"
         android:layout_margin="10dp"
-        android:layout_alignParentTop="true"/>
+        android:layout_alignParentTop="true" />
 
     <ImageButton
         android:id="@+id/btn_swap"
@@ -35,14 +35,21 @@
         android:inputType="number"
         android:layout_below="@id/spinner_to"
         android:autofillHints=""
+        android:layout_margin="10dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
         android:textSize="24sp"
         android:hint="@string/add_expense_value"/>
 
     <Button
         android:id="@+id/btn_submit"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/exp_image_height"
+        android:layout_alignParentBottom="true"
+        android:backgroundTint="?attr/colorAccent"
         android:text="@string/add_expense_submit"
-        android:layout_alignParentBottom="true"/>
+        tools:ignore="VisualLintButtonSize" />
 
 </RelativeLayout>

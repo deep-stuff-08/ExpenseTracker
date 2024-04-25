@@ -5,21 +5,14 @@ import java.util.Date;
 
 public class Entry {
     public  static class SharedUser {
-        private long id;
-        private User user;
+        private final User user;
         private int value;
 
         public SharedUser(User user, int value) {
             this.user = user;
             this.value = value;
-            this.id = -1;
         }
 
-        public SharedUser(User user, long id, int value) {
-            this.user = user;
-            this.id = id;
-            this.value = value;
-        }
         public int getValue() {
             return value;
         }
@@ -30,43 +23,33 @@ public class Entry {
         public User getUser() {
             return user;
         }
-
-        public void setUser(User user) {
-            this.user = user;
-        }
     }
     private String name;
     private int value;
-    private Category category;
-    private PaymentType paymentType;
-    private Date dateAndTime;
+    final private long categoryId;
+    final private long subCategoryId;
+    final private long paymentId;
+    final private Date dateAndTime;
     private long id;
     private ArrayList<SharedUser> sharedUsersList;
+    private User payer;
 
-	public Entry(long id, String name, int value, Category category, PaymentType paymentType, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
+	public Entry(long id, String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
         this.id = id;
         this.name = name;
         this.value = value;
-        this.category = category;
-        this.paymentType = paymentType;
+        this.categoryId = categoryId;
+        this.subCategoryId = subCategoryId;
+        this.paymentId = paymentId;
         this.dateAndTime = new Date(date.getTime() + time.getTime());
         this.sharedUsersList = sharedUsersList;
     }
-    public Entry(String name, int value, Category category, PaymentType paymentType, Date date, Date time, ArrayList<SharedUser> sharedUsersList) {
-        this(-1, name, value, category, paymentType, date, time, sharedUsersList);
+    public Entry(long id, String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
+        this(id, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
     }
-
-    public Entry(long id, String name, int value, Category category, PaymentType paymentType, Date date, Date time) {
-        this(id, name, value, category, paymentType, date, time, new ArrayList<>());
+    public Entry(String name, int value, long categoryId, long subCategoryId, long paymentId, Date date, Date time) {
+        this(-1, name, value, categoryId, subCategoryId, paymentId, date, time, new ArrayList<>());
     }
-
-    public Entry(String name, int value, Category category, PaymentType paymentType, Date date, Date time) {
-        this(-1, name, value, category, paymentType, date, time, new ArrayList<>());
-    }
-
-//    public Entry(String name, int value, long categoryID, long SubCategoryId, long paymentId, Date date, Date time) {
-//        this(-1, name, value, category, paymentType, date, time, new ArrayList<>());
-//    }
 
     public String getName() {
         return name;
@@ -84,24 +67,36 @@ public class Entry {
         this.value = value;
     }
 
-    public Date getDateAndTime() {
-        return dateAndTime;
+    public long getSubCategoryId() {
+        return subCategoryId;
+    }
+    public long getCategoryId() {
+        return categoryId;
     }
 
-    public void setDateAndTime(Date date, Date time) {
-        this.dateAndTime = new Date(date.getTime() + time.getTime());
+    public long getPaymentId() {
+        return paymentId;
+    }
+
+    public Date getDateAndTime() {
+        return dateAndTime;
     }
 
     public ArrayList<SharedUser> getSharedUsersList() {
         return sharedUsersList;
     }
 
-    public void setSharedUsersList(ArrayList<SharedUser> sharedUsersList) {
+    public User getPayer() {
+        return payer;
+    }
+
+    public void setSharedUsersList(User payer, ArrayList<SharedUser> sharedUsersList) {
+        this.payer = payer;
         this.sharedUsersList = sharedUsersList;
     }
 
     public boolean isShared() {
-        return sharedUsersList.isEmpty();
+        return !sharedUsersList.isEmpty();
     }
 
     public long getId() {

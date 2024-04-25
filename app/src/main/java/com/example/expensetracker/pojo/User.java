@@ -49,7 +49,4 @@ public class User extends SettingsParent {
         return drawableId;
     }
 
-    public void setDrawableId(int drawableId) {
-        this.drawableId = drawableId;
-    }
 }
