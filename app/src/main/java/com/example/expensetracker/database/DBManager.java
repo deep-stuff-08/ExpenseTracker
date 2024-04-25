@@ -627,7 +627,9 @@ public class DBManager{
 
     public ArrayList<Entry> getEntries(SearchFilters filters) {
         if(filters.getType() == 0) {
-            return getExpenseEntries();
+            ArrayList<Entry> entries = new ArrayList<>(getExpenseEntries());
+            entries.addAll(getIncomeEntries());
+            return entries;
         } else if(filters.getType() == 1) {
             return getIncomeEntries();
         }
@@ -647,8 +649,7 @@ public class DBManager{
                 +" JOIN " + DatabaseDetails.PAYMENT_TYPE
                 +" ON " + DatabaseDetails.EXPENSE_ENTRIES + ".paymentMethod_id = " + DatabaseDetails.PAYMENT_TYPE + ".id"
                 +" JOIN " + DatabaseDetails.CATEGORY_EXPENSE
-                +" ON " + DatabaseDetails.SUBCATEGORY_EXPENSE + ".category_id = " + DatabaseDetails.CATEGORY_EXPENSE + ".id"
-                ;
+                +" ON " + DatabaseDetails.SUBCATEGORY_EXPENSE + ".category_id = " + DatabaseDetails.CATEGORY_EXPENSE + ".id";
 
         try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
             if (null == cursor || 0 == cursor.getCount() )
@@ -768,7 +769,7 @@ public class DBManager{
         return ret;
     }
 
-    /*public Cursor getData(String columnName, String tableName, String condition) {
+    /* public Cursor getData(String columnName, String tableName, String condition) {
         try {
             columnName =  (null == columnName) ? "*" :columnName;
             String query = "select " + columnName +" from " + tableName;
