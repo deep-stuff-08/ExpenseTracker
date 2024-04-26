@@ -26,6 +26,7 @@ import com.example.expensetracker.adapters.ExpEntryAdapter;
 import com.example.expensetracker.adapters.ExpItemDetailsLookup;
 import com.example.expensetracker.adapters.ExpItemKeyProvider;
 import com.example.expensetracker.database.DBManager;
+import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.Entry;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
@@ -67,7 +68,7 @@ public class HomeFragment extends Fragment {
         filter = new SearchFilters();
 
         recycler = view.findViewById(R.id.recycleView);
-        entries = DBManager.getDBManagerInstance().getExpenseEntries();
+        entries = DBManager.getDBManagerInstance().getEntries(filter);
         ExpEntryAdapter adapter = new ExpEntryAdapter(activity, entries);
         recycler.setAdapter(adapter);
 
@@ -193,7 +194,8 @@ public class HomeFragment extends Fragment {
             AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext());
             ArrayList<String> items = new ArrayList<>();
             activity.getSettings().getPaymentMethod().forEach(paymentType -> items.add(paymentType.getName()));
-            dialog.setMultiChoiceItems(items.toArray(new String[]{}), paymentData, (dialog1, which, isChecked) -> paymentData[which] = isChecked).setPositiveButton("Ok", (dialog1, which) -> {
+            dialog.setMultiChoiceItems(items.toArray(new String[]{}), paymentData, (dialog1, which, isChecked) -> paymentData[which] = isChecked)
+                    .setPositiveButton("Ok", (dialog1, which) -> {
                 StringBuilder custom = new StringBuilder();
                 boolean areAllSelected = true;
                 boolean areNoneSelected = false;
@@ -206,7 +208,7 @@ public class HomeFragment extends Fragment {
                         list.add(activity.getSettings().getPaymentMethod().get(i).getId());
                     }
                 }
-                if(areAllSelected || areNoneSelected){
+                if(areAllSelected || !areNoneSelected){
                     textFilterPayment.setText(R.string.string_all);
                     list.clear();
                 } else {
@@ -218,19 +220,20 @@ public class HomeFragment extends Fragment {
         });
 
         TextView textFilterCategory = view.findViewById(R.id.filter_category);
+        ArrayList<String> items = new ArrayList<>();
+        if(textFilterType.getText().equals("All")) {
+            activity.getSettings().getExpenseCategory().forEach(paymentType -> items.add(paymentType.getName()));
+            activity.getSettings().getIncomeCategory().forEach(paymentType -> items.add(paymentType.getName()));
+        } else if (textFilterType.getText().equals("Expense")) {
+            activity.getSettings().getExpenseCategory().forEach(paymentType -> items.add(paymentType.getName()));
+        } else if (textFilterType.getText().equals("Income")) {
+            activity.getSettings().getIncomeCategory().forEach(paymentType -> items.add(paymentType.getName()));
+        }
+        boolean[] categoryData = new boolean[items.size()];
         textFilterCategory.setText(R.string.string_all);
         textFilterCategory.setOnClickListener(v -> {
             AlertDialog.Builder dialog = new AlertDialog.Builder(requireContext());
-            ArrayList<String> items = new ArrayList<>();
-            if(textFilterType.getText().equals("All")) {
-                activity.getSettings().getExpenseCategory().forEach(paymentType -> items.add(paymentType.getName()));
-                activity.getSettings().getIncomeCategory().forEach(paymentType -> items.add(paymentType.getName()));
-            } else if (textFilterType.getText().equals("Expense")) {
-                activity.getSettings().getExpenseCategory().forEach(paymentType -> items.add(paymentType.getName()));
-            } else if (textFilterType.getText().equals("Income")) {
-                activity.getSettings().getIncomeCategory().forEach(paymentType -> items.add(paymentType.getName()));
-            }
-            boolean[] categoryData = new boolean[items.size()];
+
             dialog.setMultiChoiceItems(items.toArray(new String[]{}), categoryData, (dialog1, which, isChecked) -> categoryData[which] = isChecked).setPositiveButton("Ok", (dialog1, which) -> {
                 StringBuilder custom = new StringBuilder();
                 ArrayList<Long> list = new ArrayList<>();
@@ -249,7 +252,7 @@ public class HomeFragment extends Fragment {
                         }
                     }
                 }
-                if(areAllSelected || areNoneSelected){
+                if(areAllSelected || !areNoneSelected){
                     list.clear();
                     textFilterCategory.setText(R.string.string_all);
                 } else {

@@ -35,6 +35,7 @@ import com.example.expensetracker.Settings;
 import com.example.expensetracker.adapters.ComboBoxAdapter;
 import com.example.expensetracker.adapters.SharedUserAdapter;
 import com.example.expensetracker.database.DBManager;
+import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.Entry;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.example.expensetracker.pojo.User;
@@ -94,17 +95,15 @@ public class AddExpenseFragment extends Fragment {
         Calendar currentTime = Calendar.getInstance();
         ((MainActivity)requireActivity()).getDeleteButton().setVisibility(View.GONE);
 
-        ComboBoxAdapter adt_Payment;
+        ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getIncomeCategory().get(0).getColorId());;
         ComboBoxAdapter adt_Category;
         ComboBoxAdapter adt_SubCategory;
         if(isIncome) {
             adt_Category = new ComboBoxAdapter(context, settings.getIncomeCategory(), settings.getIncomeCategory().get(0).getColorId());
             adt_SubCategory =new ComboBoxAdapter(context, settings.getIncomeSubCategory(0),  settings.getIncomeCategory().get(0).getColorId());
-            adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getIncomeCategory().get(0).getColorId());
         } else {
             adt_Category = new ComboBoxAdapter(context, settings.getExpenseCategory(),  settings.getExpenseCategory().get(0).getColorId());
             adt_SubCategory = new ComboBoxAdapter(context, settings.getExpenseSubCategory(0),  settings.getExpenseCategory().get(0).getColorId());
-            adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getExpenseCategory().get(0).getColorId());
         }
 
         ArrayList<String> entryNames;
@@ -154,6 +153,17 @@ public class AddExpenseFragment extends Fragment {
 
         //Setup Category / Income Type
         spinnerCategory.setAdapter(adt_Category);
+        spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                spinnerSubCategory.setAdapter(new ComboBoxAdapter(context, isIncome ? settings.getIncomeSubCategory(position) : settings.getExpenseSubCategory(position), ((Category)spinnerCategory.getSelectedItem()).getColorId()));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         //Setup SubCategory
         spinnerSubCategory.setAdapter(adt_SubCategory);
