@@ -103,6 +103,17 @@ public class TransferUserAdapter extends BaseAdapter {
         return meData.get(position);
     }
 
+    public String getDataUnfiltered(int position) {
+        if(position == 0) {
+            return "Select an Option";
+        }
+        position -= 1;
+        if(position >= meData.size()) {
+            return userData.get(position - meData.size());
+        }
+        return meData.get(position);
+    }
+
     @Override
     public Object getItem(int position) {
         return getData(position);

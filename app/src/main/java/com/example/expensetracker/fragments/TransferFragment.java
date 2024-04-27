@@ -102,8 +102,8 @@ public class TransferFragment extends Fragment {
         });
 
         btnSubmit.setOnClickListener(v -> {
-            String from = (String)spinnerFrom.getSelectedItem();
-            String to = (String)spinnerTo.getSelectedItem();
+            String from = ((TransferUserAdapter)spinnerFrom.getAdapter()).getDataUnfiltered(spinnerFrom.getSelectedItemPosition());
+            String to = ((TransferUserAdapter)spinnerTo.getAdapter()).getDataUnfiltered(spinnerTo.getSelectedItemPosition());
             String value = txtValue.getText().toString();
 
             boolean error = false;
@@ -138,11 +138,15 @@ public class TransferFragment extends Fragment {
                 ((TextView)spinnerTo.getSelectedView().findViewById(R.id.spinner_category_text)).setError("To Not Set");
                 error = true;
             }
-
             if(error) {
                 return;
             }
-            DBManager.getDBManagerInstance().insertTransferEntries(fromUserId, Integer.parseInt(value));
+            if(toUserId == -1 && fromUserId == -1) {
+                //This Functionality is not yet supported. Dummy Message
+                Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
+                return;
+            }
+            DBManager.getDBManagerInstance().insertTransferEntries(fromUserId == -1 ? toUserId : fromUserId, Integer.parseInt(value) * (fromUserId == -1 ? -1 : 1));
 
             Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
