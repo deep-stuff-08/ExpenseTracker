@@ -160,11 +160,9 @@ public class DBManager{
                 "create table IF NOT EXISTS " + DatabaseDetails.TRANSFER +
                         "(" +
                         "id INTEGER PRIMARY KEY, " +
-                        "sender_id INTEGER NOT NULL, " +
-                        "receiver_id INTEGER NOT NULL, " +
+                        "user_id INTEGER NOT NULL, " +
                         "value INTEGER NOT NULL, " +
-                        "FOREIGN KEY(sender_id) REFERENCES "+  DatabaseDetails.USERS +"(id), " +
-                        "FOREIGN KEY(receiver_id) REFERENCES "+  DatabaseDetails.USERS +"(id)" +
+                        "FOREIGN KEY(user_id) REFERENCES "+  DatabaseDetails.USERS +"(id) " +
                         ")"
         );
     }
@@ -786,8 +784,7 @@ public class DBManager{
     public void insertTransferEntries(long user_id, int value)
     {
         ContentValues contentValues = new ContentValues();
-        contentValues.put("sender_id", user_id);
-        contentValues.put("receiver_id", user_id);
+        contentValues.put("user_id", user_id);
         contentValues.put("value", value);
 
         long id = this.insert(contentValues, DatabaseDetails.TRANSFER);
