@@ -712,11 +712,11 @@ public class DBManager{
         }
     }
 
-    public void insertTransferEntries(long sender_user_id, long receiver_user_id, int value)
+    public void insertTransferEntries(long user_id, int value)
     {
         ContentValues contentValues = new ContentValues();
-        contentValues.put("sender_id", sender_user_id);
-        contentValues.put("receiver_id", receiver_user_id);
+        contentValues.put("sender_id", user_id);
+        contentValues.put("receiver_id", user_id);
         contentValues.put("value", value);
 
         long id = this.insert(contentValues, DatabaseDetails.TRANSFER);

@@ -45,5 +45,9 @@
         android:id="@+id/userSplitFragment"
         android:name="com.example.expensetracker.fragments.UserSplitFragment"
         android:label="User Splits"
-        tools:layout="@layout/fragment_user_split" />
+        tools:layout="@layout/fragment_user_split" >
+        <action
+            android:id="@+id/action_userSplitFragment_to_entryFragment"
+            app:destination="@id/entryFragment" />
+    </fragment>
 </navigation>

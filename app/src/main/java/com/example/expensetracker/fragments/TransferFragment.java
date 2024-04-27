@@ -142,7 +142,7 @@ public class TransferFragment extends Fragment {
             if(error) {
                 return;
             }
-            DBManager.getDBManagerInstance().insertTransferEntries(fromUserId, toUserId, Integer.parseInt(value));
+            DBManager.getDBManagerInstance().insertTransferEntries(fromUserId, Integer.parseInt(value));
 
             Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
             requireActivity().getOnBackPressedDispatcher().onBackPressed();

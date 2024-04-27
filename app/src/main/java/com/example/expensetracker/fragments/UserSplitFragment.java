@@ -3,6 +3,7 @@ package com.example.expensetracker.fragments;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,7 +32,9 @@ public class UserSplitFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_user_split, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.user_list);
-        recyclerView.setAdapter(new UserSplitAdapter(settings.getUsers()));
+        recyclerView.setAdapter(new UserSplitAdapter(settings.getUsers(), u -> {
+            Navigation.findNavController(view).navigate(R.id.action_userSplitFragment_to_entryFragment);
+        }));
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setVerticalScrollbarPosition(0);
         return view;

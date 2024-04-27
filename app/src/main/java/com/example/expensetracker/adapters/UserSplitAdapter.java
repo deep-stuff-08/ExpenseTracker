@@ -18,18 +18,23 @@ import java.util.Locale;
 
 public class UserSplitAdapter extends RecyclerView.Adapter<UserSplitAdapter.ViewHolder> {
     private static class UserValues {
-        String name;
+        User user;
         int value;
-        public UserValues(String name, int value) {
-            this.name = name;
+        public UserValues(User user, int value) {
+            this.user = user;
             this.value = value;
         }
     }
+    public interface OnClickListener {
+        void onClick(User u);
+    }
+    private OnClickListener clickListener;
     private ArrayList<UserValues> users;
-    public UserSplitAdapter(ArrayList<User> userList) {
+    public UserSplitAdapter(ArrayList<User> userList, OnClickListener onClickListener) {
         users = new ArrayList<>();
+        clickListener = onClickListener;
         for(User user : userList) {
-            users.add(new UserValues(user.getName(), DBManager.getDBManagerInstance().getUserShare(user.getId())));
+            users.add(new UserValues(user, DBManager.getDBManagerInstance().getUserShare(user.getId())));
         }
     }
 
@@ -42,7 +47,7 @@ public class UserSplitAdapter extends RecyclerView.Adapter<UserSplitAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.name.setText(users.get(position).name);
+        holder.name.setText(users.get(position).user.getName());
         int value = users.get(position).value;
         if(value > 0) {
             holder.value.setTextColor(holder.itemView.getResources().getColor(R.color.profitGreen, holder.itemView.getContext().getTheme()));
@@ -52,6 +57,9 @@ public class UserSplitAdapter extends RecyclerView.Adapter<UserSplitAdapter.View
             holder.value.setTextColor(holder.itemView.getResources().getColor(android.R.color.white, holder.itemView.getContext().getTheme()));
         }
         holder.value.setText(String.valueOf(value));
+        holder.itemView.setOnClickListener(v -> {
+            clickListener.onClick(users.get(position).user);
+        });
     }
 
     @Override
