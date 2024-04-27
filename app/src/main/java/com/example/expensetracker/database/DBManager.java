@@ -15,8 +15,13 @@ import com.example.expensetracker.pojo.PaymentType;
 import com.example.expensetracker.pojo.SubCategory;
 import com.example.expensetracker.pojo.User;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 public class DBManager{
@@ -555,7 +560,8 @@ public class DBManager{
         contentValues.put("value", entry.getValue());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-        contentValues.put("date_time", entry.getDateAndTime().toString());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        contentValues.put("date_time", dateFormat.format(entry.getDateAndTime()));
         contentValues.put("isShared", entry.isShared());
 
         long id = this.insert(contentValues, DatabaseDetails.EXPENSE_ENTRIES);
@@ -586,7 +592,8 @@ public class DBManager{
         contentValues.put("value", entry.getValue());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-        contentValues.put("date_time", entry.getDateAndTime().toString());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        contentValues.put("date_time", dateFormat.format(entry.getDateAndTime()));
 
         long id = this.insert(contentValues, DatabaseDetails.INCOME_ENTRIES);
         if(id == -1)
@@ -626,17 +633,65 @@ public class DBManager{
     }
 
     public ArrayList<Entry> getEntries(SearchFilters filters) {
-        if(filters.getType() == 0) {
-            ArrayList<Entry> entries = new ArrayList<>(getExpenseEntries());
-            entries.addAll(getIncomeEntries());
-            return entries;
-        } else if(filters.getType() == 1) {
-            return getIncomeEntries();
+        ArrayList<Entry> allEntries = new ArrayList<>();
+        if(filters.getType() != 2) {
+            allEntries.addAll(getExpenseEntries(filters));
         }
-        return new ArrayList<>();
+        if(filters.getType() != 1) {
+            allEntries.addAll(getIncomeEntries(filters));
+        }
+        allEntries.sort(Comparator.comparing(Entry::getDateAndTime));
+        return allEntries;
     }
 
-    public ArrayList<Entry> getExpenseEntries() {
+    private String CreateWhereQueryForSearchFilters(SearchFilters filters)
+    {
+        StringBuilder whereQuery = new StringBuilder(" where ");
+        boolean isWhereClausePresent = false;
+
+        if(filters.getCategory() != null && filters.getCategory().size() != 0)
+        {
+            isWhereClausePresent = true;
+            whereQuery.append(" category_id IN (");
+            for (int i = 0; i < filters.getCategory().size(); i++)
+            {
+                whereQuery.append(filters.getCategory().get(i)).append(",");
+            }
+            whereQuery = new StringBuilder(whereQuery.substring(0, whereQuery.length() - 1));
+            whereQuery.append(") ");
+        }
+        if(filters.getPaymentType() != null && filters.getPaymentType().size() != 0)
+        {
+            if(isWhereClausePresent)
+            {
+                whereQuery.append(" AND ");
+            }
+            else
+            {
+                isWhereClausePresent = true;
+            }
+            whereQuery.append(" paymentMethod_id IN (");
+            for (int i = 0; i < filters.getPaymentType().size(); i++)
+            {
+                whereQuery.append(filters.getPaymentType().get(i)).append(",");
+            }
+            whereQuery = new StringBuilder(whereQuery.substring(0, whereQuery.length() - 1));
+            whereQuery.append(") ");
+        }
+        if(filters.getDateAfter() != null || filters.getDateBefore() != null)
+        {
+            if(isWhereClausePresent)
+            {
+                whereQuery.append(" AND ");
+            }
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            String dateAfter =  dateFormat.format(filters.getDateAfter());
+            String dateBefore =  dateFormat.format(filters.getDateBefore());
+            whereQuery.append(" date_time BETWEEN \"").append(dateAfter).append("\" AND \"").append(dateBefore).append("\"");
+        }
+        return isWhereClausePresent ? whereQuery.toString() : "";
+    }
+    private ArrayList<Entry> getExpenseEntries(SearchFilters filters) {
         ArrayList<Entry> data = new ArrayList<>();
         String query = "select "+ DatabaseDetails.EXPENSE_ENTRIES +".id, " + DatabaseDetails.EXPENSE_ENTRIES +".name, "
                 +DatabaseDetails.EXPENSE_ENTRIES+".value, "
@@ -651,6 +706,8 @@ public class DBManager{
                 +" JOIN " + DatabaseDetails.CATEGORY_EXPENSE
                 +" ON " + DatabaseDetails.SUBCATEGORY_EXPENSE + ".category_id = " + DatabaseDetails.CATEGORY_EXPENSE + ".id";
 
+        query += CreateWhereQueryForSearchFilters(filters);
+
         try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
             if (null == cursor || 0 == cursor.getCount() )
                 return data;
@@ -662,11 +719,17 @@ public class DBManager{
                 long category_id = cursor.getLong(3);
                 long subCategory_id = cursor.getLong(5);
                 long paymentMethod_id = cursor.getLong(7);
+                String dateTime = cursor.getString(9);
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date date = formatter.parse(dateTime);
 
                 ArrayList<Entry.SharedUser> sharedUsersList = getSharedUserEntries(id);
-                Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, new Date(), new Date(), sharedUsersList);
+                Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, date, new Date(), sharedUsersList);
                 data.add(entry);
             } while (cursor.moveToNext());
+        }
+        catch (ParseException e) {
+            e.printStackTrace();
         }
         catch (Exception e)
         {
@@ -674,7 +737,7 @@ public class DBManager{
         }
         return data;
     }
-    public ArrayList<Entry> getIncomeEntries() {
+    public ArrayList<Entry> getIncomeEntries(SearchFilters filters) {
         ArrayList<Entry> data = new ArrayList<>();
         String query = "select "+ DatabaseDetails.INCOME_ENTRIES +".id, " + DatabaseDetails.INCOME_ENTRIES +".name, "
                 +DatabaseDetails.INCOME_ENTRIES+".value, "
@@ -687,8 +750,10 @@ public class DBManager{
                 +" JOIN " + DatabaseDetails.PAYMENT_TYPE
                 +" ON " + DatabaseDetails.INCOME_ENTRIES + ".paymentMethod_id = " + DatabaseDetails.PAYMENT_TYPE + ".id"
                 +" JOIN " + DatabaseDetails.CATEGORY_INCOME
-                +" ON " + DatabaseDetails.SUBCATEGORY_INCOME + ".category_id = " + DatabaseDetails.CATEGORY_INCOME + ".id"
-                ;
+                +" ON " + DatabaseDetails.SUBCATEGORY_INCOME + ".category_id = " + DatabaseDetails.CATEGORY_INCOME + ".id";
+
+        query += CreateWhereQueryForSearchFilters(filters);
+
         try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
             if (null == cursor || 0 == cursor.getCount() )
                 return data;
@@ -700,16 +765,22 @@ public class DBManager{
                     long category_id = cursor.getLong(3);
                     long subCategory_id = cursor.getLong(5);
                     long paymentMethod_id = cursor.getLong(7);
-                    Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, new Date(), new Date());
+                    String dateTime = cursor.getString(9);
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date date = formatter.parse(dateTime);
+                    Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, date, new Date());
                     data.add(entry);
             } while (cursor.moveToNext());
-            return data;
+
+        }
+        catch (ParseException e) {
+            e.printStackTrace();
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            return  data;
         }
+        return data;
     }
 
     public void insertTransferEntries(long user_id, int value)
