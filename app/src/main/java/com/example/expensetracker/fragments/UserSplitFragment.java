@@ -33,7 +33,6 @@ public class UserSplitFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_user_split, container, false);
         RecyclerView recyclerView = view.findViewById(R.id.user_list);
         recyclerView.setAdapter(new UserSplitAdapter(settings.getUsers(), u -> {
-            Navigation.findNavController(view).navigate(R.id.action_userSplitFragment_to_entryFragment);
         }));
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setVerticalScrollbarPosition(0);

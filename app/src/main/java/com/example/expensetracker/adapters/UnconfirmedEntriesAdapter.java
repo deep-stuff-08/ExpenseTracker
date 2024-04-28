@@ -55,7 +55,7 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
         holder.confirm.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putInt("unconfirmedEntryId", holder.getAdapterPosition());
-            Navigation.findNavController(holder.itemView).navigate(R.id.action_unconfirmedEntryFragment_to_entryFragment, bundle);
+            Navigation.findNavController(holder.itemView).navigate(R.id.action_userSplitFragment_to_entryFragment);
         });
     }
 

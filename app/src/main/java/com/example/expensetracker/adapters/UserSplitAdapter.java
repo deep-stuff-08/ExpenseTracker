@@ -1,12 +1,14 @@
 package com.example.expensetracker.adapters;
 
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.expensetracker.R;
@@ -58,7 +60,12 @@ public class UserSplitAdapter extends RecyclerView.Adapter<UserSplitAdapter.View
         }
         holder.value.setText(String.valueOf(value));
         holder.itemView.setOnClickListener(v -> {
-            clickListener.onClick(users.get(position).user);
+            if(value != 0) {
+                Bundle bundle = new Bundle();
+                bundle.putLong("TransferUserId", users.get(holder.getAdapterPosition()).user.getId());
+                bundle.putInt("TransferValue", value);
+                Navigation.findNavController(holder.itemView).navigate(R.id.action_userSplitFragment_to_entryFragment, bundle);
+            }
         });
     }
 

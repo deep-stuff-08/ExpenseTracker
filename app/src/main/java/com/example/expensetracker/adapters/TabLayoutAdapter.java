@@ -6,13 +6,16 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.expensetracker.fragments.AddExpenseFragment;
 import com.example.expensetracker.fragments.TransferFragment;
+import com.example.expensetracker.pojo.TransferData;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 
 public class TabLayoutAdapter extends FragmentStateAdapter {
     UnconfirmedEntry entry;
-    public TabLayoutAdapter(@NonNull Fragment fragment, UnconfirmedEntry entry) {
+    TransferData transfer;
+    public TabLayoutAdapter(@NonNull Fragment fragment, UnconfirmedEntry entry, TransferData transfer) {
         super(fragment);
         this.entry = entry;
+        this.transfer = transfer;
     }
 
     @NonNull
@@ -24,7 +27,7 @@ public class TabLayoutAdapter extends FragmentStateAdapter {
             case 1:
                 return new AddExpenseFragment(true, entry);
             case 2:
-                return new TransferFragment();
+                return new TransferFragment(transfer);
         }
         return new Fragment();
     }

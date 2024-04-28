@@ -500,15 +500,27 @@ public class DBManager{
         String query = "select value from "
                 + DatabaseDetails.EXPENSE_SHARED
                 + " where user_id = " + userId;
+        String query2 = "select value from "
+                + DatabaseDetails.TRANSFER
+                + " where user_id = " + userId;
         int value = 0;
-        try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
-            if (null == cursor || 0 == cursor.getCount() )
-                return 0;
-
-            cursor.moveToFirst();
-            do {
-                value += cursor.getInt(0);
-            } while (cursor.moveToNext());
+        try {
+            Cursor cursor =  sqLiteDatabase.rawQuery(query, null);
+            if (null != cursor && 0 != cursor.getCount() ) {
+                cursor.moveToFirst();
+                do {
+                    value += cursor.getInt(0);
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
+            cursor = sqLiteDatabase.rawQuery(query2, null);
+            if (null != cursor && 0 != cursor.getCount() ) {
+                cursor.moveToFirst();
+                do {
+                    value += cursor.getInt(0);
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
         }
         catch (Exception e)
         {

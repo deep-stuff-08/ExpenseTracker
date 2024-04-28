@@ -16,6 +16,7 @@ import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.adapters.TransferUserAdapter;
 import com.example.expensetracker.database.DBManager;
+import com.example.expensetracker.pojo.TransferData;
 import com.example.expensetracker.pojo.User;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -23,7 +24,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class TransferFragment extends Fragment {
-    public TransferFragment() {
+    TransferData transferData;
+    public TransferFragment(TransferData transferData) {
+        this.transferData = transferData;
     }
 
     @Override
@@ -52,6 +55,24 @@ public class TransferFragment extends Fragment {
 
         spinnerTo.setAdapter(combinedUserTo);
         spinnerFrom.setAdapter(combinedUserFrom);
+
+        if(transferData != null) {
+            int position = 0;
+            ArrayList<User> user = ((MainActivity)requireActivity()).getSettings().getUsers();
+            for(position = 0; position < user.size(); position++) {
+                if(transferData.getUserId() == user.get(position).getId()) {
+                    break;
+                }
+            }
+            if(transferData.getValue() > 0) {
+                spinnerTo.setSelection(me.size() + 1 + position, false);
+                spinnerFrom.setSelection(1, false);
+            } else {
+                spinnerFrom.setSelection(me.size() + 1 + position, false);
+                spinnerTo.setSelection(1, false);
+            }
+            txtValue.setText(String.valueOf(Math.abs(transferData.getValue())));
+        }
 
         spinnerTo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
