@@ -282,8 +282,12 @@ public class HomeFragment extends Fragment {
             new AlertDialog.Builder(requireContext()).setMessage("Are you sure you want to delete " + selectionTracker.getSelection().size() + " entries?")
                     .setCancelable(true)
                     .setPositiveButton("Yes, I'm Sure", (dialog, which) -> {
-                        selectionTracker.getSelection().forEach(aLong ->{
-                            DBManager.getDBManagerInstance().deleteExpenseEntries(aLong);
+                        selectionTracker.getSelection().forEach(aLong -> {
+                            if(aLong >= DBManager.IncomeOffset){
+                                DBManager.getDBManagerInstance().deleteIncomeEntries(aLong);
+                            } else {
+                                DBManager.getDBManagerInstance().deleteExpenseEntries(aLong);
+                            }
                         });
                         selectionTracker.clearSelection();
                         refreshEntries();

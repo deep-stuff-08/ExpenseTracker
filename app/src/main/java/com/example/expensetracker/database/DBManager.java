@@ -26,13 +26,11 @@ import java.util.Objects;
 
 public class DBManager{
     private static DBManager dbManager = null;
-
+    public static final long IncomeOffset = 0xa000000000000000L;
     private SQLiteDatabase sqLiteDatabase ;
 
     private DBManager()
-    {
-
-    }
+    {}
 
     private static boolean isDatabaseCreated(Context context)
     {
@@ -595,6 +593,14 @@ public class DBManager{
         this.delete(DatabaseDetails.EXPENSE_ENTRIES, condition);
     }
 
+    public void deleteIncomeEntries(long entry) {
+        if(entry >= IncomeOffset) {
+            entry -= IncomeOffset;
+        }
+        String condition = "id = '" + entry +"'";
+        this.delete(DatabaseDetails.INCOME_ENTRIES, condition);
+    }
+
     public void insertIncomeEntries(Entry entry)
     {
         ContentValues contentValues = new ContentValues();
@@ -769,7 +775,7 @@ public class DBManager{
                 return data;
             cursor.moveToFirst();
             do {
-                    long id = cursor.getLong(0);
+                    long id = IncomeOffset + cursor.getLong(0);
                     String name = cursor.getString(1);
                     int value = cursor.getInt(2);
                     long category_id = cursor.getLong(3);
