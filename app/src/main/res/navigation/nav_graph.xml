@@ -21,6 +21,9 @@
         <action
             android:id="@+id/action_homeFragment_to_userSplitFragment"
             app:destination="@id/userSplitFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_exportFragment"
+            app:destination="@id/exportFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -50,4 +53,9 @@
             android:id="@+id/action_userSplitFragment_to_entryFragment"
             app:destination="@id/entryFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/exportFragment"
+        android:name="com.example.expensetracker.fragments.ExportFragment"
+        android:label="ExportFragment"
+        tools:layout="@layout/fragment_export" />
 </navigation>

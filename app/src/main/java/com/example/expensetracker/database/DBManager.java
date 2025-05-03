@@ -13,12 +13,11 @@ import com.example.expensetracker.pojo.Category;
 import com.example.expensetracker.pojo.Entry;
 import com.example.expensetracker.pojo.PaymentType;
 import com.example.expensetracker.pojo.SubCategory;
+import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.example.expensetracker.pojo.User;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
@@ -28,6 +27,7 @@ public class DBManager{
     private static DBManager dbManager = null;
     public static final long IncomeOffset = 0xa000000000000000L;
     private SQLiteDatabase sqLiteDatabase ;
+    private static final SimpleDateFormat dataFormatterForDB = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
 
     private DBManager()
     {}
@@ -38,7 +38,6 @@ public class DBManager{
            SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READONLY).close();
         }
         catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
         return true;
@@ -52,7 +51,7 @@ public class DBManager{
         {
             dbManager.sqLiteDatabase = SQLiteDatabase.openOrCreateDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null);
             dbManager.onCreateSetup();
-            dbManager.insertSettings(Settings.createWithDefaultParameters());
+            dbManager.insertSettings(Settings.createWithDefaultParameters(), false);
         } else {
             dbManager.sqLiteDatabase = SQLiteDatabase.openDatabase(context.getDatabasePath(DatabaseDetails.DATABASE_NAME).getPath(), null, SQLiteDatabase.OPEN_READWRITE);
         }
@@ -163,14 +162,25 @@ public class DBManager{
                         "FOREIGN KEY(user_id) REFERENCES "+  DatabaseDetails.USERS +"(id) " +
                         ")"
         );
+
+        sqLiteDatabase.execSQL(
+                "create table IF NOT EXISTS " + DatabaseDetails.UNCONFIRMED_ENTRIES +
+                        "(" +
+                        "id INTEGER PRIMARY KEY, " +
+                        "sender TEXT NOT NULL, " +
+                        "body TEXT NOT NULL, " +
+                        "sentDate TEXT NOT NULL, " +
+                        "value REAL NOT NULL" +
+                        ")"
+        );
     }
 
-    public void insertSettings(Settings settings)
+    public void insertSettings(Settings settings, boolean upsert)
     {
-        settings.getPaymentMethod().forEach(this::insertPaymentType);
-        settings.getExpenseCategory().forEach(this::insertExpenseCategory);
-        settings.getIncomeCategory().forEach(this::insertIncomeCategory);
-        settings.getUsers().forEach(this::insertUser);
+        settings.getPaymentMethod().forEach(s -> this.insertPaymentType(s, upsert));
+        settings.getExpenseCategory().forEach(s -> this.insertExpenseCategory(s, upsert));
+        settings.getIncomeCategory().forEach(s -> this.insertIncomeCategory(s, upsert));
+        settings.getUsers().forEach(s -> this.insertUser(s, upsert));
     }
 
     public ArrayList<Category> getExpenseCategoryData() {
@@ -206,19 +216,22 @@ public class DBManager{
         return data;
     }
 
-    public void insertExpenseCategory(Category cat)
+    public void insertExpenseCategory(Category cat, boolean upsert)
     {
         ContentValues contentValues = new ContentValues();
+        if(upsert) {
+            contentValues.put("id", cat.getId());
+        }
         contentValues.put("name", cat.getName());
         contentValues.put("color_id", cat.getColorId());
-        long catID = this.insert(contentValues, DatabaseDetails.CATEGORY_EXPENSE);
+        long catID = this.insert(contentValues, DatabaseDetails.CATEGORY_EXPENSE, upsert);
         if(catID == -1) {
             throw new RuntimeException("Failed to insert data into database");
         }
         for(SubCategory sCat: cat.getSubCategories())
         {
             sCat.setCategoryId((int)catID);
-            insertExpenseSubCategory(sCat);
+            insertExpenseSubCategory(sCat, upsert);
         }
     }
 
@@ -278,19 +291,22 @@ public class DBManager{
         return data;
     }
 
-    public void insertIncomeCategory(Category cat)
+    public void insertIncomeCategory(Category cat, boolean upsert)
     {
         ContentValues contentValues = new ContentValues();
+        if(upsert) {
+            contentValues.put("id", cat.getId());
+        }
         contentValues.put("name", cat.getName());
         contentValues.put("color_id", cat.getColorId());
-        long catID = this.insert(contentValues, DatabaseDetails.CATEGORY_INCOME);
+        long catID = this.insert(contentValues, DatabaseDetails.CATEGORY_INCOME, upsert);
         if(catID == -1) {
             throw new RuntimeException("Failed to insert data into database");
         }
         for(SubCategory sCat: cat.getSubCategories())
         {
             sCat.setCategoryId((int)catID);
-            insertIncomeSubCategory(sCat);
+            insertIncomeSubCategory(sCat, upsert);
         }
     }
 
@@ -341,12 +357,15 @@ public class DBManager{
         return data;
     }
 
-    public void insertExpenseSubCategory(SubCategory scat)
+    public void insertExpenseSubCategory(SubCategory scat, boolean upsert)
     {
         ContentValues contentValues = new ContentValues();
+        if(upsert) {
+            contentValues.put("id", scat.getId());
+        }
         contentValues.put("name", scat.getName());
         contentValues.put("category_id", scat.getCategoryId());
-        long ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_EXPENSE);
+        long ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_EXPENSE, upsert);
         if(ret == -1)
         {
             throw new RuntimeException("Failed to insert data into database");
@@ -394,12 +413,15 @@ public class DBManager{
         return data;
     }
 
-    public void insertIncomeSubCategory(SubCategory scat)
+    public void insertIncomeSubCategory(SubCategory scat, boolean upsert)
     {
         ContentValues contentValues = new ContentValues();
+        if(upsert) {
+            contentValues.put("id", scat.getId());
+        }
         contentValues.put("name", scat.getName());
         contentValues.put("category_id", scat.getCategoryId());
-        long ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_INCOME);
+        long ret = this.insert(contentValues, DatabaseDetails.SUBCATEGORY_INCOME, upsert);
         if(ret == -1)
         {
             throw new RuntimeException("Failed to insert data into database");
@@ -446,12 +468,15 @@ public class DBManager{
         return data;
     }
 
-    public void insertPaymentType(PaymentType p)
+    public void insertPaymentType(PaymentType p, boolean upsert)
     {
         ContentValues contentValues = new ContentValues();
+        if(upsert) {
+            contentValues.put("id", p.getId());
+        }
         contentValues.put("name", p.getName());
         contentValues.put("color_id", p.getDrawableId());
-        this.insert(contentValues, DatabaseDetails.PAYMENT_TYPE);
+        this.insert(contentValues, DatabaseDetails.PAYMENT_TYPE, upsert);
     }
 
     public void updatePaymentType(PaymentType p)
@@ -476,11 +501,11 @@ public class DBManager{
         String query = "select id, name from "+ DatabaseDetails.USERS;
         try(Cursor cursor =  sqLiteDatabase.rawQuery(query,
                 null)) {
-            if (null != cursor)
-                cursor.moveToFirst();
+            assert cursor != null;
+
+            cursor.moveToFirst();
 
             do {
-                assert cursor != null;
                 String id = cursor.getString(0);
                 String name = cursor.getString(1);
                 User obj = new User(Integer.parseInt(id), name);
@@ -504,7 +529,8 @@ public class DBManager{
         int value = 0;
         try {
             Cursor cursor =  sqLiteDatabase.rawQuery(query, null);
-            if (null != cursor && 0 != cursor.getCount() ) {
+            assert cursor != null;
+            if (0 != cursor.getCount() ) {
                 cursor.moveToFirst();
                 do {
                     value += cursor.getInt(0);
@@ -512,7 +538,8 @@ public class DBManager{
                 cursor.close();
             }
             cursor = sqLiteDatabase.rawQuery(query2, null);
-            if (null != cursor && 0 != cursor.getCount() ) {
+            assert cursor != null;
+            if (0 != cursor.getCount() ) {
                 cursor.moveToFirst();
                 do {
                     value += cursor.getInt(0);
@@ -527,12 +554,15 @@ public class DBManager{
         return value;
     }
 
-    public long insertUser(User u)
+    public long insertUser(User u, boolean upsert)
     {
         ContentValues contentValues = new ContentValues();
+        if(upsert) {
+            contentValues.put("id", u.getId());
+        }
         contentValues.put("name", u.getName());
         contentValues.put("color_id", u.getDrawableId());
-        return this.insert(contentValues, DatabaseDetails.USERS);
+        return this.insert(contentValues, DatabaseDetails.USERS, upsert);
     }
 
     public void updateUser(User u)
@@ -552,13 +582,13 @@ public class DBManager{
         this.delete(DatabaseDetails.USERS, condition);
     }
 
-    public void insertSharedUserEntries(User user, int value, long expenseEntriesId)
+    public void insertSharedUserEntries(User user, float value, long expenseEntriesId)
     {
         ContentValues contentValues = new ContentValues();
         contentValues.put("expenseEntries_id", expenseEntriesId);
         contentValues.put("user_id", user.getId());
         contentValues.put("value", value);
-        this.insert(contentValues, DatabaseDetails.EXPENSE_SHARED);
+        this.insert(contentValues, DatabaseDetails.EXPENSE_SHARED, false);
     }
 
     public void insertExpenseEntries(Entry entry)
@@ -568,11 +598,10 @@ public class DBManager{
         contentValues.put("value", entry.getValue());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        contentValues.put("date_time", dateFormat.format(entry.getDateAndTime()));
+        contentValues.put("date_time", DBManager.dataFormatterForDB.format(entry.getDateAndTime()));
         contentValues.put("isShared", entry.isShared());
 
-        long id = this.insert(contentValues, DatabaseDetails.EXPENSE_ENTRIES);
+        long id = this.insert(contentValues, DatabaseDetails.EXPENSE_ENTRIES, false);
         if(id == -1)
         {
             throw new RuntimeException();
@@ -608,10 +637,9 @@ public class DBManager{
         contentValues.put("value", entry.getValue());
         contentValues.put("subCategory_id", entry.getSubCategoryId());
         contentValues.put("paymentMethod_id", entry.getPaymentId());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        contentValues.put("date_time", dateFormat.format(entry.getDateAndTime()));
+        contentValues.put("date_time", DBManager.dataFormatterForDB.format(entry.getDateAndTime()));
 
-        long id = this.insert(contentValues, DatabaseDetails.INCOME_ENTRIES);
+        long id = this.insert(contentValues, DatabaseDetails.INCOME_ENTRIES, false);
         if(id == -1)
         {
             throw  new RuntimeException();
@@ -700,9 +728,8 @@ public class DBManager{
             {
                 whereQuery.append(" AND ");
             }
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            String dateAfter =  dateFormat.format(filters.getDateAfter());
-            String dateBefore =  dateFormat.format(filters.getDateBefore());
+            String dateAfter =  DBManager.dataFormatterForDB.format(filters.getDateAfter());
+            String dateBefore =  DBManager.dataFormatterForDB.format(filters.getDateBefore());
             whereQuery.append(" date_time BETWEEN \"").append(dateAfter).append("\" AND \"").append(dateBefore).append("\"");
         }
         return isWhereClausePresent ? whereQuery.toString() : "";
@@ -736,16 +763,13 @@ public class DBManager{
                 long subCategory_id = cursor.getLong(5);
                 long paymentMethod_id = cursor.getLong(7);
                 String dateTime = cursor.getString(9);
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date date = formatter.parse(dateTime);
+                Date date = DBManager.dataFormatterForDB.parse(dateTime);
+                if(date == null) throw new RuntimeException("Couldn't Parse Data correctly");
 
                 ArrayList<Entry.SharedUser> sharedUsersList = getSharedUserEntries(id);
                 Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, date, new Date(), sharedUsersList);
                 data.add(entry);
             } while (cursor.moveToNext());
-        }
-        catch (ParseException e) {
-            e.printStackTrace();
         }
         catch (Exception e)
         {
@@ -782,15 +806,11 @@ public class DBManager{
                     long subCategory_id = cursor.getLong(5);
                     long paymentMethod_id = cursor.getLong(7);
                     String dateTime = cursor.getString(9);
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    Date date = formatter.parse(dateTime);
+                    Date date = DBManager.dataFormatterForDB.parse(dateTime);
                     Entry entry = new Entry(id, name, value, category_id, subCategory_id, paymentMethod_id, date, new Date());
                     data.add(entry);
             } while (cursor.moveToNext());
 
-        }
-        catch (ParseException e) {
-            e.printStackTrace();
         }
         catch (Exception e)
         {
@@ -805,10 +825,10 @@ public class DBManager{
         contentValues.put("user_id", user_id);
         contentValues.put("value", value);
 
-        long id = this.insert(contentValues, DatabaseDetails.TRANSFER);
+        long id = this.insert(contentValues, DatabaseDetails.TRANSFER, false);
         if(id == -1)
         {
-            throw  new RuntimeException();
+            throw new RuntimeException();
         }
     }
 
@@ -839,9 +859,97 @@ public class DBManager{
         return getEntryNames(DatabaseDetails.EXPENSE_ENTRIES);
     }
 
-    private long insert(ContentValues contentValues, String tableName)
+    public void insertUnconfirmedEntries(UnconfirmedEntry entry) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("sender", entry.getSender());
+        contentValues.put("body", entry.getBody());
+        contentValues.put("sentDate", dataFormatterForDB.format(entry.getSentDate()));
+        contentValues.put("value", entry.getValue());
+        long id = this.insert(contentValues, DatabaseDetails.UNCONFIRMED_ENTRIES, false);
+        if(id == -1)
+        {
+            throw new RuntimeException();
+        }
+        entry.setId(id);
+    }
+
+    public void deleteUnconfirmedEntries(long id) {
+        String condition = "id = '" + id +"'";
+        this.delete(DatabaseDetails.UNCONFIRMED_ENTRIES, condition);
+    }
+
+    public void deleteAllUnconfirmedEntries() {
+        this.delete(DatabaseDetails.UNCONFIRMED_ENTRIES, null);
+    }
+
+    public UnconfirmedEntry getUnconfirmedEntry(long index) {
+        UnconfirmedEntry entry = null;
+
+        String query = "select "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".id, "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".sender, "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".body, "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".sentDate, "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".value "
+                +"FROM "+ DatabaseDetails.UNCONFIRMED_ENTRIES
+                +" WHERE " + DatabaseDetails.UNCONFIRMED_ENTRIES + ".id==" + index;
+
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
+            if (null == cursor || 0 == cursor.getCount())
+                throw new RuntimeException("Index not found : " + index);
+
+            cursor.moveToFirst();
+            long id = cursor.getLong(0);
+            String sender = cursor.getString(1);
+            String body = cursor.getString(2);
+            Date sentdate = DBManager.dataFormatterForDB.parse(cursor.getString(3));
+            float value = cursor.getFloat(4);
+            entry = new UnconfirmedEntry(sender, body, sentdate, value, value > 0);
+            entry.setId(id);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return entry;
+    }
+
+    public ArrayList<UnconfirmedEntry> getUnconfirmedEntries() {
+        ArrayList<UnconfirmedEntry> data = new ArrayList<>();
+        String query = "select "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".id, "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".sender, "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".body, "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".sentDate, "
+                +DatabaseDetails.UNCONFIRMED_ENTRIES + ".value "
+                +"FROM "+ DatabaseDetails.UNCONFIRMED_ENTRIES;
+
+        try(Cursor cursor =  sqLiteDatabase.rawQuery(query, null)) {
+            if (null == cursor || 0 == cursor.getCount() )
+                return data;
+            cursor.moveToFirst();
+            do {
+                long id = cursor.getLong(0);
+                String sender = cursor.getString(1);
+                String body = cursor.getString(2);
+                Date sentdate = DBManager.dataFormatterForDB.parse(cursor.getString(3));
+                float value = cursor.getFloat(4);
+                UnconfirmedEntry entry = new UnconfirmedEntry(sender, body, sentdate, value, value > 0);
+                entry.setId(id);
+                data.add(entry);
+            } while (cursor.moveToNext());
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
+    private long insert(ContentValues contentValues, String tableName, boolean upsert)
     {
-        return sqLiteDatabase.insert(tableName, null, contentValues);
+        return sqLiteDatabase.insertWithOnConflict(tableName, null, contentValues, upsert ? SQLiteDatabase.CONFLICT_REPLACE : SQLiteDatabase.CONFLICT_FAIL);
     }
 
     private void delete(String tableName, String condition) {
@@ -854,22 +962,4 @@ public class DBManager{
         Log.d("DATABASE_LOG", "update: exiting");
         return ret;
     }
-
-    /* public Cursor getData(String columnName, String tableName, String condition) {
-        try {
-            columnName =  (null == columnName) ? "*" :columnName;
-            String query = "select " + columnName +" from " + tableName;
-            query += (null == condition) ? "" : " where " + condition;
-            Log.d("DATABASE_LOG", "getData: query = " + query);
-            Cursor cursor = sqLiteDatabase.rawQuery(query,
-                    null);
-            if (null != cursor)
-                cursor.moveToFirst();
-
-            return cursor;
-        }
-        catch(Exception e) {
-            return null;
-        }
-    }*/
 }

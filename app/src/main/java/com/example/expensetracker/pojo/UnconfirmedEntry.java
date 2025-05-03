@@ -8,10 +8,10 @@ public class UnconfirmedEntry {
     private final String sender;
     private final String body;
     private final Date sentDate;
-    private final int value;
+    private final float value;
     private final boolean isCredited;
 
-    public UnconfirmedEntry(String sender, String body, Date sentDate, int value, boolean isCredited) {
+    public UnconfirmedEntry(String sender, String body, Date sentDate, float value, boolean isCredited) {
         this.sender = sender;
         this.body = body;
         this.sentDate = sentDate;
@@ -31,7 +31,7 @@ public class UnconfirmedEntry {
         return sentDate;
     }
 
-    public int getValue() {
+    public float getValue() {
         return value;
     }
 

@@ -1,6 +1,7 @@
 package com.example.expensetracker.fragments;
 
 import android.os.Bundle;
+import android.service.autofill.DateValueSanitizer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
 import com.example.expensetracker.adapters.TabLayoutAdapter;
+import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.TransferData;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.google.android.material.tabs.TabLayout;
@@ -33,10 +35,10 @@ public class EntryFragment extends Fragment {
         UnconfirmedEntry unconfirmedEntry = null;
         TransferData transferData = null;
         Bundle arg = getArguments();
-        final int unconfirmedEntryId = arg == null ? -1 : arg.getInt("unconfirmedEntryId", -1);
+        final long unconfirmedEntryId = arg == null ? -1 : arg.getLong("unconfirmedEntryId", -1);
         final long transferUserId = arg == null ? -1 : arg.getLong("TransferUserId", -1);
         if(unconfirmedEntryId >= 0) {
-            unconfirmedEntry = ((MainActivity) requireActivity()).getEntries().get(unconfirmedEntryId);
+            unconfirmedEntry = DBManager.getDBManagerInstance().getUnconfirmedEntry(unconfirmedEntryId);
         } else if(transferUserId >= 0) {
             int value = arg.getInt("TransferValue", 0);
             transferData = new TransferData(transferUserId, value);

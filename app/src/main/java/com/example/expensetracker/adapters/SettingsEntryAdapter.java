@@ -181,27 +181,27 @@ public class SettingsEntryAdapter extends RecyclerView.Adapter<SettingsEntryAdap
             public void onSettingsAddListener(String name, int logo) {
                 switch (rootPosition) {
                     case 0: // Payment Type
-                        DBManager.getDBManagerInstance().insertPaymentType(new PaymentType(name, logo));
+                        DBManager.getDBManagerInstance().insertPaymentType(new PaymentType(name, logo), false);
                         settings.setPaymentMethod(DBManager.getDBManagerInstance().getPaymentData());
                         break;
                     case 1: //Expense Category
-                        DBManager.getDBManagerInstance().insertExpenseCategory(new Category(name, logo));
+                        DBManager.getDBManagerInstance().insertExpenseCategory(new Category(name, logo), false);
                         settings.setExpenseCategory(DBManager.getDBManagerInstance().getExpenseCategoryData());
                         break;
                     case 2: //Expense Sub-Category
-                        DBManager.getDBManagerInstance().insertExpenseSubCategory(new SubCategory(name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                        DBManager.getDBManagerInstance().insertExpenseSubCategory(new SubCategory(name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo), false);
                         settings.setExpenseCategory(DBManager.getDBManagerInstance().getExpenseCategoryData());
                         break;
                     case 3: //Income Category
-                        DBManager.getDBManagerInstance().insertIncomeCategory(new Category(name, logo));
+                        DBManager.getDBManagerInstance().insertIncomeCategory(new Category(name, logo), false);
                         settings.setIncomeCategory(DBManager.getDBManagerInstance().getIncomeCategoryData());
                         break;
                     case 4: //Expense Sub-Category
-                        DBManager.getDBManagerInstance().insertIncomeSubCategory(new SubCategory(name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo));
+                        DBManager.getDBManagerInstance().insertIncomeSubCategory(new SubCategory(name, holder.hiddenCategory.getSelectedItemPosition() + 1, logo), false);
                         settings.setIncomeCategory(DBManager.getDBManagerInstance().getIncomeCategoryData());
                         break;
                     case 5: //Users
-                        DBManager.getDBManagerInstance().insertUser(new User(name));
+                        DBManager.getDBManagerInstance().insertUser(new User(name), false);
                         settings.setUsers(DBManager.getDBManagerInstance().getUserData());
                         break;
                 }

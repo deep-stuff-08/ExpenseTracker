@@ -275,7 +275,7 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(((MainActivity)requireActivity()).getEntries().size() > 0) {
+        if(DBManager.getDBManagerInstance().getUnconfirmedEntries().size() > 0) {
             requireView().findViewById(R.id.unconfirmed_parent).setVisibility(View.VISIBLE);
         }
         ((MainActivity)requireActivity()).getDeleteButton().setOnClickListener(v -> {

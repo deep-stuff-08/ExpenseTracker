@@ -86,7 +86,7 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
                 holder.value.setTextColor(activity.getColor(R.color.profitGreen));
                 sign = "+";
             }
-            holder.value.setText(String.format(Locale.getDefault(), "%s%d", sign, entries.get(position).getValue()));
+            holder.value.setText(String.format(Locale.getDefault(), "%s%.2f", sign, entries.get(position).getValue()));
             holder.image.setImageResource(Objects.requireNonNull(expenseSubCategoryHashMap.get(entries.get(position).getSubCategoryId())).getDrawableId());
             holder.image.setBackgroundColor(Objects.requireNonNull(expenseCategoryHashMap.get(entries.get(position).getCategoryId())).getColorId());
             holder.id = entries.get(position).getId();

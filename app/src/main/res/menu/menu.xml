@@ -13,4 +13,8 @@
     <item android:id="@+id/menu_users_split"
         android:title="@string/user_splits"
         app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_export_data"
+        android:title="@string/export_data"
+        app:showAsAction="never"/>
 </menu>

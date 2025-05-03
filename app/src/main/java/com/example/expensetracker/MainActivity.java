@@ -28,15 +28,11 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
-/**
- * -1 : File Write Error
-*/
-
 public class MainActivity extends AppCompatActivity {
     private int currentNav;
     private Settings settings;
-    private ArrayList<UnconfirmedEntry> unconfirmedEntries;
     private long pressedTime;
+    public static final SimpleDateFormat userFriendlyDateFormatter = new SimpleDateFormat("dd/MM/yy hh:mm:ss a", Locale.ENGLISH);
 
     public ImageView getDeleteButton() {
         return findViewById(R.id.delete_entry_button);
@@ -52,14 +48,10 @@ public class MainActivity extends AppCompatActivity {
         long lastTime = sharedPref.getLong("LastTime", 0);
         SharedPreferences.Editor sharedPrefEditor = sharedPref.edit();
 
-        sharedPrefEditor.putLong("LastTime", new Date().getTime());
-        sharedPrefEditor.apply();
         boolean isFirstOpen = !sharedPref.getBoolean("NotFirstOpen", false);
 
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
-
-        unconfirmedEntries = new ArrayList<>();
 
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             if(isFirstOpen) {
@@ -77,8 +69,11 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             SmsReader reader = new SmsReader();
-            Date lastDate = lastTime != 0 ? new Date(lastTime) : new Date();
-            unconfirmedEntries = reader.readMessagesSentAfter(this, lastDate);
+            Date lastDate = new Date(lastTime);
+            sharedPrefEditor.putLong("LastTime", new Date().getTime());
+            sharedPrefEditor.apply();
+            ArrayList<UnconfirmedEntry> entries = reader.readMessagesSentAfter(this, lastDate);
+            entries.forEach(entry -> DBManager.getDBManagerInstance().insertUnconfirmedEntries(entry));
         }
 
         NavController mNavigationController = Navigation.findNavController(this,R.id.fragment_container_view);
@@ -158,6 +153,14 @@ public class MainActivity extends AppCompatActivity {
             }
             navController.navigate(R.id.action_homeFragment_to_userSplitFragment);
             return true;
+        } else if (R.id.menu_export_data == item.getItemId()) {
+            invalidateMenu();
+            NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
+            if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
+                navController.navigateUp();
+            }
+            navController.navigate(R.id.action_homeFragment_to_exportFragment);
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -170,10 +173,6 @@ public class MainActivity extends AppCompatActivity {
 
     public Settings getSettings() {
         return settings;
-    }
-
-    public ArrayList<UnconfirmedEntry> getEntries() {
-        return unconfirmedEntries;
     }
 
     public void terminateApplicationWithError(int errorCode) {

@@ -119,23 +119,25 @@ public class AddExpenseFragment extends Fragment {
         textName.setAdapter(adt);
         textName.setThreshold(1);
 
+        //Setup Value
+        final float[] totalValue = {0};
+        final float[] actualValue = {0};
+
         if(unconfirmedEntry != null) {
             TextView textView = view.findViewById(R.id.expense_msg_body);
             textView.setText(unconfirmedEntry.getBody());
             textView.setVisibility(View.VISIBLE);
             textValue.setText(String.valueOf(unconfirmedEntry.getValue()));
+            actualValue[0] = unconfirmedEntry.getValue();
         }
 
-        //Setup Value
-        final int[] totalValue = {0};
-        final int[] actualValue = {0};
         textValue.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                actualValue[0] = textValue.getText().length() == 0 ? 0 : Integer.parseInt(textValue.getText().toString());
-                int currentValue = spinnerShareType.getSelectedItemPosition() == 0 ? actualValue[0] : 100;
+                actualValue[0] = textValue.getText().length() == 0 ? 0 : Float.parseFloat(textValue.getText().toString());
+                float currentValue = spinnerShareType.getSelectedItemPosition() == 0 ? actualValue[0] : 100;
                 textSharingValue.setText(getString(R.string.value_div, totalValue[0], currentValue));
                 if(totalValue[0] == currentValue) {
                     textSharingValue.setTextColor(getResources().getColor(R.color.categoryGreen, context.getTheme()));
@@ -253,7 +255,7 @@ public class AddExpenseFragment extends Fragment {
         spinnerShareType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                int currentValue = position == 0 ? actualValue[0] : 100;
+                float currentValue = position == 0 ? actualValue[0] : 100;
                 textSharingValue.setText(getString(R.string.value_div, totalValue[0], currentValue));
                 if(totalValue[0] == currentValue) {
                     textSharingValue.setTextColor(getResources().getColor(R.color.categoryGreen, context.getTheme()));
@@ -305,7 +307,7 @@ public class AddExpenseFragment extends Fragment {
         //Setup Shared User List
         listSharedUsers.setAdapter(new SharedUserAdapter(settings.getUsers(), newTotal -> {
             totalValue[0] = newTotal;
-            int currentValue = spinnerShareType.getSelectedItemPosition() == 0 ? actualValue[0] : 100;
+            float currentValue = spinnerShareType.getSelectedItemPosition() == 0 ? actualValue[0] : 100;
             textSharingValue.setText(getString(R.string.value_div, totalValue[0], currentValue));
             if(totalValue[0] == actualValue[0]) {
                 textSharingValue.setTextColor(getResources().getColor(R.color.categoryGreen, context.getTheme()));
@@ -343,9 +345,6 @@ public class AddExpenseFragment extends Fragment {
             if(error) {
                 return;
             }
-            if(unconfirmedEntry != null) {
-                ((MainActivity)requireActivity()).getEntries().remove(unconfirmedEntry);
-            }
             Date date = new Date();
             Date time = new Date();
             try {
@@ -354,7 +353,7 @@ public class AddExpenseFragment extends Fragment {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            Entry entry = new Entry(textName.getText().toString(), Integer.parseInt(textValue.getText().toString()), ((SubCategory)spinnerSubCategory.getSelectedItem()).getCategoryId(), ((SubCategory)spinnerSubCategory.getSelectedItem()).getId(), spinnerPayment.getSelectedItemPosition() +1, date, time);
+            Entry entry = new Entry(textName.getText().toString(), Float.parseFloat(textValue.getText().toString()), ((SubCategory)spinnerSubCategory.getSelectedItem()).getCategoryId(), ((SubCategory)spinnerSubCategory.getSelectedItem()).getId(), spinnerPayment.getSelectedItemPosition() +1, date, time);
             if(!isIncome && checkBoxIsShared.isChecked()) {
                 ArrayList<Entry.SharedUser> newUserList = new ArrayList<>();
                 ArrayList<Entry.SharedUser> sharedUserList = new ArrayList<>();
@@ -369,13 +368,13 @@ public class AddExpenseFragment extends Fragment {
                     new AlertDialog.Builder(context).setMessage("There are a few names I don't recognize. Should I add them to your user list? If you choose no their split will be added in Misc.\n" + userList)
                             .setPositiveButton("Yes", (dialog, which) -> {
                                 newUserList.forEach(sharedUser -> {
-                                    long newId = DBManager.getDBManagerInstance().insertUser(sharedUser.getUser());
+                                    long newId = DBManager.getDBManagerInstance().insertUser(sharedUser.getUser(), false);
                                     sharedUser.getUser().setId(newId);
                                 });
                                 settings.setUsers(DBManager.getDBManagerInstance().getUserData());
                                 sharedUserList.addAll(newUserList);
                                 entry.setSharedUsersList(payer, sharedUserList);
-                                onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
+                                onSuccessfulSubmit(entry, view, unconfirmedEntry, checkBoxIsRepeat.isChecked(), false);
                             })
                             .setCancelable(true)
                             .setNegativeButton("No", (dialog, which) -> {
@@ -396,19 +395,22 @@ public class AddExpenseFragment extends Fragment {
                                 }
                                 sharedExpensePayer.getSelectedItem();
                                 entry.setSharedUsersList(payer, sharedUserList);
-                                onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
+                                onSuccessfulSubmit(entry, view, unconfirmedEntry, checkBoxIsRepeat.isChecked(), false);
                             }).show();
                 } else {
                     entry.setSharedUsersList(payer, sharedUserList);
-                    onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), false);
+                    onSuccessfulSubmit(entry, view, unconfirmedEntry, checkBoxIsRepeat.isChecked(), false);
                 }
             } else {
-                onSuccessfulSubmit(entry, view, checkBoxIsRepeat.isChecked(), isIncome);
+                onSuccessfulSubmit(entry, view, unconfirmedEntry, checkBoxIsRepeat.isChecked(), isIncome);
             }
         });
     }
 
-    private void onSuccessfulSubmit(Entry entry, View view, boolean isRepeat, boolean isIncome) {
+    private void onSuccessfulSubmit(Entry entry, View view, UnconfirmedEntry unconfirmedEntry, boolean isRepeat, boolean isIncome) {
+        if(unconfirmedEntry != null) {
+            DBManager.getDBManagerInstance().deleteUnconfirmedEntries(unconfirmedEntry.getId());
+        }
         if(isIncome) {
             DBManager.getDBManagerInstance().insertIncomeEntries(entry);
         } else {
@@ -416,9 +418,7 @@ public class AddExpenseFragment extends Fragment {
         }
         Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
         if (isRepeat) {
-            Bundle bundle = new Bundle();
-            bundle.putBoolean("isLogMultiOn", true);
-            Navigation.findNavController(view).navigate(R.id.entryFragment, bundle, new NavOptions.Builder().setPopUpTo(R.id.entryFragment, true).build());
+            Navigation.findNavController(view).navigate(R.id.entryFragment, null, new NavOptions.Builder().setPopUpTo(R.id.entryFragment, true).build());
         } else {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
         }

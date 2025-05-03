@@ -11,21 +11,19 @@ import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.expensetracker.MainActivity;
 import com.example.expensetracker.R;
+import com.example.expensetracker.database.DBManager;
 import com.example.expensetracker.pojo.UnconfirmedEntry;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedEntriesAdapter.ViewHolder> {
     private final ArrayList<UnconfirmedEntry> entries;
-    private final SimpleDateFormat sdf;
     private int mExpandedPosition = -1;
 
     public UnconfirmedEntriesAdapter(ArrayList<UnconfirmedEntry> newEntries) {
         entries = newEntries;
-        sdf = new SimpleDateFormat("dd/MM/yy hh:mm:ss", Locale.getDefault());
     }
     @NonNull
     @Override
@@ -34,11 +32,18 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
         return new UnconfirmedEntriesAdapter.ViewHolder(view);
     }
 
+    @NonNull
+    public void clearAll() {
+        int size = entries.size();
+        entries.clear();
+        notifyItemRangeRemoved(0, size);
+    }
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final boolean isExpanded = position==mExpandedPosition;
         holder.title.setText(entries.get(position).getSender());
-        holder.date.setText(sdf.format(entries.get(position).getSentDate()));
+        holder.date.setText(MainActivity.userFriendlyDateFormatter.format(entries.get(position).getSentDate()));
         holder.value.setText(String.valueOf(entries.get(position).getValue()));
         holder.itemView.setActivated(isExpanded);
         holder.itemView.setOnClickListener(v -> {
@@ -48,14 +53,16 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
         });
         holder.delete.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         holder.delete.setOnClickListener(v -> {
+            long entryID = entries.get(holder.getAdapterPosition()).getId();
             entries.remove(holder.getAdapterPosition());
             notifyItemRemoved(holder.getAdapterPosition());
+            DBManager.getDBManagerInstance().deleteUnconfirmedEntries(entryID);
         });
         holder.confirm.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         holder.confirm.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
-            bundle.putInt("unconfirmedEntryId", holder.getAdapterPosition());
-            Navigation.findNavController(holder.itemView).navigate(R.id.action_userSplitFragment_to_entryFragment);
+            bundle.putLong("unconfirmedEntryId", entries.get(holder.getAdapterPosition()).getId());
+            Navigation.findNavController(holder.itemView).navigate(R.id.action_unconfirmedEntryFragment_to_entryFragment, bundle);
         });
     }
 
@@ -68,7 +75,6 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
         private final TextView title;
         private final TextView date;
         private final TextView value;
-
         private final Button delete;
         private final Button confirm;
         public ViewHolder(@NonNull View itemView) {

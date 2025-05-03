@@ -19,10 +19,11 @@
     <string name="edit">edit</string>
     <string name="add">+ Add</string>
     <string name="unconfirmed_entries">Unconfimed Entries</string>
-    <string name="value_div">%1$d / %2$d</string>
+    <string name="value_div">%1$.2f / %2$.2f</string>
     <string name="expense_share_user_me">Me</string>
     <string name="settle_swap">Swap</string>
     <string name="incomeorexpensetab">IncomeOrExpense</string>
     <string name="string_all">All</string>
     <string name="user_splits">User Splits</string>
+    <string name="export_data">Export Data</string>
 </resources>

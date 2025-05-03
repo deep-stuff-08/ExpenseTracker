@@ -22,7 +22,7 @@ public class SmsReader {
         if(cursor.getCount() > 0) {
             do {
                 String body = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.BODY));
-                int value = extractValue(body);
+                float value = extractValue(body);
                 if(value != 0) {
                     String sender = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.ADDRESS));
                     Date date = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(Telephony.Sms.DATE)));
@@ -34,17 +34,17 @@ public class SmsReader {
         return entries;
     }
 
-    private int extractValue(String body) {
+    private float extractValue(String body) {
         Matcher matcher = Pattern.compile("(?i)(acct|card)( *)(X+)([0-9]{3,4})").matcher(body);
-        int value = 0;
+        float value = 0;
         if(matcher.find()) {
-            Matcher amountMatcher = Pattern.compile("(?i)(RS|INR)(.?)( ?)([0-9]+)(.[0-9]{2})").matcher(body);
+            Matcher amountMatcher = Pattern.compile("(?i)(RS|INR)(.?)( ?)([0-9]+)(.[0-9]{1,2})?").matcher(body);
             if(amountMatcher.find()) {
                 String amt = amountMatcher.group()
                         .replaceFirst("(?i)(RS|INR)(.?+)", "")
                         .replaceAll(",", "")
                         .trim();
-                value = Math.round(Float.parseFloat(amt));
+                value = Float.parseFloat(amt);
                 if(Pattern.compile("(?i)(debited|spent)").matcher(body).find()) {
                     value *= -1;
                 } else if(!Pattern.compile("(?i)(credited|recived)").matcher(body).find()) {
