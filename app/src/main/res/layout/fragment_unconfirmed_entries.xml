@@ -14,9 +14,10 @@
         />
 
     <TextView
+        android:id="@+id/text_no_entries"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Yay!! No unconfirmed Entries"
+        android:text="@string/yay_no_unconfirmed_entries"
         android:textSize="34sp"
         android:textAlignment="center"
         android:visibility="gone"
