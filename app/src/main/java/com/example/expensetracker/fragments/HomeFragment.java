@@ -268,7 +268,10 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        view.findViewById(R.id.fab).setOnClickListener(view1 -> Navigation.findNavController(view1).navigate(R.id.action_homeFragment_to_entryFragment));
+        view.findViewById(R.id.fab).setOnClickListener(view1 -> {
+            Navigation.findNavController(view1).navigate(R.id.action_homeFragment_to_entryFragment);
+            ((MainActivity)requireActivity()).getDeleteButton().setVisibility(View.GONE);
+        });
         view.findViewById(R.id.unconfirmed_parent).setOnClickListener(view2 -> Navigation.findNavController(view2).navigate(R.id.action_homeFragment_to_unconfirmedEntryFragment));
     }
 

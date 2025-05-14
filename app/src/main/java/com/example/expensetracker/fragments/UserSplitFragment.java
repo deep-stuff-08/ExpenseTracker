@@ -27,7 +27,6 @@ public class UserSplitFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ((MainActivity)requireActivity()).getDeleteButton().setVisibility(View.GONE);
         Settings settings = ((MainActivity)requireActivity()).getSettings();
 
         View view = inflater.inflate(R.layout.fragment_user_split, container, false);

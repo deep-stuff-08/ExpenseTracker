@@ -94,7 +94,6 @@ public class AddExpenseFragment extends Fragment {
 
         Settings settings = ((MainActivity)requireActivity()).getSettings();
         Calendar currentTime = Calendar.getInstance();
-        ((MainActivity)requireActivity()).getDeleteButton().setVisibility(View.GONE);
 
         ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getIncomeCategory().get(0).getColorId());;
         ComboBoxAdapter adt_Category;

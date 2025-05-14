@@ -36,7 +36,6 @@ public class TransferFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ((MainActivity)requireActivity()).getDeleteButton().setVisibility(View.GONE);
         View view = inflater.inflate(R.layout.fragment_transfer, container, false);
 
         Spinner spinnerTo = view.findViewById(R.id.spinner_to);

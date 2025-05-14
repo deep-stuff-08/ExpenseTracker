@@ -27,4 +27,6 @@
     <string name="user_splits">User Splits</string>
     <string name="export_data">Export Data</string>
     <string name="yay_no_unconfirmed_entries">Yay!! No Unconfirmed Entries</string>
+    <string name="recheck">Recheck</string>
+    <string name="discard_all">Discard All</string>
 </resources>

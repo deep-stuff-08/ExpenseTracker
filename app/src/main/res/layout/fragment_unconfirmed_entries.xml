@@ -13,6 +13,15 @@
         android:layout_above="@id/discard_all_btn"
         />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/recheck_btn"
+        android:layout_centerHorizontal="true"
+        android:text="@string/recheck"
+        android:layout_margin="10sp"
+        android:visibility="gone"/>
+
     <TextView
         android:id="@+id/text_no_entries"
         android:layout_width="match_parent"
@@ -31,7 +40,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/discard_all_btn"
         android:layout_margin="10sp"
-        android:text="Discard All"
+        android:text="@string/discard_all"
         android:layout_alignParentBottom="true"
         />
 </RelativeLayout>
