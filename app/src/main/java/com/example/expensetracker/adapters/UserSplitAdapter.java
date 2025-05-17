@@ -30,11 +30,10 @@ public class UserSplitAdapter extends RecyclerView.Adapter<UserSplitAdapter.View
     public interface OnClickListener {
         void onClick(User u);
     }
-    private OnClickListener clickListener;
-    private ArrayList<UserValues> users;
+
+    private final ArrayList<UserValues> users;
     public UserSplitAdapter(ArrayList<User> userList, OnClickListener onClickListener) {
         users = new ArrayList<>();
-        clickListener = onClickListener;
         for(User user : userList) {
             users.add(new UserValues(user, DBManager.getDBManagerInstance().getUserShare(user.getId())));
         }
@@ -62,8 +61,8 @@ public class UserSplitAdapter extends RecyclerView.Adapter<UserSplitAdapter.View
         holder.itemView.setOnClickListener(v -> {
             if(value != 0) {
                 Bundle bundle = new Bundle();
-                bundle.putLong("TransferUserId", users.get(holder.getAdapterPosition()).user.getId());
-                bundle.putInt("TransferValue", value);
+                bundle.putLong("TransferUserId", users.get(holder.getAbsoluteAdapterPosition()).user.getId());
+                bundle.putInt("TransferValue", -value);
                 Navigation.findNavController(holder.itemView).navigate(R.id.action_userSplitFragment_to_entryFragment, bundle);
             }
         });

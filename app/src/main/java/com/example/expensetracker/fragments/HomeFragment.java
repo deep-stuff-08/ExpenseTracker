@@ -286,10 +286,10 @@ public class HomeFragment extends Fragment {
                     .setCancelable(true)
                     .setPositiveButton("Yes, I'm Sure", (dialog, which) -> {
                         selectionTracker.getSelection().forEach(aLong -> {
-                            if(aLong >= DBManager.IncomeOffset){
-                                DBManager.getDBManagerInstance().deleteIncomeEntries(aLong);
-                            } else {
+                            if((aLong & DBManager.IncomeOffset) == 0){
                                 DBManager.getDBManagerInstance().deleteExpenseEntries(aLong);
+                            } else {
+                                DBManager.getDBManagerInstance().deleteIncomeEntries(aLong);
                             }
                         });
                         selectionTracker.clearSelection();
@@ -297,6 +297,9 @@ public class HomeFragment extends Fragment {
                     })
                     .setNegativeButton("No", null)
                     .show();
+        });
+        ((MainActivity)requireActivity()).getEditButton().setOnClickListener(v -> {
+
         });
     }
 }

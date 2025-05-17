@@ -35,10 +35,15 @@ public class MainActivity extends AppCompatActivity {
     private long pressedTime;
     public static final SimpleDateFormat userFriendlyDateFormatter = new SimpleDateFormat("dd/MM/yy hh:mm:ss a", Locale.ENGLISH);
     private ImageView deleteBtn;
+    private ImageView editBtn;
 
     public ImageView getDeleteButton() {
         return deleteBtn;
     }
+    public ImageView getEditButton() {
+        return editBtn;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
         deleteBtn = findViewById(R.id.delete_entry_button);
+        editBtn = findViewById(R.id.edit_entry_button);
 
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
             if(isFirstOpen) {
@@ -134,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if(R.id.menu_action_settings == item.getItemId()) {
             deleteBtn.setVisibility(View.GONE);
+            editBtn.setVisibility(View.GONE);
             invalidateMenu();
             NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
             if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
@@ -143,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (R.id.menu_unconfirmed_entries == item.getItemId()) {
             deleteBtn.setVisibility(View.GONE);
+            editBtn.setVisibility(View.GONE);
             invalidateMenu();
             NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
             if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
@@ -152,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (R.id.menu_users_split == item.getItemId()) {
             deleteBtn.setVisibility(View.GONE);
+            editBtn.setVisibility(View.GONE);
             invalidateMenu();
             NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
             if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {
@@ -161,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (R.id.menu_export_data == item.getItemId()) {
             deleteBtn.setVisibility(View.GONE);
+            editBtn.setVisibility(View.GONE);
             invalidateMenu();
             NavController navController = Navigation.findNavController(this, R.id.fragment_container_view);
             if (Objects.requireNonNull(navController.getCurrentDestination()).getId() != R.id.homeFragment) {

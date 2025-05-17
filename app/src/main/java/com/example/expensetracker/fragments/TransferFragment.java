@@ -73,35 +73,6 @@ public class TransferFragment extends Fragment {
             txtValue.setText(String.valueOf(Math.abs(transferData.getValue())));
         }
 
-        spinnerTo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                TransferUserAdapter t = ((TransferUserAdapter)spinnerFrom.getAdapter());
-                if(position != 0) {
-                    String item = (String) spinnerTo.getSelectedItem();
-                    t.setSelectedItem(item);
-                }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-        spinnerFrom.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                TransferUserAdapter t = ((TransferUserAdapter) spinnerTo.getAdapter());
-                if(position != 0) {
-                    String item = (String) spinnerFrom.getSelectedItem();
-                    t.setSelectedItem(item);
-                }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
         btnSwap.setOnClickListener(v -> {
             TransferUserAdapter from = (TransferUserAdapter) spinnerFrom.getAdapter();
             TransferUserAdapter to = (TransferUserAdapter) spinnerTo.getAdapter();
@@ -153,6 +124,12 @@ public class TransferFragment extends Fragment {
                 }
             }
 
+            if(toUserId == fromUserId) {
+                ((TextView)spinnerFrom.getSelectedView().findViewById(R.id.spinner_category_text)).setError("Cannot transfer to same user");
+                ((TextView)spinnerTo.getSelectedView().findViewById(R.id.spinner_category_text)).setError("Cannot transfer to same user");
+                error = true;
+            }
+
             if(toUserId != -1 && fromUserId != -1) {
                 ((TextView)spinnerFrom.getSelectedView().findViewById(R.id.spinner_category_text)).setError("From Not Set");
                 ((TextView)spinnerTo.getSelectedView().findViewById(R.id.spinner_category_text)).setError("To Not Set");
@@ -161,12 +138,7 @@ public class TransferFragment extends Fragment {
             if(error) {
                 return;
             }
-            if(toUserId == -1 && fromUserId == -1) {
-                //This Functionality is not yet supported. Dummy Message
-                Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
-                return;
-            }
-            DBManager.getDBManagerInstance().insertTransferEntries(fromUserId == -1 ? toUserId : fromUserId, Integer.parseInt(value) * (fromUserId == -1 ? -1 : 1));
+            DBManager.getDBManagerInstance().insertTransferEntries(fromUserId == -1 ? toUserId : fromUserId, Integer.parseInt(value) * (fromUserId == -1 ? 1 : -1));
 
             Snackbar.make(view, "Entry Saved Successfully", Snackbar.LENGTH_SHORT).show();
             requireActivity().getOnBackPressedDispatcher().onBackPressed();

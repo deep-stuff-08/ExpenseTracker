@@ -44,7 +44,11 @@ public class SmsReader {
                 amt = amt.replaceFirst("(?i)(RS|INR)(.?+)", "");
                 amt = amt.replaceAll(",", "");
                 amt = amt.trim();
-                value = Float.parseFloat(amt);
+                try {
+                    value = Float.parseFloat(amt);
+                } catch (NumberFormatException e) {
+                    return 0;
+                }
                 if(Pattern.compile("(?i)(debited|spent)").matcher(body).find()) {
                     value *= -1;
                 } else if(!Pattern.compile("(?i)(credited|recived)").matcher(body).find()) {

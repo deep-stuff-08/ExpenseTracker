@@ -23,7 +23,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:visibility="gone"
+            android:layout_margin="5sp"
             android:src="@android:drawable/ic_menu_delete"/>
+        <ImageView
+            android:id="@+id/edit_entry_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_margin="5sp"
+            android:visibility="gone"
+            android:src="@android:drawable/ic_menu_edit"/>
     </androidx.appcompat.widget.Toolbar>
 
     <fragment
