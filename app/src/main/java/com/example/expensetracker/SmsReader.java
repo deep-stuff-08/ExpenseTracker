@@ -26,7 +26,7 @@ public class SmsReader {
                 if(value != 0) {
                     String sender = cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.ADDRESS));
                     Date date = new Date(cursor.getLong(cursor.getColumnIndexOrThrow(Telephony.Sms.DATE)));
-                    entries.add(new UnconfirmedEntry(sender, body, date, Math.abs(value), value > 0));
+                    entries.add(new UnconfirmedEntry(sender, body, date, value));
                 }
             } while (cursor.moveToNext());
         }

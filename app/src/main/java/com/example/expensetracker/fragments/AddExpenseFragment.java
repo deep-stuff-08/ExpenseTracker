@@ -47,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -95,7 +96,7 @@ public class AddExpenseFragment extends Fragment {
         Settings settings = ((MainActivity)requireActivity()).getSettings();
         Calendar currentTime = Calendar.getInstance();
 
-        ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getIncomeCategory().get(0).getColorId());;
+        ComboBoxAdapter adt_Payment = new ComboBoxAdapter(context, settings.getPaymentMethod(), settings.getIncomeCategory().get(0).getColorId());
         ComboBoxAdapter adt_Category;
         ComboBoxAdapter adt_SubCategory;
         if(isIncome) {
@@ -113,8 +114,10 @@ public class AddExpenseFragment extends Fragment {
             entryNames = DBManager.getDBManagerInstance().getExpenseEntryNames();
         }
 
+        HashSet<String> entryNameSet = new HashSet<>(entryNames);
+
         //Setup Name
-        ArrayAdapter<String> adt = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, entryNames);
+        ArrayAdapter<String> adt = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, new ArrayList<>(entryNameSet));
         textName.setAdapter(adt);
         textName.setThreshold(1);
 

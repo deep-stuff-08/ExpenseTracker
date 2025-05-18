@@ -20,6 +20,8 @@ import com.example.expensetracker.pojo.UnconfirmedEntry;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import java.util.Objects;
+
 public class EntryFragment extends Fragment {
     TabLayoutAdapter tabLayoutAdapter;
     ViewPager2 viewPager;
@@ -62,11 +64,9 @@ public class EntryFragment extends Fragment {
         }).attach();
 
         if(unconfirmedEntry != null) {
-            tabLayout.selectTab(tabLayout.getTabAt(unconfirmedEntry.isCredited() ? 1 : 0));
-            viewPager.setCurrentItem(unconfirmedEntry.isCredited() ? 1 : 0);
+            viewPager.setCurrentItem(unconfirmedEntry.isIncome() ? 1 : 0, false);
         } else if(transferUserId >= 0) {
-            tabLayout.selectTab(tabLayout.getTabAt(2));
-            viewPager.setCurrentItem(2);
+            viewPager.setCurrentItem(2, false);
         }
     }
 }

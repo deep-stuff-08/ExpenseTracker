@@ -9,14 +9,12 @@ public class UnconfirmedEntry {
     private final String body;
     private final Date sentDate;
     private final float value;
-    private final boolean isCredited;
 
-    public UnconfirmedEntry(String sender, String body, Date sentDate, float value, boolean isCredited) {
+    public UnconfirmedEntry(String sender, String body, Date sentDate, float value) {
         this.sender = sender;
         this.body = body;
         this.sentDate = sentDate;
         this.value = value;
-        this.isCredited = isCredited;
     }
 
     public String getSender() {
@@ -35,8 +33,12 @@ public class UnconfirmedEntry {
         return value;
     }
 
-    public boolean isCredited() {
-        return isCredited;
+    public boolean isExpense() {
+        return value < 0;
+    }
+
+    public boolean isIncome() {
+        return !isExpense();
     }
 
     public long getId() {

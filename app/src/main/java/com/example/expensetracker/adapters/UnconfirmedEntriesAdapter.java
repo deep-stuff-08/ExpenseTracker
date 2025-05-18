@@ -48,20 +48,20 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
         holder.itemView.setActivated(isExpanded);
         holder.itemView.setOnClickListener(v -> {
             notifyItemChanged(mExpandedPosition);
-            mExpandedPosition = isExpanded ? -1:holder.getAdapterPosition();
-            notifyItemChanged(holder.getAdapterPosition());
+            mExpandedPosition = isExpanded ? -1:holder.getAbsoluteAdapterPosition();
+            notifyItemChanged(holder.getAbsoluteAdapterPosition());
         });
         holder.delete.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         holder.delete.setOnClickListener(v -> {
-            long entryID = entries.get(holder.getAdapterPosition()).getId();
-            entries.remove(holder.getAdapterPosition());
-            notifyItemRemoved(holder.getAdapterPosition());
+            long entryID = entries.get(holder.getAbsoluteAdapterPosition()).getId();
+            entries.remove(holder.getAbsoluteAdapterPosition());
+            notifyItemRemoved(holder.getAbsoluteAdapterPosition());
             DBManager.getDBManagerInstance().deleteUnconfirmedEntries(entryID);
         });
         holder.confirm.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         holder.confirm.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
-            bundle.putLong("unconfirmedEntryId", entries.get(holder.getAdapterPosition()).getId());
+            bundle.putLong("unconfirmedEntryId", entries.get(holder.getAbsoluteAdapterPosition()).getId());
             Navigation.findNavController(holder.itemView).navigate(R.id.action_unconfirmedEntryFragment_to_entryFragment, bundle);
         });
     }

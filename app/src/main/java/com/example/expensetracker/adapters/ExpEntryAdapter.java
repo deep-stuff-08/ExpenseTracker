@@ -93,6 +93,12 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
             boolean isSelected = selectionTracker.isSelected(entries.get(position).getId());
             holder.itemView.setActivated(isSelected);
             holder.checkBox.setChecked(isSelected);
+
+            if(position == entries.size() - 1) {
+                RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) holder.itemView.getLayoutParams();
+                layoutParams.bottomMargin = 200;
+                holder.itemView.setLayoutParams(layoutParams);
+            }
         }
     }
     @Override
@@ -126,7 +132,7 @@ public class ExpEntryAdapter extends RecyclerView.Adapter<ExpEntryAdapter.ViewHo
             return new ItemDetailsLookup.ItemDetails<Long>() {
                 @Override
                 public int getPosition() {
-                    return getAdapterPosition();
+                    return getBindingAdapterPosition();
                 }
 
                 @Nullable

@@ -904,7 +904,7 @@ public class DBManager{
             String body = cursor.getString(2);
             Date sentdate = DBManager.dataFormatterForDB.parse(cursor.getString(3));
             float value = cursor.getFloat(4);
-            entry = new UnconfirmedEntry(sender, body, sentdate, value, value > 0);
+            entry = new UnconfirmedEntry(sender, body, sentdate, value);
             entry.setId(id);
         }
         catch (Exception e)
@@ -934,7 +934,7 @@ public class DBManager{
                 String body = cursor.getString(2);
                 Date sentdate = DBManager.dataFormatterForDB.parse(cursor.getString(3));
                 float value = cursor.getFloat(4);
-                UnconfirmedEntry entry = new UnconfirmedEntry(sender, body, sentdate, value, value > 0);
+                UnconfirmedEntry entry = new UnconfirmedEntry(sender, body, sentdate, value);
                 entry.setId(id);
                 data.add(entry);
             } while (cursor.moveToNext());
