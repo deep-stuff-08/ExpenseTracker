@@ -35,13 +35,13 @@ public class SmsReader {
     }
 
     private float extractValue(String body) {
-        Matcher matcher = Pattern.compile("(?i)(acct|card)( *)((ending)*)( *)(X*)([0-9]{3,4})").matcher(body);
+        Matcher matcher = Pattern.compile("(?i)(acct|card)( *)((ending)?)((no\\.)?)( *)(X*)([0-9]{3,4})").matcher(body);
         float value = 0;
         if(matcher.find()) {
-            Matcher amountMatcher = Pattern.compile("(?i)(RS|INR)(.?)( ?)([0-9,.]+)").matcher(body);
+            Matcher amountMatcher = Pattern.compile("(?i)(RS|INR)(\\.?)( ?)([0-9,.]+)").matcher(body);
             if(amountMatcher.find()) {
                 String amt = amountMatcher.group();
-                amt = amt.replaceFirst("(?i)(RS|INR)(.?+)", "");
+                amt = amt.replaceFirst("(?i)(RS|INR)(\\.?+)", "");
                 amt = amt.replaceAll(",", "");
                 amt = amt.trim();
                 try {

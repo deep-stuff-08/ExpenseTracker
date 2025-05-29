@@ -55,8 +55,8 @@ public class UnconfirmedEntriesAdapter extends RecyclerView.Adapter<UnconfirmedE
         holder.delete.setOnClickListener(v -> {
             long entryID = entries.get(holder.getAbsoluteAdapterPosition()).getId();
             entries.remove(holder.getAbsoluteAdapterPosition());
-            notifyItemRemoved(holder.getAbsoluteAdapterPosition());
             DBManager.getDBManagerInstance().deleteUnconfirmedEntries(entryID);
+            notifyItemRemoved(holder.getAbsoluteAdapterPosition());
         });
         holder.confirm.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
         holder.confirm.setOnClickListener(v -> {

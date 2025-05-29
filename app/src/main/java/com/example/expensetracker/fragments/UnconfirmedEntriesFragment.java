@@ -34,6 +34,7 @@ public class UnconfirmedEntriesFragment extends Fragment {
     private View.OnClickListener discardClickListener;
     private final CharSequence discardText = "Discard All";
     private RecyclerView recyclerView;
+    private RecyclerView.AdapterDataObserver dataObserver;
     private Button discardBtn;
     private TextView noEntriesTxt;
 
@@ -52,7 +53,16 @@ public class UnconfirmedEntriesFragment extends Fragment {
         discardBtn = view.findViewById(R.id.discard_all_btn);
         noEntriesTxt = view.findViewById(R.id.text_no_entries);
 
-         recheckClickListener = v -> {
+        dataObserver = new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                if(recyclerView.getAdapter() != null && recyclerView.getAdapter().getItemCount() == 0) {
+                    Init();
+                }
+            }
+        };
+
+        recheckClickListener = v -> {
             View datepickview = View.inflate(view.getContext(), R.layout.dialog_datepicker, null);
             DatePicker datePicker = datepickview.findViewById(R.id.recheck_dateview);
             datePicker.setMaxDate(new Date().getTime());
@@ -97,7 +107,9 @@ public class UnconfirmedEntriesFragment extends Fragment {
 
     void Init() {
         ArrayList<UnconfirmedEntry> list = DBManager.getDBManagerInstance().getUnconfirmedEntries();
-        recyclerView.setAdapter(new UnconfirmedEntriesAdapter(list));
+        UnconfirmedEntriesAdapter adapter = new UnconfirmedEntriesAdapter(list);
+        adapter.registerAdapterDataObserver(dataObserver);
+        recyclerView.setAdapter(adapter);
         if(list.size() == 0) {
             SetupButtonAsRecheck();
         } else {
